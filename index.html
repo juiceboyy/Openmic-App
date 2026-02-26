@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haagse Open Mic - Artiesten Database</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        apple: { gray: '#f5f5f7', border: '#e5e5ea', text: '#1d1d1f', blue: '#0071e3' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: theme('colors.apple.gray'); color: theme('colors.apple.text'); }
+        .glass-header { background: rgba(255, 255, 255, 0.8); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid theme('colors.apple.border'); }
+        .table-container { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); }
+        .loader { border-top-color: theme('colors.apple.blue'); animation: spinner 1.5s linear infinite; }
+        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal-scroll::-webkit-scrollbar { width: 8px; }
+        .modal-scroll::-webkit-scrollbar-track { background: transparent; }
+        .modal-scroll::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 20px; }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    </style>
+</head>
+<body class="antialiased h-screen flex flex-col font-sans overflow-hidden">
+
+    <header class="glass-header sticky top-0 z-30 px-8 py-5 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="bg-apple-blue p-2 rounded-lg text-white shadow-sm">
+                <i data-lucide="mic-2" class="w-5 h-5"></i>
+            </div>
+            <h1 class="text-xl font-semibold tracking-tight">Haagse Open Mic</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                <input type="text" id="search-input" placeholder="Zoek op naam, act of e-mail..." class="pl-9 pr-4 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 w-64 lg:w-72 bg-white transition-all">
+            </div>
+            
+            <button onclick="openSyncModal()" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm flex items-center gap-2" title="Haal nieuwe contacten uit je adresboek">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sync
+            </button>
+
+            <button onclick="openMailingModal()" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+                <i data-lucide="mail" class="w-4 h-4"></i> Mailing
+            </button>
+
+            <button onclick="openPhotoModal()" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+                <i data-lucide="camera" class="w-4 h-4"></i> Foto's
+            </button>
+            
+            <button onclick="openModal()" class="bg-apple-blue hover:bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i> Nieuw Contact
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-x-auto overflow-y-auto p-8 relative">
+        <div class="max-w-[1500px] mx-auto">
+            
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <select id="filter-region" class="border border-gray-200 bg-white rounded-lg px-3 py-2 text-sm font-medium text-gray-600 focus:outline-none focus:ring-2 focus:ring-apple-blue/50">
+                    <option value="all">Alle Regio's</option>
+                    <option value="Den Haag">Den Haag</option>
+                    <option value="Rotterdam">Rotterdam</option>
+                </select>
+                <select id="filter-type" class="border border-gray-200 bg-white rounded-lg px-3 py-2 text-sm font-medium text-gray-600 focus:outline-none focus:ring-2 focus:ring-apple-blue/50">
+                    <option value="all">Alle Types</option>
+                    <option value="Artiest">Artiest</option>
+                    <option value="Bobo">Bobo</option>
+                    <option value="Supplier">Supplier</option>
+                    <option value="Publiek">Publiek</option>
+                </select>
+                <select id="filter-bookable" class="border border-gray-200 bg-white rounded-lg px-3 py-2 text-sm font-medium text-gray-600 focus:outline-none focus:ring-2 focus:ring-apple-blue/50">
+                    <option value="all">Boekbaar: Alle</option>
+                    <option value="ja">Boekbaar: Ja</option>
+                    <option value="nee">Boekbaar: Nee</option>
+                </select>
+
+                <div class="ml-auto text-sm text-gray-500 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
+                    Gevonden: <span id="contact-count" class="font-semibold text-apple-blue text-base">0</span>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-gray-200 table-container overflow-x-auto min-h-[400px] relative">
+                <div id="loading-state" class="absolute inset-0 bg-white/80 z-10 flex flex-col items-center justify-center backdrop-blur-sm">
+                    <div class="w-10 h-10 border-4 border-gray-200 rounded-full loader mb-4"></div>
+                    <p class="text-sm font-medium text-gray-500">Contacten ophalen uit Google Sheets...</p>
+                </div>
+                <div id="empty-state" class="hidden absolute inset-0 bg-white z-0 flex flex-col items-center justify-center">
+                    <i data-lucide="users" class="w-12 h-12 text-gray-300 mb-3"></i>
+                    <p class="text-sm font-medium text-gray-500">Geen contacten gevonden voor deze filters.</p>
+                </div>
+
+                <table class="w-full text-left border-collapse min-w-[1250px]">
+                    <thead>
+                        <tr class="bg-gray-50/50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                            <th class="px-6 py-4 font-semibold w-1/6">Naam & Act</th>
+                            <th class="px-6 py-4 font-semibold w-1/6">Contact</th>
+                            <th class="px-6 py-4 font-semibold w-1/8">Type & Regio</th>
+                            <th class="px-6 py-4 font-semibold w-1/6">Details</th>
+                            <th class="px-6 py-4 font-semibold w-1/6">Status / Favs</th>
+                            <th class="px-6 py-4 font-semibold w-1/6">Notities</th>
+                            <th class="px-6 py-4 font-semibold text-right min-w-[120px]">Acties</th>
+                        </tr>
+                    </thead>
+                    <tbody id="artist-table-body" class="text-sm divide-y divide-gray-100">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="sync-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-full overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-5 h-5 text-apple-blue"></i> Synchroniseer Google Contacts
+                </h2>
+                <button onclick="closeSyncModal()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+
+            <div class="p-6 overflow-y-auto modal-scroll bg-white flex-1">
+                <div id="sync-step-1" class="text-center py-6">
+                    <i data-lucide="contact" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
+                    <h3 class="text-lg font-medium text-gray-800 mb-2">Zoek naar nieuwe contacten</h3>
+                    <p class="text-sm text-gray-500 mb-6 max-w-md mx-auto">De app kijkt in jouw adresboek (Google Contacts) en vergelijkt dit met de huidige database. We laten je zien wie er nieuw is, en jij bepaalt wie er geïmporteerd wordt.</p>
+                    <button id="start-sync-btn" onclick="fetchGoogleContacts()" class="bg-apple-blue hover:bg-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm inline-flex items-center">
+                        <i data-lucide="search" class="w-4 h-4 mr-2"></i> Adresboek Scannen
+                    </button>
+                </div>
+
+                <div id="sync-step-2" class="hidden">
+                    <h3 class="text-sm font-semibold text-gray-800 mb-3 flex items-center justify-between">
+                        <span>Nieuwe contacten gevonden</span>
+                        <span class="text-xs text-gray-500 font-normal">Vink uit wie je <span class="underline">niet</span> wilt toevoegen</span>
+                    </h3>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-2 font-semibold w-10 text-center">
+                                        <input type="checkbox" id="sync-select-all" checked onchange="toggleAllSyncCheckboxes(this)" class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer">
+                                    </th>
+                                    <th class="px-4 py-2 font-semibold">Naam</th>
+                                    <th class="px-4 py-2 font-semibold">Contactgegevens</th>
+                                    <th class="px-4 py-2 font-semibold">Notities</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sync-contacts-body" class="text-sm divide-y divide-gray-100">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sync-modal-footer" class="hidden px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-2xl">
+                <button onclick="closeSyncModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors mr-auto">Annuleren</button>
+                <button id="import-contacts-btn" onclick="importSelectedContacts()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
+                    <i data-lucide="download" class="w-4 h-4 mr-2"></i> Importeer Geselecteerde
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="mailing-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-full overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i data-lucide="mail" class="w-5 h-5 text-apple-blue"></i> Nieuwe E-mailing Sturen
+                </h2>
+                <button onclick="closeMailingModal()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto modal-scroll bg-white flex-1">
+                <div class="mb-5 bg-blue-50 border border-blue-100 rounded-lg p-4 flex gap-3">
+                    <i data-lucide="info" class="w-5 h-5 text-apple-blue shrink-0 mt-0.5"></i>
+                    <div>
+                        <p class="text-sm text-gray-700 font-medium">Je gaat e-mailen naar je huidige gefilterde lijst.</p>
+                        <p class="text-xs text-gray-500 mt-1">Geldige ontvangers: <strong id="mailing-count" class="text-apple-blue">0</strong> artiesten.<br>
+                        Mensen zonder e-mailadres, unsubscribes en blacklists worden automatisch overgeslagen door het systeem.</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1 font-semibold">Onderwerp</label>
+                        <input type="text" id="mailing-subject" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50" placeholder="Bijv: Haagse Open Mic op dinsdag a.s. in Amare!">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1 font-semibold flex justify-between">
+                            <span>Jouw Bericht</span>
+                            <span class="text-gray-400 font-normal">Aanhef ("Hoi [Naam],") wordt automatisch toegevoegd!</span>
+                        </label>
+                        <textarea id="mailing-body" rows="8" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 placeholder-gray-400" placeholder="Typ hier het bericht dat je aan iedereen wilt sturen..."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-2xl">
+                <button onclick="closeMailingModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors mr-auto">Annuleren</button>
+                <button id="mailing-test-btn" onclick="sendMailing(true)" class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
+                    <i data-lucide="flask-conical" class="w-4 h-4 mr-2"></i> Stuur Test (halfhide@...)
+                </button>
+                <button id="mailing-send-btn" onclick="sendMailing(false)" class="bg-apple-blue hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
+                    <i data-lucide="send" class="w-4 h-4 mr-2"></i> Verstuur Definitief
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="photo-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl flex flex-col max-h-full overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+                <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i data-lucide="camera" class="w-5 h-5 text-apple-blue"></i> Foto's Distribueren (JCSFotografie)
+                </h2>
+                <button onclick="closePhotoModal()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto modal-scroll bg-white flex-1">
+                <div id="photo-step-1">
+                    <p class="text-sm text-gray-600 mb-4">Plak hier de algemene link naar de Google Drive map van de specifieke Open Mic.</p>
+                    <label class="block text-xs text-gray-500 mb-1 font-semibold">Google Drive Map URL</label>
+                    <input type="text" id="drive-folder-url" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 mb-4" placeholder="https://drive.google.com/drive/folders/1aBcD2...">
+                    <button id="scan-btn" onclick="scanFolder()" class="bg-apple-blue hover:bg-blue-600 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center w-full">
+                        <i data-lucide="folder-search" class="w-4 h-4 mr-2"></i> Map Scannen
+                    </button>
+                </div>
+                <div id="photo-step-2" class="hidden">
+                    <h3 class="text-sm font-semibold text-gray-800 mb-3">Gevonden Mappen & Matches</h3>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+                                <tr>
+                                    <th class="px-4 py-2 font-semibold">Stuur?</th>
+                                    <th class="px-4 py-2 font-semibold">Mapnaam in Drive</th>
+                                    <th class="px-4 py-2 font-semibold">Gevonden Artiest(en)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="photo-matches-body" class="text-sm divide-y divide-gray-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="photo-modal-footer" class="hidden px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-2xl">
+                <button onclick="closePhotoModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors mr-auto">Annuleren</button>
+                <button id="send-emails-btn" onclick="sendPhotos()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
+                    <i data-lucide="send" class="w-4 h-4 mr-2"></i> Verstuur E-mails
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col max-h-full overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+                <h2 id="modal-title" class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                    <i data-lucide="user-plus" class="w-5 h-5 text-apple-blue"></i> Nieuw Contact Toevoegen
+                </h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto modal-scroll bg-white">
+                <form id="new-contact-form" class="space-y-6">
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Persoonlijke Gegevens</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-gray-500 mb-1">Voornaam</label><input type="text" name="Voornaam" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50"></div>
+                            <div><label class="block text-xs text-gray-500 mb-1">Achternaam</label><input type="text" name="Achternaam" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50"></div>
+                            <div class="col-span-2"><label class="block text-xs text-gray-500 mb-1">Artiestennaam / Act</label><input type="text" name="Artiestennaam" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Contact Details</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="block text-xs text-gray-500 mb-1">E-mailadres</label><input type="email" name="E-mailadres" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50"></div>
+                            <div><label class="block text-xs text-gray-500 mb-1">Telefoonnummer</label><input type="text" name="Telefoonnummer" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50"></div>
+                            <div><label class="block text-xs text-gray-500 mb-1">Instagram (URL of @naam)</label><input type="text" name="Instagram account" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50"></div>
+                            <div>
+                                <label class="block text-xs text-gray-500 mb-1">Soort Contact</label>
+                                <select name="Soort contact" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white">
+                                    <option value="Artiest">Artiest</option>
+                                    <option value="Bobo">Bobo</option>
+                                    <option value="Supplier">Supplier</option>
+                                    <option value="Publiek">Publiek</option>
+                                </select>
+                            </div>
+                            <div><label class="block text-xs text-gray-500 mb-1">Speelduur (bijv. 30 min)</label><input type="text" name="Speelduur" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Labels & Status</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer"><input type="checkbox" name="Regio Den Haag" class="rounded text-apple-blue focus:ring-apple-blue"><span>Regio Den Haag</span></label>
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer"><input type="checkbox" name="Regio Rotterdam" class="rounded text-apple-blue focus:ring-apple-blue"><span>Regio Rotterdam</span></label>
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer"><input type="checkbox" name="Boekbaar (Ja/Nee)" class="rounded text-apple-blue focus:ring-apple-blue"><span>Boekbaar</span></label>
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer"><input type="checkbox" name="Favoriet Gijs (Ja/Nee)" class="rounded text-apple-blue focus:ring-apple-blue"><span>Favoriet Gijs</span></label>
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer"><input type="checkbox" name="Favoriet Ro (Ja/Nee)" class="rounded text-apple-blue focus:ring-apple-blue"><span>Favoriet Ro</span></label>
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer"><input type="checkbox" name="Interesse in workshops (Ja/Nee)" class="rounded text-apple-blue focus:ring-apple-blue"><span>Wil Workshops</span></label>
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer"><input type="checkbox" name="Workshop 7 nov (Ja/Nee)" class="rounded text-apple-blue focus:ring-apple-blue"><span>Was bij 7 nov</span></label>
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer"><input type="checkbox" name="Unsubscribed (Ja/Nee)" class="rounded text-red-500 focus:ring-red-500"><span class="text-red-700">Unsubscribed</span></label>
+                            <label class="flex items-center space-x-2 text-sm cursor-pointer"><input type="checkbox" name="Blacklist (Ja/Nee)" class="rounded text-red-500 focus:ring-red-500"><span class="text-red-700 font-medium">Blacklist</span></label>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Notities</h3>
+                        <textarea name="Notities" rows="3" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 placeholder-gray-400" placeholder="Schrijf hier eventuele extra notities of bijzonderheden..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-2xl">
+                <button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors">Annuleren</button>
+                <button id="save-btn" onclick="submitForm()" class="bg-apple-blue hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center min-w-[120px]">Opslaan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // VASTE WEB APP URL
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzk7SHUUOUEhgMAgKZ9XUUgna3oz_1XDa5Na8m4a5VV7TbTa0lpB7Ku_6SOgmaMIGxE/exec';
+
+        let allArtists = [];
+        let currentFilteredData = [];
+        let currentEditRowIndex = null; 
+        let scannedMatches = [];
+        let fetchedSyncContacts = []; 
+
+        function isTrue(val) { return String(val).toLowerCase() === 'ja' || val === true || val === 'TRUE'; }
+
+        function toggleNote(element) {
+            const textDiv = element.querySelector('.note-text');
+            const hintDiv = element.querySelector('.note-hint');
+            if (textDiv.classList.contains('line-clamp-3')) {
+                textDiv.classList.remove('line-clamp-3');
+                hintDiv.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="m18 15-6-6-6 6"/></svg> Inklappen';
+                hintDiv.classList.remove('opacity-0', 'group-hover:opacity-100'); 
+            } else {
+                textDiv.classList.add('line-clamp-3');
+                hintDiv.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="m6 9 6 6 6-6"/></svg> Lees meer';
+                hintDiv.classList.add('opacity-0', 'group-hover:opacity-100'); 
+            }
+        }
+
+        function openSyncModal() {
+            document.getElementById('sync-modal').classList.remove('hidden');
+            document.getElementById('sync-step-1').classList.remove('hidden');
+            document.getElementById('sync-step-2').classList.add('hidden');
+            document.getElementById('sync-modal-footer').classList.add('hidden');
+            document.getElementById('sync-contacts-body').innerHTML = '';
+            fetchedSyncContacts = [];
+            lucide.createIcons();
+        }
+
+        function closeSyncModal() { document.getElementById('sync-modal').classList.add('hidden'); }
+
+        async function fetchGoogleContacts() {
+            const btn = document.getElementById('start-sync-btn');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ _action: 'fetch_google_contacts' })
+                });
+                const result = await response.json();
+                if (result.status === "success") {
+                    fetchedSyncContacts = result.contacts; renderSyncContacts();
+                    document.getElementById('sync-step-1').classList.add('hidden');
+                    document.getElementById('sync-step-2').classList.remove('hidden');
+                    document.getElementById('sync-modal-footer').classList.remove('hidden');
+                } else { alert("Fout bij ophalen: " + result.message); }
+            } catch (e) { alert("Kon contacten niet ophalen. Check de console (F12)."); } finally { btn.innerHTML = origHTML; btn.disabled = false; }
+        }
+
+        function renderSyncContacts() {
+            const tbody = document.getElementById('sync-contacts-body');
+            tbody.innerHTML = '';
+            if(fetchedSyncContacts.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">Je bent helemaal up-to-date! Er zijn geen nieuwe contacten gevonden in je adresboek.</td></tr>`;
+                document.getElementById('import-contacts-btn').style.display = 'none'; return;
+            }
+            document.getElementById('import-contacts-btn').style.display = 'flex';
+            fetchedSyncContacts.forEach((contact, index) => {
+                let nameStr = `${contact.firstName} ${contact.lastName}`.trim();
+                if(!nameStr) nameStr = '<span class="text-gray-400 italic">Geen naam</span>';
+                let contactStr = '';
+                if(contact.email) contactStr += `<div><i data-lucide="mail" class="w-3.5 h-3.5 inline mr-1 text-gray-400"></i> ${contact.email}</div>`;
+                if(contact.phone) contactStr += `<div><i data-lucide="phone" class="w-3.5 h-3.5 inline mr-1 text-gray-400"></i> ${contact.phone}</div>`;
+                if(!contactStr) contactStr = '-';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3 text-center align-top pt-3.5">
+                            <input type="checkbox" id="sync-cb-${index}" checked class="sync-checkbox rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer">
+                        </td>
+                        <td class="px-4 py-3 font-medium text-gray-800 align-top pt-3">${nameStr}</td>
+                        <td class="px-4 py-3 text-gray-600 text-xs align-top pt-3.5 space-y-1">${contactStr}</td>
+                        <td class="px-4 py-3 text-gray-500 text-xs align-top pt-3 line-clamp-2" title="${contact.notes}">${contact.notes || '-'}</td>
+                    </tr>
+                `;
+            });
+            lucide.createIcons();
+        }
+
+        function toggleAllSyncCheckboxes(source) {
+            const checkboxes = document.querySelectorAll('.sync-checkbox');
+            checkboxes.forEach(cb => cb.checked = source.checked);
+        }
+
+        async function importSelectedContacts() {
+            const toImport = [];
+            fetchedSyncContacts.forEach((c, idx) => { if(document.getElementById(`sync-cb-${idx}`).checked) { toImport.push(c); } });
+            if(toImport.length === 0) { alert("Selecteer minstens één contact om te importeren."); return; }
+
+            const btn = document.getElementById('import-contacts-btn');
+            const origHTML = btn.innerHTML;
+            btn.innerHTML = '<div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ _action: 'import_contacts', contacts: toImport })
+                });
+                const result = await response.json();
+                if (result.status === "success") {
+                    alert(`Succes! ${result.importedCount} contact(en) toegevoegd aan de database.`);
+                    closeSyncModal(); document.getElementById('loading-state').style.display = 'flex'; fetchArtists(); 
+                } else { alert("Fout bij importeren: " + result.message); }
+            } catch (e) { alert("Importeren mislukt. Check de console (F12)."); } finally { btn.innerHTML = origHTML; btn.disabled = false; }
+        }
+
+        // --- Mailing Functionaliteit ---
+        let mailingRecipients = [];
+        function openMailingModal() {
+            mailingRecipients = currentFilteredData.filter(a => { return a.email && a.email !== '-' && !a.unsubscribed && !a.blacklist; }).map(a => { return { email: a.email, name: a.artistName !== '-' ? a.artistName : a.firstName }; });
+            document.getElementById('mailing-count').innerText = mailingRecipients.length;
+            if (mailingRecipients.length === 0) {
+                document.getElementById('mailing-test-btn').disabled = true; document.getElementById('mailing-send-btn').disabled = true; document.getElementById('mailing-send-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                document.getElementById('mailing-test-btn').disabled = false; document.getElementById('mailing-send-btn').disabled = false; document.getElementById('mailing-send-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            document.getElementById('mailing-subject').value = ''; document.getElementById('mailing-body').value = '';
+            document.getElementById('mailing-modal').classList.remove('hidden'); lucide.createIcons();
+        }
+
+        function closeMailingModal() { document.getElementById('mailing-modal').classList.add('hidden'); }
+
+        async function sendMailing(isTest) {
+            const subject = document.getElementById('mailing-subject').value.trim(); const message = document.getElementById('mailing-body').value.trim();
+            if (!subject) { alert("Vul een onderwerp in."); return; } if (!message) { alert("Vul een bericht in."); return; }
+            if (mailingRecipients.length === 0) return;
+
+            let confirmMsg = `Weet je zeker dat je deze mail naar ${mailingRecipients.length} ontvanger(s) wilt sturen?`;
+            if (isTest) confirmMsg = `TEST MODUS\n\nStuur 1 test-mail naar halfhide@gmail.com?\n\nJe ziet in de mail precies hoe deze eruit komt te zien.`;
+            if (!confirm(confirmMsg)) return;
+
+            const btnId = isTest ? 'mailing-test-btn' : 'mailing-send-btn'; const btn = document.getElementById(btnId); const origHTML = btn.innerHTML;
+            btn.innerHTML = '<div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>'; btn.disabled = true;
+            let payloadRecipients = isTest ? [mailingRecipients[0]] : mailingRecipients;
+
+            try {
+                const response = await fetch(WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ _action: 'send_mailing', recipients: payloadRecipients, subject: subject, message: message, testMode: isTest, testEmail: 'halfhide@gmail.com' }) });
+                const result = await response.json();
+                if (result.status === "success") { alert(`Gelukt! Er ${result.sentCount === 1 ? 'is' : 'zijn'} ${result.sentCount} e-mail(s) verzonden.`); if (!isTest) closeMailingModal(); } else { alert("Fout: " + result.message); }
+            } catch (e) { alert("Verzenden mislukt. Check de console."); } finally { btn.innerHTML = origHTML; btn.disabled = false; }
+        }
+
+        // --- Foto Functionaliteit ---
+        function openPhotoModal() {
+            document.getElementById('photo-modal').classList.remove('hidden'); document.getElementById('photo-step-1').classList.remove('hidden'); document.getElementById('photo-step-2').classList.add('hidden'); document.getElementById('photo-modal-footer').classList.add('hidden'); document.getElementById('drive-folder-url').value = ''; document.getElementById('photo-matches-body').innerHTML = ''; scannedMatches = []; lucide.createIcons();
+        }
+        function closePhotoModal() { document.getElementById('photo-modal').classList.add('hidden'); }
+        async function scanFolder() {
+            const url = document.getElementById('drive-folder-url').value; if(!url) { alert("Plak eerst een link!"); return; }
+            const btn = document.getElementById('scan-btn'); const origHTML = btn.innerHTML; btn.innerHTML = '<div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>'; btn.disabled = true;
+            try {
+                const response = await fetch(WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ _action: 'scan_folder', folderUrl: url }) });
+                const result = await response.json();
+                if (result.status === "success") { scannedMatches = result.matches; renderMatches(); document.getElementById('photo-step-1').classList.add('hidden'); document.getElementById('photo-step-2').classList.remove('hidden'); document.getElementById('photo-modal-footer').classList.remove('hidden'); } else { alert("Fout bij scannen: " + result.message); }
+            } catch (e) { alert("Kon de link niet scannen."); } finally { btn.innerHTML = origHTML; btn.disabled = false; }
+        }
+        function renderMatches() {
+            const tbody = document.getElementById('photo-matches-body'); tbody.innerHTML = '';
+            if(scannedMatches.length === 0) { tbody.innerHTML = `<tr><td colspan="3" class="px-4 py-4 text-center text-gray-500">Geen submappen gevonden in deze link.</td></tr>`; return; }
+            scannedMatches.forEach((match, index) => {
+                let isValid = match.matchFound && !match.multipleMatches && match.email && match.email !== '-'; let checkbox = `<input type="checkbox" id="match-cb-${index}" class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer" ${isValid ? 'checked' : 'disabled'}>`; let matchText = '';
+                if (match.multipleMatches) {
+                    let options = `<option value="">Kies de juiste artiest...</option>`; match.candidates.forEach((cand, cIdx) => { options += `<option value="${cIdx}">${cand.artistName} (${cand.email && cand.email !== '-' ? cand.email : 'Geen e-mail'})</option>`; });
+                    matchText = `<div class="flex flex-col gap-1.5"><span class="text-orange-600 font-medium text-xs"><i data-lucide="help-circle" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i> Meerdere matches gevonden:</span><select id="match-select-${index}" onchange="resolveMultipleMatch(${index})" class="border border-orange-300 bg-orange-50 text-orange-800 rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-orange-500 w-full max-w-[280px]">${options}</select></div>`;
+                } else if(isValid) { matchText = `<span class="text-green-600 font-medium"><i data-lucide="check-circle-2" class="w-4 h-4 inline mr-1 -mt-0.5"></i> ${match.artistName} <span class="text-xs font-normal">(${match.email})</span></span>`; } else if (match.matchFound) { matchText = `<span class="text-orange-500 font-medium"><i data-lucide="alert-triangle" class="w-4 h-4 inline mr-1 -mt-0.5"></i> ${match.artistName} <span class="text-xs font-normal">(Geen E-mail)</span></span>`; } else { matchText = `<span class="text-red-500"><i data-lucide="x-circle" class="w-4 h-4 inline mr-1 -mt-0.5"></i> Geen match gevonden in database</span>`; }
+                let rowClass = match.multipleMatches ? 'bg-orange-50/30' : (!isValid ? 'bg-gray-50' : '');
+                tbody.innerHTML += `<tr class="${rowClass} transition-colors" id="match-row-${index}"><td class="px-4 py-3 align-top pt-3.5">${checkbox}</td><td class="px-4 py-3 font-medium text-gray-800 align-top pt-3.5"><a href="${match.folderLink}" target="_blank" class="hover:text-apple-blue hover:underline flex items-start"><i data-lucide="folder" class="w-4 h-4 mr-2 text-gray-400 shrink-0 mt-0.5"></i> <span class="break-all">${match.folderName}</span></a></td><td class="px-4 py-3 align-top pt-3">${matchText}</td></tr>`;
+            });
+            lucide.createIcons();
+        }
+        function resolveMultipleMatch(index) {
+            let select = document.getElementById(`match-select-${index}`); let cb = document.getElementById(`match-cb-${index}`); let row = document.getElementById(`match-row-${index}`); let val = select.value;
+            if (val === "") { cb.checked = false; cb.disabled = true; row.classList.add('bg-orange-50/30'); scannedMatches[index].selected = false; scannedMatches[index].artistName = null; scannedMatches[index].email = null; } else {
+                let chosenCandidate = scannedMatches[index].candidates[val]; scannedMatches[index].artistName = chosenCandidate.artistName; scannedMatches[index].email = chosenCandidate.email;
+                if (chosenCandidate.email && chosenCandidate.email !== '-') { cb.disabled = false; cb.checked = true; scannedMatches[index].selected = true; select.classList.remove('border-orange-300', 'bg-orange-50', 'text-orange-800'); select.classList.add('border-green-300', 'bg-green-50', 'text-green-800'); row.classList.remove('bg-orange-50/30'); } else { cb.checked = false; cb.disabled = true; scannedMatches[index].selected = false; select.classList.remove('border-green-300', 'bg-green-50', 'text-green-800'); select.classList.add('border-orange-300', 'bg-orange-50', 'text-orange-800'); alert("Deze artiest heeft geen geldig e-mailadres."); }
+            }
+        }
+        async function sendPhotos() {
+            scannedMatches.forEach((m, idx) => { const cb = document.getElementById(`match-cb-${idx}`); m.selected = cb ? cb.checked : false; });
+            const toSend = scannedMatches.filter(m => m.selected); if(toSend.length === 0) { alert("Je hebt geen vinkjes aangezet!"); return; }
+            if(!confirm(`Weet je zeker dat je naar ${toSend.length} artiest(en) een e-mail wilt sturen?`)) return;
+            const btn = document.getElementById('send-emails-btn'); const origHTML = btn.innerHTML; btn.innerHTML = '<div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>'; btn.disabled = true;
+            try {
+                const response = await fetch(WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ _action: 'send_emails', matches: scannedMatches }) });
+                const result = await response.json(); if (result.status === "success") { alert(`Gelukt! Er zijn ${result.sentCount} e-mails verstuurd.`); closePhotoModal(); } else { alert("Fout: " + result.message); }
+            } catch (e) { alert("Verzenden mislukt."); } finally { btn.innerHTML = origHTML; btn.disabled = false; }
+        }
+
+        // --- Bestaande Modal & CRUD Functies ---
+        function openModal(rowIndex = null) {
+            const form = document.getElementById('new-contact-form'); const title = document.getElementById('modal-title'); form.reset(); currentEditRowIndex = rowIndex;
+            if (rowIndex !== null) {
+                title.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-apple-blue"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg> Contact Bewerken`;
+                const artist = allArtists.find(a => a.rowIndex === rowIndex);
+                if (artist) {
+                    form.elements['Voornaam'].value = artist.firstName !== '-' ? artist.firstName : ''; form.elements['Achternaam'].value = artist.lastName !== '-' ? artist.lastName : ''; form.elements['Artiestennaam'].value = artist.artistName !== '-' ? artist.artistName : ''; form.elements['E-mailadres'].value = artist.email !== '-' ? artist.email : ''; form.elements['Telefoonnummer'].value = artist.phone !== '-' ? artist.phone : ''; form.elements['Instagram account'].value = artist.instagram !== '-' ? artist.instagram : ''; form.elements['Soort contact'].value = artist.type !== '-' ? artist.type : 'Artiest'; form.elements['Speelduur'].value = artist.setLength !== '-' ? artist.setLength : ''; form.elements['Notities'].value = artist.notes !== '-' ? artist.notes : '';
+                    form.elements['Regio Den Haag'].checked = artist.regionDH; form.elements['Regio Rotterdam'].checked = artist.regionRdam; form.elements['Boekbaar (Ja/Nee)'].checked = artist.bookable; form.elements['Favoriet Gijs (Ja/Nee)'].checked = artist.favGijs; form.elements['Favoriet Ro (Ja/Nee)'].checked = artist.favRo; form.elements['Interesse in workshops (Ja/Nee)'].checked = artist.workshops; form.elements['Workshop 7 nov (Ja/Nee)'].checked = artist.workshop7Nov; form.elements['Unsubscribed (Ja/Nee)'].checked = artist.unsubscribed; form.elements['Blacklist (Ja/Nee)'].checked = artist.blacklist;
+                }
+            } else { title.innerHTML = '<i data-lucide="user-plus" class="w-5 h-5 text-apple-blue"></i> Nieuw Contact Toevoegen'; lucide.createIcons(); }
+            document.getElementById('contact-modal').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('contact-modal').classList.add('hidden'); currentEditRowIndex = null; }
+
+        async function submitForm() {
+            if (WEB_APP_URL === 'JOUW_WEB_APP_URL_HIER') { alert("Vul url in!"); return; }
+            const btn = document.getElementById('save-btn'); const orig = btn.innerHTML; btn.innerHTML = '<div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>'; btn.disabled = true;
+            const payload = {}; for (let [key, value] of new FormData(document.getElementById('new-contact-form')).entries()) { payload[key] = value === 'on' ? true : (value || "-"); }
+            ["Regio Den Haag", "Regio Rotterdam", "Boekbaar (Ja/Nee)", "Favoriet Gijs (Ja/Nee)", "Favoriet Ro (Ja/Nee)", "Interesse in workshops (Ja/Nee)", "Workshop 7 nov (Ja/Nee)", "Unsubscribed (Ja/Nee)", "Blacklist (Ja/Nee)"].forEach(f => { if (!payload.hasOwnProperty(f)) payload[f] = false; });
+            if (currentEditRowIndex !== null) { payload._action = 'edit'; payload._rowIndex = currentEditRowIndex; } else { payload._action = 'add'; }
+            try {
+                const res = await fetch(WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+                const data = await res.json();
+                if (data.status === "success") { closeModal(); document.getElementById('loading-state').style.display = 'flex'; fetchArtists(); } else { alert("Fout: " + data.message); }
+            } catch (e) { alert("Kon niet opslaan."); } finally { btn.innerHTML = orig; btn.disabled = false; }
+        }
+
+        async function deleteContact(rowIndex) {
+            if (!confirm("Zeker weten?")) return;
+            document.getElementById('loading-state').style.display = 'flex';
+            try {
+                const res = await fetch(WEB_APP_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ _action: 'delete', _rowIndex: rowIndex }) });
+                if ((await res.json()).status === "success") fetchArtists();
+            } catch (e) { alert("Fout bij verwijderen."); document.getElementById('loading-state').style.display = 'none'; }
+        }
+
+        function renderBadges(artist) {
+            let badges = '';
+            if (artist.blacklist) badges += `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-200 mb-1">Blacklist</span> `;
+            else if (artist.bookable) badges += `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200 mb-1">Boekbaar</span> `;
+            if (artist.favGijs) badges += `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 mb-1" title="Fav Gijs"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Gijs</span> `;
+            if (artist.favRo) badges += `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200 mb-1" title="Fav Ro"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Ro</span> `;
+            return badges;
+        }
+
+        function renderTable(dataToRender) {
+            const tableBody = document.getElementById('artist-table-body');
+            const emptyState = document.getElementById('empty-state');
+            document.getElementById('contact-count').innerText = dataToRender.length;
+            tableBody.innerHTML = '';
+            if (dataToRender.length === 0) { emptyState.classList.remove('hidden'); return; } 
+            
+            emptyState.classList.add('hidden');
+            const sortedData = [...dataToRender].sort((a, b) => {
+                const nameA = String(`${a.firstName} ${a.lastName}`.trim() || a.artistName || '').toLowerCase();
+                const nameB = String(`${b.firstName} ${b.lastName}`.trim() || b.artistName || '').toLowerCase();
+                return nameA.localeCompare(nameB);
+            });
+
+            sortedData.forEach(artist => {
+                const fullName = `${artist.firstName} ${artist.lastName}`.trim();
+                let regionTags = []; if (artist.regionDH) regionTags.push('Den Haag'); if (artist.regionRdam) regionTags.push('Rotterdam');
+                const displayRegion = regionTags.length > 0 ? regionTags.join(' & ') : '-';
+                const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50 transition-colors group align-top";
+                
+                let artistNameHTML = '';
+                if (artist.artistName && artist.artistName !== '-') {
+                    artistNameHTML = `<div class="inline-flex items-center mt-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-apple-blue text-xs font-medium border border-blue-100"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1.5 flex-shrink-0"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" x2="12" y1="19" y2="22"></line></svg>${artist.artistName}</div>`;
+                }
+
+                let instaHTML = '';
+                if (artist.instagram && artist.instagram !== '-') {
+                    let instaLink = artist.instagram;
+                    if (!instaLink.startsWith('http')) {
+                        if (instaLink.includes('instagram.com')) instaLink = 'https://' + instaLink;
+                        else instaLink = 'https://instagram.com/' + instaLink.replace('@', '');
+                    }
+                    let displayInsta = artist.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '');
+                    instaHTML = `<div class="flex items-center text-gray-600 text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-gray-400 flex-shrink-0"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg> <a href="${instaLink}" target="_blank" rel="noopener noreferrer" class="hover:text-apple-blue hover:underline truncate max-w-[160px]">${displayInsta}</a></div>`;
+                }
+
+                let detailsHTML = '';
+                if (artist.setLength && artist.setLength !== '-' && String(artist.setLength).trim() !== '') detailsHTML += `<div class="flex items-center mb-1 text-xs text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-gray-400 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Speelduur: <strong class="ml-1 text-gray-900">${artist.setLength}</strong></div>`;
+                if (artist.workshops) detailsHTML += `<div class="flex items-center mb-1 text-xs text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 flex-shrink-0 text-blue-500"><path d="M21.42 10.922a2 2 0 0 1-.019 3.138l-8.5 6.5a2 2 0 0 1-2.454.008l-8.5-6.5a2 2 0 0 1 .03-3.138l8.5-6.07a2 2 0 0 1 2.41 0l8.5 6.062z"></path><path d="M22 10v6"></path><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path></svg> Interesse in workshops</div>`;
+                if (artist.workshop7Nov) detailsHTML += `<div class="flex items-center text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 flex-shrink-0 text-green-500"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line><path d="m9 16 2 2 4-4"></path></svg> <span class="text-green-600 font-medium">Interesse 7 nov</span></div>`;
+                if (detailsHTML === '') detailsHTML = '<span class="text-gray-400 text-xs">-</span>';
+
+                let notesHTML = '<span class="text-gray-400 text-xs">-</span>';
+                if (artist.notes && artist.notes !== '-') {
+                    const isLong = artist.notes.length > 90 || artist.notes.includes('\n');
+                    if (isLong) {
+                        notesHTML = `<div class="group cursor-pointer rounded hover:bg-gray-100/50 p-1.5 -ml-1.5 transition-colors" onclick="toggleNote(this)"><div class="note-text text-xs text-gray-600 line-clamp-3 whitespace-pre-wrap leading-relaxed">${artist.notes}</div><div class="note-hint text-[10px] text-apple-blue mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-medium flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="m6 9 6 6 6-6"/></svg> Lees meer</div></div>`;
+                    } else {
+                        notesHTML = `<div class="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed px-1.5 -ml-1.5 py-1.5">${artist.notes}</div>`;
+                    }
+                }
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4"><div class="font-medium text-gray-900">${fullName || '-'}</div>${artistNameHTML}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex items-center text-gray-600 text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-gray-400 flex-shrink-0"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg> <span class="truncate max-w-[180px]" title="${artist.email}">${artist.email}</span></div>
+                            <div class="flex items-center text-gray-600 text-xs"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-gray-400 flex-shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${artist.phone}</div>
+                            ${instaHTML}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4"><div class="font-medium text-gray-900">${artist.type}</div><div class="flex items-center text-xs text-gray-500 mt-1"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 flex-shrink-0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${displayRegion}</div></td>
+                    <td class="px-6 py-4"><div class="flex flex-col">${detailsHTML}</div></td>
+                    <td class="px-6 py-4"><div class="flex flex-wrap gap-1">${renderBadges(artist)} ${artist.unsubscribed ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 mb-1">Unsubscribed</span>` : ''}</div></td>
+                    <td class="px-6 py-4 max-w-[200px]">${notesHTML}</td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                            <button onclick="openModal(${artist.rowIndex})" class="text-apple-blue bg-blue-50 border border-blue-100 hover:bg-apple-blue hover:text-white transition-colors px-3 py-1.5 rounded-lg focus:outline-none flex items-center justify-center shadow-sm" title="Bewerken"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg><span class="text-xs font-medium ml-1">Bewerk</span></button>
+                            <button onclick="deleteContact(${artist.rowIndex})" class="text-red-500 bg-red-50 border border-red-100 hover:bg-red-500 hover:text-white transition-colors p-2 rounded-lg focus:outline-none flex items-center justify-center shadow-sm" title="Verwijderen"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg></button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const regionFilter = document.getElementById('filter-region').value;
+            const typeFilter = document.getElementById('filter-type').value;
+            const bookableFilter = document.getElementById('filter-bookable').value;
+
+            currentFilteredData = allArtists.filter(artist => {
+                const fullName = String(`${artist.firstName} ${artist.lastName}`).toLowerCase();
+                const actName = String(artist.artistName).toLowerCase();
+                const email = (artist.email && artist.email !== '-') ? String(artist.email).toLowerCase() : '';
+                
+                const matchesSearch = fullName.includes(searchTerm) || actName.includes(searchTerm) || email.includes(searchTerm);
+                let matchesRegion = true; if (regionFilter === 'Den Haag') matchesRegion = artist.regionDH === true; if (regionFilter === 'Rotterdam') matchesRegion = artist.regionRdam === true;
+                const matchesType = typeFilter === 'all' || artist.type === typeFilter;
+                let matchesBookable = true; if (bookableFilter === 'ja') matchesBookable = artist.bookable === true; if (bookableFilter === 'nee') matchesBookable = artist.bookable === false;
+
+                return matchesSearch && matchesRegion && matchesType && matchesBookable;
+            });
+            renderTable(currentFilteredData);
+        }
+
+        document.getElementById('search-input').addEventListener('input', applyFilters);
+        document.getElementById('filter-region').addEventListener('change', applyFilters);
+        document.getElementById('filter-type').addEventListener('change', applyFilters);
+        document.getElementById('filter-bookable').addEventListener('change', applyFilters);
+
+        async function fetchArtists() {
+            if (WEB_APP_URL === 'JOUW_WEB_APP_URL_HIER') { document.getElementById('loading-state').style.display = 'none'; return; }
+            try {
+                const response = await fetch(WEB_APP_URL);
+                const data = await response.json();
+                
+                allArtists = data.map(row => ({
+                    rowIndex: row.rowIndex, 
+                    firstName: row['Voornaam'] !== '-' ? String(row['Voornaam']) : '',
+                    lastName: row['Achternaam'] !== '-' ? String(row['Achternaam']) : '',
+                    artistName: row['Artiestennaam'] ? String(row['Artiestennaam']) : '-',
+                    email: row['E-mailadres'] ? String(row['E-mailadres']) : '-',
+                    phone: row['Telefoonnummer'] ? String(row['Telefoonnummer']) : '-',
+                    instagram: row['Instagram account'] ? String(row['Instagram account']) : '-',
+                    bookable: isTrue(row['Boekbaar (Ja/Nee)']),
+                    favGijs: isTrue(row['Favoriet Gijs (Ja/Nee)']),
+                    favRo: isTrue(row['Favoriet Ro (Ja/Nee)']),
+                    setLength: row['Speelduur'] ? String(row['Speelduur']) : '-',
+                    regionDH: isTrue(row['Regio Den Haag']),
+                    regionRdam: isTrue(row['Regio Rotterdam']),
+                    workshops: isTrue(row['Interesse in workshops (Ja/Nee)']),
+                    workshop7Nov: isTrue(row['Workshop 7 nov (Ja/Nee)']),
+                    unsubscribed: isTrue(row['Unsubscribed (Ja/Nee)']),
+                    type: row['Soort contact'] ? String(row['Soort contact']).trim() : '-',
+                    blacklist: isTrue(row['Blacklist (Ja/Nee)']),
+                    notes: row['Notities'] ? String(row['Notities']) : '-'
+                }));
+
+                document.getElementById('loading-state').style.display = 'none';
+                applyFilters();
+
+            } catch (error) { document.getElementById('loading-state').innerHTML = `<p class="text-sm font-medium text-red-500">Er is een fout opgetreden.</p>`; }
+        }
+
+        lucide.createIcons();
+        fetchArtists();
+    </script>
+</body>
+</html>
