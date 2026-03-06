@@ -325,8 +325,8 @@ async function scanFolder() {
 }
 
 function resolveMultipleMatch(index, selectElement) {
-    let cb = getEl(`match-cb-`); 
-    let row = getEl(`match-row-`); 
+    let cb = getEl(`match-cb-${index}`); 
+    let row = getEl(`match-row-${index}`); 
     let val = selectElement.value;
     
     if (val === "") { 
@@ -357,7 +357,7 @@ function resolveMultipleMatch(index, selectElement) {
 
 async function sendPhotos() {
     state.scannedMatches.forEach((m, idx) => { 
-        const cb = getEl(`match-cb-`); 
+        const cb = getEl(`match-cb-${idx}`); 
         m.selected = cb ? cb.checked : false; 
     });
     
@@ -413,23 +413,7 @@ async function initApp() {
     document.body.insertAdjacentHTML('beforeend', syncModalTemplate);
     document.body.insertAdjacentHTML('beforeend', mailingModalTemplate);
 
-    lucide.createIcons();
-    await loadArtists();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    // Filter Events
-    getEl('search-input').addEventListener('input', applyFilters);
-    getEl('filter-region').addEventListener('change', applyFilters);
-    getEl('filter-type').addEventListener('change', applyFilters);
-    getEl('filter-bookable').addEventListener('change', applyFilters);
-
-    // Button Events (Binding to IDs)
-    getEl('btn-open-sync').addEventListener('click', openSyncModal);
-    getEl('btn-open-mailing').addEventListener('click', openMailingModal);
-    getEl('btn-open-photo').addEventListener('click', openPhotoModal);
-    getEl('btn-open-add').addEventListener('click', () => openContactModal());
-
+    // Attach listeners to elements from the templates now that they exist
     getEl('btn-sync-start').addEventListener('click', fetchGoogleContacts);
     getEl('sync-select-all').addEventListener('change', (e) => toggleAllSyncCheckboxes(e.target));
     getEl('btn-import-contacts').addEventListener('click', importSelectedContacts);
@@ -442,12 +426,35 @@ document.addEventListener('DOMContentLoaded', () => {
     
     getEl('btn-save-contact').addEventListener('click', submitContactForm);
 
-    // Generic Close Buttons
+    // Generic Close Buttons for modals
     document.querySelectorAll('[data-close]').forEach(btn => {
         btn.addEventListener('click', () => closeModal(btn.getAttribute('data-close')));
     });
 
-    // Delegated Events for Table
+    // Delegated Events for Photo Matches (inside a modal)
+    getEl('photo-matches-body').addEventListener('change', (e) => {
+        if (e.target.classList.contains('match-resolver')) {
+            resolveMultipleMatch(parseInt(e.target.dataset.index), e.target);
+        }
+    });
+
+    lucide.createIcons();
+    await loadArtists();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Attach listeners to static elements (always present in index.html)
+    getEl('search-input').addEventListener('input', applyFilters);
+    getEl('filter-region').addEventListener('change', applyFilters);
+    getEl('filter-type').addEventListener('change', applyFilters);
+    getEl('filter-bookable').addEventListener('change', applyFilters);
+
+    getEl('btn-open-sync').addEventListener('click', openSyncModal);
+    getEl('btn-open-mailing').addEventListener('click', openMailingModal);
+    getEl('btn-open-photo').addEventListener('click', openPhotoModal);
+    getEl('btn-open-add').addEventListener('click', () => openContactModal());
+
+    // Delegated Events for Table (static container)
     getEl('artist-table-body').addEventListener('click', (e) => {
         const btnEdit = e.target.closest('.btn-edit');
         const btnDelete = e.target.closest('.btn-delete');
@@ -458,12 +465,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (noteToggle) ui.toggleNote(noteToggle);
     });
 
-    // Delegated Events for Photo Matches
-    getEl('photo-matches-body').addEventListener('change', (e) => {
-        if (e.target.classList.contains('match-resolver')) {
-            resolveMultipleMatch(parseInt(e.target.dataset.index), e.target);
-        }
-    });
-
+    // Start the app initialization process
     initApp();
 });
