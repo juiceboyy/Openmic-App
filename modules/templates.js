@@ -1,4 +1,4 @@
-export const photoModalTemplate = `
+export const photoModalTemplate = /*html*/`
 <div id="photo-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl flex flex-col max-h-full overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
@@ -41,7 +41,7 @@ export const photoModalTemplate = `
     </div>
 </div>`;
 
-export const contactModalTemplate = `
+export const contactModalTemplate = /*html*/`
 <div id="contact-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col max-h-full overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
@@ -78,7 +78,7 @@ export const contactModalTemplate = `
     </div>
 </div>`;
 
-export const syncModalTemplate = `
+export const syncModalTemplate = /*html*/`
 <div id="sync-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-full overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
@@ -125,7 +125,7 @@ export const syncModalTemplate = `
     </div>
 </div>`;
 
-export const mailingModalTemplate = `
+export const mailingModalTemplate = /*html*/`
 <div id="mailing-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-full overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
