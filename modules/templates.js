@@ -154,3 +154,40 @@ export const mailingModalTemplate = /*html*/`
         </div>
     </div>
 </div>`;
+
+export const lineupModalTemplate = /*html*/`
+<div id="lineup-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl flex flex-col max-h-[90vh] overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-2xl">
+            <h2 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <i data-lucide="list-ordered" class="w-5 h-5 text-apple-blue"></i> Speelschema (Max 12)
+            </h2>
+            <button onclick="closeLineupModal()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto modal-scroll bg-white flex-1">
+            <div class="flex gap-2 mb-6">
+                <div class="relative flex-1">
+                    <select id="lineup-artist-select" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 appearance-none bg-white">
+                        <option value="">Kies een artiest...</option>
+                    </select>
+                    <i data-lucide="chevron-down" class="absolute right-3 top-3 w-4 h-4 text-gray-400 pointer-events-none"></i>
+                </div>
+                <button onclick="addArtistToLineup()" class="bg-apple-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center">
+                    <i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Toevoegen
+                </button>
+            </div>
+
+            <div id="lineup-list-container" class="space-y-2">
+                <!-- Lineup items injected here -->
+            </div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-2xl">
+            <button onclick="closeLineupModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors mr-auto">Annuleren</button>
+            <button id="btn-save-lineup" onclick="saveLineupToDatabase()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
+                <i data-lucide="save" class="w-4 h-4 mr-2"></i> Opslaan in Aanmeldlijst
+            </button>
+        </div>
+    </div>
+</div>`;

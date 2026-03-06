@@ -1,10 +1,11 @@
 import { getEl } from './modules/utils.js';
-import { photoModalTemplate, contactModalTemplate, syncModalTemplate, mailingModalTemplate } from './modules/templates.js';
+import { photoModalTemplate, contactModalTemplate, syncModalTemplate, mailingModalTemplate, lineupModalTemplate } from './modules/templates.js';
 import * as UI from './modules/uiHandler.js';
 import * as Contact from './modules/contactsHandler.js';
 import * as Sync from './modules/syncHandler.js';
 import * as Mailing from './modules/mailingHandler.js';
 import * as Photo from './modules/photoHandler.js';
+import * as Lineup from './modules/lineupHandler.js';
 
 // --- Initialization ---
 
@@ -14,6 +15,7 @@ async function initApp() {
     document.body.insertAdjacentHTML('beforeend', contactModalTemplate);
     document.body.insertAdjacentHTML('beforeend', syncModalTemplate);
     document.body.insertAdjacentHTML('beforeend', mailingModalTemplate);
+    document.body.insertAdjacentHTML('beforeend', lineupModalTemplate);
 
     // Attach listeners to elements from the templates now that they exist
     getEl('btn-sync-start').addEventListener('click', Sync.fetchGoogleContacts);
@@ -100,3 +102,11 @@ window.openPhotoModal = Photo.openPhotoModal;
 window.scanFolder = Photo.scanFolder;
 window.sendPhotos = Photo.sendPhotos;
 window.resolveMultipleMatch = Photo.resolveMultipleMatch;
+
+window.openLineupModal = Lineup.openLineupModal;
+window.closeLineupModal = Lineup.closeLineupModal;
+window.addArtistToLineup = Lineup.addArtistToLineup;
+window.removeArtistFromLineup = Lineup.removeArtistFromLineup;
+window.moveArtistUp = Lineup.moveArtistUp;
+window.moveArtistDown = Lineup.moveArtistDown;
+window.saveLineupToDatabase = Lineup.saveLineupToDatabase;
