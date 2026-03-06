@@ -1,7 +1,7 @@
 import { getEl, isTrue, toggleButtonLoading } from './modules/utils.js';
 import { api } from './modules/api.js';
 import { ui } from './modules/ui.js';
-import { photoModalTemplate, contactModalTemplate } from './modules/templates.js';
+import { photoModalTemplate, contactModalTemplate, syncModalTemplate, mailingModalTemplate } from './modules/templates.js';
 
 const App = {
     state: {
@@ -156,6 +156,8 @@ const App = {
             // Inject heavy modals dynamically to keep index.html clean
             document.body.insertAdjacentHTML('beforeend', photoModalTemplate);
             document.body.insertAdjacentHTML('beforeend', contactModalTemplate);
+            document.body.insertAdjacentHTML('beforeend', syncModalTemplate);
+            document.body.insertAdjacentHTML('beforeend', mailingModalTemplate);
 
             // Cache DOM
             const ids = [
