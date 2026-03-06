@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { getEl, toggleButtonLoading } from './utils.js';
 import { loadArtists, toggleGlobalLoading } from './uiHandler.js';
+import { showToast, showConfirm } from './notifications.js';
 
 export function openModal(rowIndex = null) {
     const newContactForm = getEl('new-contact-form');
@@ -58,16 +59,16 @@ export async function submitForm() {
     if(state.currentEditRowIndex) payload._rowIndex = state.currentEditRowIndex;
     try {
         const data = await apiRequest(payload);
-        if (data.status === "success") { getEl('contact-modal').classList.add('hidden'); toggleGlobalLoading(getEl('loading-state'), true); loadArtists(); } 
-        else { alert("Fout: " + data.message); }
-    } catch (e) { alert("Kon niet opslaan."); } finally { toggleButtonLoading(btn, false, orig); }
+        if (data.status === "success") { getEl('contact-modal').classList.add('hidden'); toggleGlobalLoading(getEl('loading-state'), true); loadArtists(); showToast("Contact succesvol opgeslagen", "success"); } 
+        else { showToast("Fout: " + data.message, "error"); }
+    } catch (e) { showToast("Kon niet opslaan.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
 
 export async function deleteContact(rowIndex) {
-    if (!confirm("Zeker weten?")) return;
+    if (!await showConfirm("Weet je zeker dat je dit contact wilt verwijderen?")) return;
     toggleGlobalLoading(getEl('loading-state'), true);
     try {
         const res = await apiRequest({ _action: 'delete', _rowIndex: rowIndex });
-        if (res.status === "success") loadArtists();
-    } catch (e) { alert("Fout bij verwijderen."); toggleGlobalLoading(getEl('loading-state'), false); }
+        if (res.status === "success") { loadArtists(); showToast("Contact verwijderd", "success"); }
+    } catch (e) { showToast("Fout bij verwijderen.", "error"); toggleGlobalLoading(getEl('loading-state'), false); }
 }

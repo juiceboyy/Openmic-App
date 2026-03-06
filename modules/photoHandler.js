@@ -1,6 +1,7 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { getEl, toggleButtonLoading } from './utils.js';
+import { showToast, showConfirm } from './notifications.js';
 
 export function renderMatches(matches, elements) {
     const { photoMatchesBody } = elements;
@@ -33,12 +34,12 @@ export function closePhotoModal(modalId) {
 }
 
 export async function scanFolder() {
-    const url = getEl('drive-folder-url').value; if(!url) { alert("Plak eerst een link!"); return; }
+    const url = getEl('drive-folder-url').value; if(!url) { showToast("Plak eerst een link!", "error"); return; }
     const btn = getEl('btn-scan-folder'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
         const result = await apiRequest({ _action: 'scan_folder', folderUrl: url });
-        if (result.status === "success") { state.scannedMatches = result.matches; renderMatches(state.scannedMatches, { photoMatchesBody: getEl('photo-matches-body') }); getEl('photo-step-1').classList.add('hidden'); getEl('photo-step-2').classList.remove('hidden'); getEl('photo-modal-footer').classList.remove('hidden'); } else { alert("Fout: " + result.message); }
-    } catch (e) { alert("Scan mislukt."); } finally { toggleButtonLoading(btn, false, orig); }
+        if (result.status === "success") { state.scannedMatches = result.matches; renderMatches(state.scannedMatches, { photoMatchesBody: getEl('photo-matches-body') }); getEl('photo-step-1').classList.add('hidden'); getEl('photo-step-2').classList.remove('hidden'); getEl('photo-modal-footer').classList.remove('hidden'); } else { showToast("Fout: " + result.message, "error"); }
+    } catch (e) { showToast("Scan mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
 
 export function resolveMultipleMatch(index, selectElement) {
@@ -46,17 +47,17 @@ export function resolveMultipleMatch(index, selectElement) {
     if (val === "") { cb.checked = false; cb.disabled = true; row.classList.add('bg-orange-50/30'); state.scannedMatches[index].selected = false; } else {
         let chosen = state.scannedMatches[index].candidates[val]; state.scannedMatches[index].artistName = chosen.artistName; state.scannedMatches[index].email = chosen.email;
         if (chosen.email && chosen.email !== '-') { cb.disabled = false; cb.checked = true; state.scannedMatches[index].selected = true; selectElement.classList.replace('border-orange-300', 'border-green-300'); selectElement.classList.replace('bg-orange-50', 'bg-green-50'); row.classList.remove('bg-orange-50/30'); } 
-        else { cb.checked = false; cb.disabled = true; state.scannedMatches[index].selected = false; alert("Geen geldig e-mailadres."); }
+        else { cb.checked = false; cb.disabled = true; state.scannedMatches[index].selected = false; showToast("Geen geldig e-mailadres.", "error"); }
     }
 }
 
 export async function sendPhotos() {
     state.scannedMatches.forEach((m, idx) => { const cb = getEl(`match-cb-${idx}`); m.selected = cb ? cb.checked : false; });
-    const toSend = state.scannedMatches.filter(m => m.selected); if(toSend.length === 0) { alert("Geen vinkjes gezet!"); return; }
-    if(!confirm(`Stuur e-mail naar ${toSend.length} artiest(en)?`)) return;
+    const toSend = state.scannedMatches.filter(m => m.selected); if(toSend.length === 0) { showToast("Geen vinkjes gezet!", "error"); return; }
+    if(!await showConfirm(`Stuur e-mail naar ${toSend.length} artiest(en)?`)) return;
     const btn = getEl('btn-send-photos'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
         const result = await apiRequest({ _action: 'send_emails', matches: state.scannedMatches });
-        if (result.status === "success") { alert(`Gelukt! ${result.sentCount} e-mails verstuurd.`); getEl('photo-modal').classList.add('hidden'); } else { alert("Fout: " + result.message); }
-    } catch (e) { alert("Verzenden mislukt."); } finally { toggleButtonLoading(btn, false, orig); }
+        if (result.status === "success") { showToast(`Gelukt! ${result.sentCount} e-mails verstuurd.`, "success"); getEl('photo-modal').classList.add('hidden'); } else { showToast("Fout: " + result.message, "error"); }
+    } catch (e) { showToast("Verzenden mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }

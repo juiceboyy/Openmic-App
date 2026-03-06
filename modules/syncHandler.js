@@ -2,6 +2,7 @@ import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { getEl, toggleButtonLoading } from './utils.js';
 import { loadArtists, toggleGlobalLoading } from './uiHandler.js';
+import { showToast } from './notifications.js';
 
 export function renderSyncContacts(contacts, elements) {
     const { syncContactsBody, btnImportContacts } = elements;
@@ -45,8 +46,8 @@ export async function fetchGoogleContacts() {
         if (result.status === "success") {
             state.fetchedSyncContacts = result.contacts; renderSyncContacts(state.fetchedSyncContacts, { syncContactsBody: getEl('sync-contacts-body'), btnImportContacts: getEl('btn-import-contacts') });
             getEl('sync-step-1').classList.add('hidden'); getEl('sync-step-2').classList.remove('hidden'); getEl('sync-modal-footer').classList.remove('hidden');
-        } else { alert("Fout bij ophalen: " + result.message); }
-    } catch (e) { alert("Kon contacten niet ophalen."); } finally { toggleButtonLoading(btn, false, orig); }
+        } else { showToast("Fout bij ophalen: " + result.message, "error"); }
+    } catch (e) { showToast("Kon contacten niet ophalen.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
 
 export function toggleAllSyncCheckboxes(source) {
@@ -55,10 +56,10 @@ export function toggleAllSyncCheckboxes(source) {
 
 export async function importSelectedContacts() {
     const toImport = []; state.fetchedSyncContacts.forEach((c, idx) => { if(getEl(`sync-cb-${idx}`).checked) { toImport.push(c); } });
-    if(toImport.length === 0) { alert("Selecteer minstens één contact."); return; }
+    if(toImport.length === 0) { showToast("Selecteer minstens één contact.", "error"); return; }
     const btn = getEl('btn-import-contacts'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
         const result = await apiRequest({ _action: 'import_contacts', contacts: toImport });
-        if (result.status === "success") { alert(`Succes! ${result.importedCount} toegevoegd.`); getEl('sync-modal').classList.add('hidden'); toggleGlobalLoading(getEl('loading-state'), true); loadArtists(); } else { alert("Fout: " + result.message); }
-    } catch (e) { alert("Importeren mislukt."); } finally { toggleButtonLoading(btn, false, orig); }
+        if (result.status === "success") { showToast(`Succes! ${result.importedCount} toegevoegd.`, "success"); getEl('sync-modal').classList.add('hidden'); toggleGlobalLoading(getEl('loading-state'), true); loadArtists(); } else { showToast("Fout: " + result.message, "error"); }
+    } catch (e) { showToast("Importeren mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
