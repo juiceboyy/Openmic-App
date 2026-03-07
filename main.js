@@ -55,6 +55,9 @@ async function initApp() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize theme as soon as DOM is ready to prevent errors
+    Theme.initTheme();
+
     // Attach listeners to static elements (always present in index.html)
     getEl('search-input').addEventListener('input', UI.applyFilters);
     getEl('filter-region').addEventListener('change', UI.applyFilters);
@@ -80,9 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Start the app initialization process
     initApp();
 });
-
-// Initialize theme immediately to prevent flash
-Theme.initTheme();
 
 // --- Window Expose (For inline handlers if needed) ---
 window.openModal = Contact.openModal;
