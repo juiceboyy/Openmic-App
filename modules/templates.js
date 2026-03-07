@@ -168,7 +168,9 @@ export const lineupModalTemplate = /*html*/`
         <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800 flex-1">
 
             <div class="flex gap-2 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100 dark:bg-blue-900/20 dark:border-blue-800">
-                <input type="text" id="current-session-name" placeholder="Naam tabblad (bijv. 10 mrt 2026)" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white">
+                <select id="current-session-name" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white">
+                    <option value="" disabled selected>Kies de huidige sessie...</option>
+                </select>
                 <button onclick="loadCurrentSession()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
                     <i data-lucide="download-cloud" class="w-4 h-4"></i> Sessie Laden
                 </button>
@@ -176,7 +178,9 @@ export const lineupModalTemplate = /*html*/`
 
             <div id="lineup-editor-container" class="hidden">
                 <div class="flex gap-2 mb-6 bg-gray-50 p-3 rounded-lg border border-gray-200 dark:bg-gray-700/30 dark:border-gray-700">
-                    <input type="text" id="prev-sheet-name" placeholder="Naam tabblad vorige maand (bijv. 10 feb 2026)" class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue/50 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                    <select id="prev-sheet-name" class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="" disabled selected>Kies de vorige sessie...</option>
+                    </select>
                     <button onclick="loadPreviousLineup()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> Check Historie</button>
                 </div>
 

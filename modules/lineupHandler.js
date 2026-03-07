@@ -125,6 +125,7 @@ export function openLineupModal() {
     getEl('lineup-modal').classList.remove('hidden');
     renderLineupUI();
     lucide.createIcons();
+    fetchAvailableSheets();
 }
 
 export function closeLineupModal() {
@@ -135,7 +136,7 @@ export async function loadCurrentSession() {
     const sessionName = getEl('current-session-name').value.trim();
     
     if (!sessionName) {
-        showToast("Vul eerst een sessie naam in.", "error");
+        showToast("Kies eerst een sessie.", "error");
         return;
     }
 
@@ -192,10 +193,32 @@ export async function loadCurrentSession() {
     }
 }
 
+export async function fetchAvailableSheets() {
+    try {
+        const result = await apiRequest({ _action: 'get_sheet_names' });
+        if (result.status === "success" && Array.isArray(result.sheetNames)) {
+            const sheets = result.sheetNames.reverse();
+            const options = sheets.map(name => `<option value="${name}">${name}</option>`).join('');
+            
+            const currentSelect = getEl('current-session-name');
+            if (currentSelect) {
+                currentSelect.innerHTML = `<option value="" disabled selected>Kies de huidige sessie...</option>${options}`;
+            }
+
+            const prevSelect = getEl('prev-sheet-name');
+            if (prevSelect) {
+                prevSelect.innerHTML = `<option value="" disabled selected>Kies de vorige sessie...</option>${options}`;
+            }
+        }
+    } catch (e) {
+        console.error("Fout bij ophalen tabbladen:", e);
+    }
+}
+
 export async function loadPreviousLineup() {
     const prevSheetName = getEl('prev-sheet-name').value.trim();
     if (!prevSheetName) {
-        showToast("Vul eerst de naam van het vorige tabblad in.", "error");
+        showToast("Kies eerst de vorige sessie.", "error");
         return;
     }
 
