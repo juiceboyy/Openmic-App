@@ -4,6 +4,7 @@ import { showToast } from './notifications.js';
 import { getEl, toggleButtonLoading } from './utils.js';
 
 let currentLineup = [];
+let selectedArtistRowIndex = null;
 
 export function openLineupModal() {
     getEl('lineup-modal').classList.remove('hidden');
@@ -15,9 +16,55 @@ export function closeLineupModal() {
     getEl('lineup-modal').classList.add('hidden');
 }
 
-export function addArtistToLineup() {
-    const select = getEl('lineup-artist-select');
-    const rowIndex = parseInt(select.value);
+export function handleLineupSearch(event) {
+    const query = event.target.value.toLowerCase().trim();
+    const resultsDiv = getEl('lineup-search-results');
+
+    if (!query) {
+        resultsDiv.classList.add('hidden');
+        resultsDiv.innerHTML = '';
+        return;
+    }
+
+    const matches = state.allArtists.filter(a => {
+        const artName = (a.artistName || '').toLowerCase();
+        const fName = (a.firstName || '').toLowerCase();
+        const lName = (a.lastName || '').toLowerCase();
+        return artName.includes(query) || fName.includes(query) || lName.includes(query);
+    });
+
+    let html = '';
+    if (matches.length === 0) {
+        html = '<div class="px-4 py-3 text-sm text-gray-500">Geen artiesten gevonden...</div>';
+    } else {
+        matches.forEach(artist => {
+            const displayName = artist.artistName && artist.artistName !== '-' ? artist.artistName : `${artist.firstName} ${artist.lastName}`;
+            html += `<div onclick="selectLineupArtist(${artist.rowIndex}, '${displayName.replace(/'/g, "\\'")}')" class="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors"> <div class="font-medium text-gray-900">${displayName}</div> <div class="text-xs text-gray-500">${artist.firstName} ${artist.lastName}</div> </div>`;
+        });
+    }
+
+    resultsDiv.innerHTML = html;
+    resultsDiv.classList.remove('hidden');
+}
+
+export function selectLineupArtist(rowIndex, displayName) {
+    selectedArtistRowIndex = rowIndex;
+    getEl('lineup-search-input').value = displayName;
+    getEl('lineup-search-results').classList.add('hidden');
+}
+
+export function addSelectedArtistToLineup() {
+    if (selectedArtistRowIndex === null) {
+        showToast('Zoek en selecteer eerst een artiest.', 'error');
+        return;
+    }
+    addArtistToLineup(selectedArtistRowIndex);
+    selectedArtistRowIndex = null;
+    getEl('lineup-search-input').value = '';
+}
+
+export function addArtistToLineup(rowIndexInput) {
+    const rowIndex = parseInt(rowIndexInput);
     
     if (isNaN(rowIndex)) {
         showToast("Selecteer eerst een artiest.", "error");
@@ -39,7 +86,6 @@ export function addArtistToLineup() {
 
     currentLineup.push(artist);
     renderLineupUI();
-    select.value = ""; 
 }
 
 export function removeArtistFromLineup(index) {
@@ -95,19 +141,6 @@ export async function saveLineupToDatabase() {
 
 export function renderLineupUI() {
     const container = getEl('lineup-list-container');
-    const select = getEl('lineup-artist-select');
-    
-    if (select.options.length <= 1) {
-        select.innerHTML = '<option value="">Kies een artiest...</option>';
-        const sorted = [...state.allArtists].sort((a, b) => (a.artistName !== '-' ? a.artistName : a.firstName).localeCompare(b.artistName !== '-' ? b.artistName : b.firstName));
-        sorted.forEach(artist => {
-            const name = artist.artistName !== '-' ? `${artist.artistName} (${artist.firstName})` : `${artist.firstName} ${artist.lastName}`;
-            const option = document.createElement('option');
-            option.value = artist.rowIndex;
-            option.textContent = name;
-            select.appendChild(option);
-        });
-    }
 
     let html = '';
     for (let i = 0; i < 12; i++) {

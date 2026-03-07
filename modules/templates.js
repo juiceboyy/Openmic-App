@@ -166,15 +166,16 @@ export const lineupModalTemplate = /*html*/`
         </div>
         
         <div class="p-6 overflow-y-auto modal-scroll bg-white flex-1">
-            <div class="flex gap-2 mb-6">
+            <div class="relative flex items-start gap-2 mb-6">
                 <div class="relative flex-1">
-                    <select id="lineup-artist-select" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 appearance-none bg-white">
-                        <option value="">Kies een artiest...</option>
-                    </select>
-                    <i data-lucide="chevron-down" class="absolute right-3 top-3 w-4 h-4 text-gray-400 pointer-events-none"></i>
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                        <input type="text" id="lineup-search-input" oninput="handleLineupSearch(event)" placeholder="Zoek op artiest of naam..." class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" autocomplete="off">
+                    </div>
+                    <div id="lineup-search-results" class="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto mt-1 divide-y divide-gray-100"></div>
                 </div>
-                <button onclick="addArtistToLineup()" class="bg-apple-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center">
-                    <i data-lucide="plus" class="w-4 h-4 mr-1.5"></i> Toevoegen
+                <button onclick="addSelectedArtistToLineup()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Toevoegen
                 </button>
             </div>
 
