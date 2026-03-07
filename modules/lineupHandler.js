@@ -74,7 +74,9 @@ export async function loadCurrentSession() {
                 
                 if (result.data && Array.isArray(result.data)) {
                     result.data.forEach((item, i) => {
-                        if (i < 12 && item && item.name) {
+                        // Defensieve check: negeer pauze-achtige strings mochten die toch doorkomen
+                        const isPause = item && item.name && (item.name.toLowerCase().includes('pauze') || item.name.includes('☕'));
+                        if (i < 12 && item && item.name && !isPause) {
                             const searchName = item.name.toLowerCase();
                             const artist = state.allArtists.find(a => 
                                 (a.artistName && a.artistName.toLowerCase() === searchName) || 
@@ -86,6 +88,8 @@ export async function loadCurrentSession() {
                             } else {
                                 currentLineup[i] = { artistName: item.name, notes: item.notes || '', fallback: true };
                             }
+                        } else if (i < 12) {
+                            currentLineup[i] = null;
                         }
                     });
                 }
