@@ -11,6 +11,88 @@ let activeSlotIndex = null;
 let activeSessionName = '';
 let draggedItem = null; // { list: 'main'|'reserve', index: 0 }
 
+// Helper functions voor fuzzy matching
+function normalizeString(str) {
+    if (!str || str === '-') return '';
+    return str.toLowerCase()
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Verwijder accenten
+        .replace(/[^a-z0-9\s]/g, "") // Verwijder leestekens
+        .replace(/\s+/g, " ") // Dubbele spaties weg
+        .trim();
+}
+
+function levenshteinDistance(a, b) {
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+
+    const matrix = [];
+
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // substitution
+                    Math.min(
+                        matrix[i][j - 1] + 1, // insertion
+                        matrix[i - 1][j] + 1 // deletion
+                    )
+                );
+            }
+        }
+    }
+
+    return matrix[b.length][a.length];
+}
+
+function isFuzzyMatch(artist, historicalName) {
+    const h = normalizeString(historicalName);
+    if (!h) return false;
+    
+    // Helper om te checken of string A lijkt op string B
+    const checkSimilarity = (strA, strB) => {
+        if (!strA || !strB) return false;
+        // Directe substring match (bestaande logica)
+        if (strB.includes(strA) || strA.includes(strB)) return true;
+        
+        // Levenshtein check voor typefouten
+        // Alleen zinvol als de strings een redelijke lengte hebben (> 3)
+        if (strA.length > 3 && strB.length > 3) {
+            const dist = levenshteinDistance(strA, strB);
+            // Toestaan: 1 fout per 4 karakters (ongeveer)
+            const maxDist = Math.floor(Math.min(strA.length, strB.length) / 4) + 1; 
+            return dist <= maxDist;
+        }
+        return false;
+    };
+
+    // Check Artist Name
+    if (artist.artistName && artist.artistName !== '-') {
+        const a = normalizeString(artist.artistName);
+        if (checkSimilarity(a, h)) return true;
+    }
+
+    // Check Real Name
+    const f = normalizeString(artist.firstName);
+    const l = normalizeString(artist.lastName);
+    const full = `${f} ${l}`.trim();
+    
+    if (full) {
+        if (checkSimilarity(full, h)) return true;
+    }
+    
+    return false;
+}
+
 function saveToLocalStorage() {
     localStorage.setItem(LS_KEY, JSON.stringify({ main: currentLineup, reserve: reserveLineup }));
 }
@@ -192,18 +274,26 @@ export function handleLineupSearch(event) {
     resultsDiv.innerHTML = html;
 }
 
-export function selectLineupArtist(rowIndex) {
+export async function selectLineupArtist(rowIndex) {
     const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
     
     if (artist && activeSlotIndex !== null) {
         const displayName = artist.artistName && artist.artistName !== '-' ? artist.artistName : `${artist.firstName} ${artist.lastName}`;
         
-        // Check of artiest vorige maand speelde
-        const playedRecently = playedLastMonth.some(name => name.toLowerCase() === displayName.toLowerCase());
+        // Fuzzy check op historie
+        const matchedName = playedLastMonth.find(name => isFuzzyMatch(artist, name));
 
-        if (playedRecently) {
-            reserveLineup.push(artist);
-            showToast('Let op: Deze artiest speelde vorige maand al! Verplaatst naar reservelijst.', 'error');
+        if (matchedName) {
+            const confirmed = await showConfirm(
+                `Let op: <strong>${displayName}</strong> lijkt erg op <strong>${matchedName}</strong> die vorige keer al heeft gespeeld.<br><br>Wil je deze artiest toch toevoegen aan het hoofdschema?`
+            );
+
+            if (confirmed) {
+                currentLineup[activeSlotIndex] = artist;
+            } else {
+                reserveLineup.push(artist);
+                showToast('Artiest verplaatst naar reservelijst.', 'info');
+            }
         } else {
             currentLineup[activeSlotIndex] = artist;
         }
