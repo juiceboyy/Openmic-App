@@ -1,7 +1,3 @@
-export const CONFIG = {
-    WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzk7SHUUOUEhgMAgKZ9XUUgna3oz_1XDa5Na8m4a5VV7TbTa0lpB7Ku_6SOgmaMIGxE/exec',
-};
-
 export const isTrue = (val) => String(val).toLowerCase() === 'ja' || val === true || val === 'TRUE';
 
 export const getEl = (id) => document.getElementById(id);

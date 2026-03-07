@@ -1,9 +1,10 @@
 import { getEl } from './utils.js';
+import { STORAGE_KEYS } from './config.js';
 
 export function initTheme() {
     // Check local storage of systeem voorkeur
-    if (localStorage.getItem('openmic_theme') === 'dark' || 
-        (!('openmic_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (localStorage.getItem(STORAGE_KEYS.THEME) === 'dark' || 
+        (!(STORAGE_KEYS.THEME in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
     } else {
         document.documentElement.classList.remove('dark');
@@ -13,7 +14,7 @@ export function initTheme() {
 
 export function toggleTheme() {
     const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('openmic_theme', isDark ? 'dark' : 'light');
+    localStorage.setItem(STORAGE_KEYS.THEME, isDark ? 'dark' : 'light');
     updateThemeIcon();
 }
 

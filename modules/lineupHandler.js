@@ -4,8 +4,9 @@ import { showToast, showConfirm } from './notifications.js';
 import { getEl, toggleButtonLoading } from './utils.js';
 import { isFuzzyMatch, saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, copyLineupToClipboard, getDisplayName, createLineupItemHTML, createEmptySlotHTML, createReserveItemHTML } from './lineupHelpers.js';
 import * as DD from './lineupDragDrop.js';
+import { LINEUP_CONFIG } from './config.js';
 
-let currentLineup = new Array(12).fill(null);
+let currentLineup = new Array(LINEUP_CONFIG.MAX_SLOTS).fill(null);
 let reserveLineup = [];
 let playedLastMonth = [];
 let activeSlotIndex = null;
@@ -13,10 +14,20 @@ let activeSessionName = '';
 
 const save = () => saveToLocalStorage(currentLineup, reserveLineup);
 
+export function resizeLineup(newSize) {
+    if (newSize > currentLineup.length) {
+        while (currentLineup.length < newSize) currentLineup.push(null);
+    } else if (newSize < currentLineup.length) {
+        const removed = currentLineup.splice(newSize);
+        removed.forEach(artist => { if (artist) reserveLineup.push(artist); });
+    }
+    save(); renderLineupUI();
+}
+
 export function openLineupModal() {
     if (currentLineup.every(slot => slot === null)) {
         const p = loadFromLocalStorage();
-        if (p) { if (Array.isArray(p) && p.length === 12) currentLineup = p; else if (p.main) { currentLineup = p.main; if (p.reserve) reserveLineup = p.reserve; } }
+        if (p) { if (Array.isArray(p) && p.length === LINEUP_CONFIG.MAX_SLOTS) currentLineup = p; else if (p.main) { currentLineup = p.main; if (p.reserve) reserveLineup = p.reserve; } }
     }
     getEl('lineup-modal').classList.remove('hidden');
     renderLineupUI();
@@ -25,22 +36,22 @@ export function openLineupModal() {
 
 export const closeLineupModal = () => getEl('lineup-modal').classList.add('hidden');
 
-export async function loadCurrentSession() {
+export async function loadCurrentSession(event) {
     const sessionName = getEl('current-session-name').value.trim();
     if (!sessionName) { showToast("Kies eerst een sessie.", "error"); return; }
     const btn = event.currentTarget; const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
         const result = await apiRequest({ _action: 'get_current_lineup', sheetName: sessionName });
         if (result.status === "success") {
-            currentLineup = new Array(12).fill(null);
+            currentLineup = new Array(LINEUP_CONFIG.MAX_SLOTS).fill(null);
             if (!result.isNew && result.data && Array.isArray(result.data)) {
                 result.data.forEach((item, i) => {
                     const isPause = item && item.name && (item.name.toLowerCase().includes('pauze') || item.name.includes('☕'));
-                    if (i < 12 && item && item.name && !isPause) {
+                    if (i < LINEUP_CONFIG.MAX_SLOTS && item && item.name && !isPause) {
                         const searchName = item.name.toLowerCase();
                         const artist = state.allArtists.find(a => (a.artistName && a.artistName.toLowerCase() === searchName) || (`${a.firstName} ${a.lastName}`.toLowerCase() === searchName));
                         if (artist) currentLineup[i] = artist; else currentLineup[i] = { artistName: item.name, notes: item.notes || '', fallback: true };
-                    } else if (i < 12) currentLineup[i] = null;
+                    } else if (i < LINEUP_CONFIG.MAX_SLOTS) currentLineup[i] = null;
                 });
             }
             showToast(result.isNew ? 'Nieuwe sessie gestart.' : 'Bestaande sessie ingeladen!', 'success');
@@ -60,7 +71,7 @@ export async function fetchAvailableSheets() {
     } catch (e) { console.error("Fout bij ophalen tabbladen:", e); }
 }
 
-export async function loadPreviousLineup() {
+export async function loadPreviousLineup(event) {
     const prevSheetName = getEl('prev-sheet-name').value.trim();
     if (!prevSheetName) { showToast("Kies eerst de vorige sessie.", "error"); return; }
     const btn = event.currentTarget; const orig = btn.innerHTML; toggleButtonLoading(btn, true);
@@ -126,7 +137,7 @@ export function addArtistToLineup(rowIndexInput) {
     const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
     if (!artist) return;
     const emptyIndex = currentLineup.findIndex(slot => slot === null);
-    if (emptyIndex === -1) { showToast("Het speelschema is vol (max 12).", "error"); return; }
+    if (emptyIndex === -1) { showToast(`Het speelschema is vol (max ${LINEUP_CONFIG.MAX_SLOTS}).`, "error"); return; }
     if (currentLineup.some(a => a && a.rowIndex === artist.rowIndex)) { showToast("Deze artiest staat al in de lijst.", "error"); return; }
     currentLineup[emptyIndex] = artist;
     save(); renderLineupUI();
@@ -138,7 +149,7 @@ export const removeArtistFromReserve = (index) => { reserveLineup.splice(index, 
 export async function clearLineup() {
     if (currentLineup.every(slot => slot === null)) return; // Niets te wissen
     if (await showConfirm("Weet je zeker dat je het hele speelschema wilt wissen?")) {
-        currentLineup = new Array(12).fill(null);
+        currentLineup = new Array(LINEUP_CONFIG.MAX_SLOTS).fill(null);
         reserveLineup = [];
         save();
         renderLineupUI();
@@ -156,7 +167,7 @@ export function moveArtistUp(index) {
 }
 
 export function moveArtistDown(index) {
-    if (index < currentLineup.length - 1) { [currentLineup[index + 1], currentLineup[index]] = [currentLineup[index], currentLineup[index + 1]]; save(); renderLineupUI(); }
+    if (index < LINEUP_CONFIG.MAX_SLOTS - 1) { [currentLineup[index + 1], currentLineup[index]] = [currentLineup[index], currentLineup[index + 1]]; save(); renderLineupUI(); }
 }
 
 export function handleDropOnMain(event, targetIndex) {
@@ -186,7 +197,7 @@ export async function saveLineupToDatabase() {
             showToast("Lineup succesvol opgeslagen!", "success");
             // Reset state en local storage voor een schone lei
             clearLocalStorage();
-            currentLineup = new Array(12).fill(null);
+            currentLineup = new Array(LINEUP_CONFIG.MAX_SLOTS).fill(null);
             reserveLineup = [];
             activeSessionName = '';
             getEl('current-session-name').value = '';
@@ -200,8 +211,8 @@ export async function saveLineupToDatabase() {
 export function renderLineupUI() {
     const container = getEl('lineup-list-container');
     let html = '';
-    for (let i = 0; i < 12; i++) {
-        if (i === 6) html += `<div class="pauze-divider flex items-center justify-center py-3 my-2 border-y border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/30 rounded-lg"> <span class="text-gray-500 dark:text-gray-400 font-medium text-sm">☕ Pauze</span> </div>`;
+    for (let i = 0; i < LINEUP_CONFIG.MAX_SLOTS; i++) {
+        if (i === LINEUP_CONFIG.PAUSE_INDEX) html += `<div class="pauze-divider flex items-center justify-center py-3 my-2 border-y border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/30 rounded-lg"> <span class="text-gray-500 dark:text-gray-400 font-medium text-sm">☕ Pauze</span> </div>`;
         const artist = currentLineup[i];
         html += artist ? createLineupItemHTML(i, artist, i + 1) : createEmptySlotHTML(i, i + 1);
     }

@@ -162,7 +162,7 @@ export const lineupModalTemplate = /*html*/`
             <h2 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                 <i data-lucide="list-ordered" class="w-5 h-5 text-apple-blue"></i> Speelschema (Max 12)
             </h2>
-            <button onclick="closeLineupModal()" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <button data-close="lineup-modal" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         
         <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800 flex-1">
@@ -171,7 +171,7 @@ export const lineupModalTemplate = /*html*/`
                 <select id="current-session-name" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white">
                     <option value="" disabled selected>Kies de huidige sessie...</option>
                 </select>
-                <button onclick="loadCurrentSession()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                <button id="btn-load-session" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
                     <i data-lucide="download-cloud" class="w-4 h-4"></i> Sessie Laden
                 </button>
             </div>
@@ -181,14 +181,14 @@ export const lineupModalTemplate = /*html*/`
                     <select id="prev-sheet-name" class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <option value="" disabled selected>Kies de vorige sessie...</option>
                     </select>
-                    <button onclick="loadPreviousLineup()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> Check Historie</button>
+                    <button id="btn-check-history" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> Check Historie</button>
                 </div>
 
                 <div id="lineup-list-container" class="space-y-2">
                     <!-- Lineup items injected here -->
                 </div>
 
-                <div id="reserve-list-container" ondragover="handleDragOver(event)" ondrop="handleDropOnReserve(event)" class="mt-8 p-4 border-2 border-dashed border-orange-200 bg-orange-50/30 rounded-lg dark:border-orange-900/50 dark:bg-orange-900/10 min-h-[100px] transition-colors">
+                <div id="reserve-list-container" class="mt-8 p-4 border-2 border-dashed border-orange-200 bg-orange-50/30 rounded-lg dark:border-orange-900/50 dark:bg-orange-900/10 min-h-[100px] transition-colors">
                     <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center"><i data-lucide="clipboard-list" class="w-4 h-4 inline mr-2"></i> Reservelijst</h3>
                     <div id="reserve-list-content" class="space-y-2">
                         <!-- Reserve items injected here -->
@@ -200,11 +200,11 @@ export const lineupModalTemplate = /*html*/`
         <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50 flex flex-col rounded-b-2xl">
             <div class="flex justify-end gap-3 w-full">
                 <div class="mr-auto flex gap-2">
-                    <button onclick="clearLineup()" class="px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center" title="Alles wissen"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                    <button onclick="exportLineupToClipboard()" class="px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center"><i data-lucide="copy" class="w-4 h-4 mr-2"></i> Kopieer lijst</button>
+                    <button id="btn-clear-lineup" class="px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center" title="Alles wissen"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <button id="btn-copy-lineup" class="px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center"><i data-lucide="copy" class="w-4 h-4 mr-2"></i> Kopieer lijst</button>
                 </div>
-                <button onclick="closeLineupModal()" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">Annuleren</button>
-                <button id="btn-save-lineup" onclick="saveLineupToDatabase()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
+                <button data-close="lineup-modal" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">Annuleren</button>
+                <button id="btn-save-lineup" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
                     <i data-lucide="save" class="w-4 h-4 mr-2"></i> Opslaan in Aanmeldlijst
                 </button>
             </div>
@@ -221,5 +221,23 @@ export const lineupSearchModalTemplate = /*html*/`
             <button onclick="closeSlotSearch()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div id="slot-search-results" class="max-h-64 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700"></div>
+    </div>
+</div>`;
+
+export const settingsModalTemplate = /*html*/`
+<div id="settings-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[80] flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden transition-colors border border-gray-100 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-700/50">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2"><i data-lucide="settings" class="w-5 h-5 text-gray-500"></i> Instellingen</h2>
+            <button data-close="settings-modal" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="p-6 space-y-4">
+            <div><label class="block text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Aantal Slots</label><input type="number" id="setting-max-slots" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white"></div>
+            <div><label class="block text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Pauze na slot #</label><input type="number" id="setting-pause-index" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white"></div>
+        </div>
+        <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50 flex justify-end gap-3">
+            <button data-close="settings-modal" class="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors">Annuleren</button>
+            <button id="btn-save-settings" class="bg-apple-blue hover:bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">Opslaan</button>
+        </div>
     </div>
 </div>`;

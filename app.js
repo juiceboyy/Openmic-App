@@ -1,5 +1,5 @@
 import { getEl } from './modules/utils.js';
-import { photoModalTemplate, contactModalTemplate, syncModalTemplate, mailingModalTemplate, lineupModalTemplate, lineupSearchModalTemplate } from './modules/templates.js';
+import { photoModalTemplate, contactModalTemplate, syncModalTemplate, mailingModalTemplate, lineupModalTemplate, lineupSearchModalTemplate, settingsModalTemplate } from './modules/templates.js';
 import * as UI from './modules/uiHandler.js';
 import * as Contact from './modules/contactsHandler.js';
 import * as Sync from './modules/syncHandler.js';
@@ -7,6 +7,7 @@ import * as Mailing from './modules/mailingHandler.js';
 import * as Photo from './modules/photoHandler.js';
 import * as Lineup from './modules/lineupHandler.js';
 import * as Theme from './modules/themeHandler.js';
+import * as Settings from './modules/settingsHandler.js';
 
 const App = {
     init() {
@@ -14,7 +15,7 @@ const App = {
             Theme.initTheme();
             
             // Inject Templates
-            const templates = [photoModalTemplate, contactModalTemplate, syncModalTemplate, mailingModalTemplate, lineupModalTemplate, lineupSearchModalTemplate];
+            const templates = [photoModalTemplate, contactModalTemplate, syncModalTemplate, mailingModalTemplate, lineupModalTemplate, lineupSearchModalTemplate, settingsModalTemplate];
             templates.forEach(t => document.body.insertAdjacentHTML('beforeend', t));
 
             // Bind Static Events
@@ -36,10 +37,13 @@ const App = {
         // Modal Openers
         getEl('btn-open-sync').addEventListener('click', Sync.openSyncModal);
         getEl('btn-open-mailing').addEventListener('click', Mailing.openMailingModal);
+        getEl('btn-open-lineup').addEventListener('click', Lineup.openLineupModal);
         getEl('btn-open-photo').addEventListener('click', Photo.openPhotoModal);
         getEl('btn-open-add').addEventListener('click', () => Contact.openModal());
 
         // Feature Specific Actions
+        getEl('btn-toggle-theme').addEventListener('click', Theme.toggleTheme);
+        getEl('btn-open-settings').addEventListener('click', Settings.openSettingsModal);
         getEl('btn-sync-start').addEventListener('click', Sync.fetchGoogleContacts);
         getEl('sync-select-all').addEventListener('change', (e) => Sync.toggleAllSyncCheckboxes(e.target));
         getEl('btn-import-contacts').addEventListener('click', Sync.importSelectedContacts);
@@ -51,6 +55,19 @@ const App = {
         getEl('btn-send-photos').addEventListener('click', Photo.sendPhotos);
         
         getEl('btn-save-contact').addEventListener('click', Contact.submitForm);
+        
+        getEl('btn-save-settings').addEventListener('click', Settings.saveSettings);
+
+        // Lineup Modal Actions
+        getEl('btn-load-session').addEventListener('click', Lineup.loadCurrentSession);
+        getEl('btn-check-history').addEventListener('click', Lineup.loadPreviousLineup);
+        getEl('btn-clear-lineup').addEventListener('click', Lineup.clearLineup);
+        getEl('btn-copy-lineup').addEventListener('click', Lineup.exportLineupToClipboard);
+        getEl('btn-save-lineup').addEventListener('click', Lineup.saveLineupToDatabase);
+        
+        const reserveContainer = getEl('reserve-list-container');
+        reserveContainer.addEventListener('dragover', Lineup.handleDragOver);
+        reserveContainer.addEventListener('drop', Lineup.handleDropOnReserve);
 
         // Delegated Events (Table & Modals)
         getEl('artist-table-body').addEventListener('click', this.handleTableClick);
@@ -86,11 +103,11 @@ const App = {
         if(id === 'sync-modal') Sync.closeSyncModal('sync-modal');
         if(id === 'mailing-modal') Mailing.closeMailingModal('mailing-modal');
         if(id === 'photo-modal') Photo.closePhotoModal('photo-modal');
+        if(id === 'lineup-modal') Lineup.closeLineupModal();
+        if(id === 'settings-modal') Settings.closeSettingsModal();
     },
 
     exposeToWindow() {
-        window.toggleTheme = Theme.toggleTheme;
-        window.openLineupModal = Lineup.openLineupModal;
         window.closeLineupModal = Lineup.closeLineupModal;
         window.loadCurrentSession = Lineup.loadCurrentSession;
         window.loadPreviousLineup = Lineup.loadPreviousLineup;
