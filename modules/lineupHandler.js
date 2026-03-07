@@ -1,13 +1,36 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
-import { showToast } from './notifications.js';
+import { showToast, showConfirm } from './notifications.js';
 import { getEl, toggleButtonLoading } from './utils.js';
 
+const LS_KEY = 'openmic_lineup_draft';
 let currentLineup = new Array(12).fill(null);
 let activeSlotIndex = null;
 let draggedItemIndex = null;
 
+function saveToLocalStorage() {
+    localStorage.setItem(LS_KEY, JSON.stringify(currentLineup));
+}
+
+function loadFromLocalStorage() {
+    const stored = localStorage.getItem(LS_KEY);
+    if (stored) {
+        try {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length === 12) {
+                currentLineup = parsed;
+            }
+        } catch (e) {
+            console.error("Fout bij laden lineup uit local storage", e);
+        }
+    }
+}
+
 export function openLineupModal() {
+    // Als de huidige lineup leeg is (bijv. na refresh), probeer te herstellen uit storage
+    if (currentLineup.every(slot => slot === null)) {
+        loadFromLocalStorage();
+    }
     getEl('lineup-modal').classList.remove('hidden');
     renderLineupUI();
     lucide.createIcons();
@@ -56,7 +79,16 @@ export function handleLineupSearch(event) {
     } else {
         matches.forEach(artist => {
             const displayName = artist.artistName && artist.artistName !== '-' ? artist.artistName : `${artist.firstName} ${artist.lastName}`;
-            html += `<div onclick="selectLineupArtist(${artist.rowIndex}, '${displayName.replace(/'/g, "\\'")}')" class="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors"> <div class="font-medium text-gray-900">${displayName}</div> <div class="text-xs text-gray-500">${artist.firstName} ${artist.lastName}</div> </div>`;
+            const isAlreadyInLineup = currentLineup.some(slot => slot && slot.rowIndex === artist.rowIndex);
+
+            if (isAlreadyInLineup) {
+                html += `<div class="px-4 py-3 bg-gray-50 opacity-60 cursor-not-allowed flex justify-between items-center">
+                            <div><div class="font-medium text-gray-500">${displayName}</div><div class="text-xs text-gray-400">${artist.firstName} ${artist.lastName}</div></div>
+                            <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded">Al in lijst</span>
+                        </div>`;
+            } else {
+                html += `<div onclick="selectLineupArtist(${artist.rowIndex})" class="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors"> <div class="font-medium text-gray-900">${displayName}</div> <div class="text-xs text-gray-500">${artist.firstName} ${artist.lastName}</div> </div>`;
+            }
         });
     }
 
@@ -68,6 +100,7 @@ export function selectLineupArtist(rowIndex) {
     
     if (artist && activeSlotIndex !== null) {
         currentLineup[activeSlotIndex] = artist;
+        saveToLocalStorage();
         closeSlotSearch();
         renderLineupUI();
     }
@@ -98,17 +131,57 @@ export function addArtistToLineup(rowIndexInput) {
     }
 
     currentLineup[emptyIndex] = artist;
+    saveToLocalStorage();
     renderLineupUI();
 }
 
 export function removeArtistFromLineup(index) {
     currentLineup[index] = null;
+    saveToLocalStorage();
     renderLineupUI();
+}
+
+export async function clearLineup() {
+    if (currentLineup.every(slot => slot === null)) return; // Niets te wissen
+    
+    if (await showConfirm("Weet je zeker dat je het hele speelschema wilt wissen?")) {
+        currentLineup = new Array(12).fill(null);
+        saveToLocalStorage();
+        renderLineupUI();
+        showToast("Speelschema leeggemaakt.", "success");
+    }
+}
+
+export async function exportLineupToClipboard() {
+    if (currentLineup.every(slot => slot === null)) {
+        showToast("De lineup is leeg.", "error");
+        return;
+    }
+
+    let text = `🎤 *Open Mic Lineup* 🎤\n\n`;
+    
+    for (let i = 0; i < 12; i++) {
+        if (i === 6) text += `\n☕ *Pauze*\n\n`;
+        
+        const num = i + 1;
+        const artist = currentLineup[i];
+        const name = artist ? (artist.artistName !== '-' ? artist.artistName : `${artist.firstName} ${artist.lastName}`) : '...';
+        
+        text += `${num}. ${name}\n`;
+    }
+
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast("Lijst gekopieerd naar klembord!", "success");
+    } catch (err) {
+        showToast("Kon niet kopiëren.", "error");
+    }
 }
 
 export function moveArtistUp(index) {
     if (index > 0) {
         [currentLineup[index - 1], currentLineup[index]] = [currentLineup[index], currentLineup[index - 1]];
+        saveToLocalStorage();
         renderLineupUI();
     }
 }
@@ -116,6 +189,7 @@ export function moveArtistUp(index) {
 export function moveArtistDown(index) {
     if (index < currentLineup.length - 1) {
         [currentLineup[index + 1], currentLineup[index]] = [currentLineup[index], currentLineup[index + 1]];
+        saveToLocalStorage();
         renderLineupUI();
     }
 }
@@ -152,6 +226,7 @@ export function handleDrop(event, targetIndex) {
     currentLineup[targetIndex] = currentLineup[draggedItemIndex];
     currentLineup[draggedItemIndex] = temp;
 
+    saveToLocalStorage();
     draggedItemIndex = null;
     renderLineupUI();
 }
@@ -181,6 +256,13 @@ export async function saveLineupToDatabase() {
 
         if (result.status === "success") {
             showToast("Lineup succesvol opgeslagen!", "success");
+            
+            // Reset state en local storage voor een schone lei
+            localStorage.removeItem(LS_KEY);
+            currentLineup = new Array(12).fill(null);
+            getEl('lineup-sheet-name').value = '';
+            renderLineupUI();
+            
             closeLineupModal();
         } else {
             showToast("Fout: " + result.message, "error");

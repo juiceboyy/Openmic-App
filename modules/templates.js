@@ -175,7 +175,11 @@ export const lineupModalTemplate = /*html*/`
         <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col rounded-b-2xl">
             <input type="text" id="lineup-sheet-name" placeholder="Naam tabblad (bijv. 10 maart 2026)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 mb-3">
             <div class="flex justify-end gap-3 w-full">
-                <button onclick="closeLineupModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors mr-auto">Annuleren</button>
+                <div class="mr-auto flex gap-2">
+                    <button onclick="clearLineup()" class="px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center" title="Alles wissen"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <button onclick="exportLineupToClipboard()" class="px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center"><i data-lucide="copy" class="w-4 h-4 mr-2"></i> Kopieer lijst</button>
+                </div>
+                <button onclick="closeLineupModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors">Annuleren</button>
                 <button id="btn-save-lineup" onclick="saveLineupToDatabase()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
                     <i data-lucide="save" class="w-4 h-4 mr-2"></i> Opslaan in Aanmeldlijst
                 </button>
