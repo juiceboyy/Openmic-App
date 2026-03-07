@@ -167,25 +167,33 @@ export const lineupModalTemplate = /*html*/`
         
         <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800 flex-1">
 
-            <div class="flex gap-2 mb-6 bg-gray-50 p-3 rounded-lg border border-gray-200 dark:bg-gray-700/30 dark:border-gray-700">
-                <input type="text" id="prev-sheet-name" placeholder="Naam tabblad vorige maand (bijv. 10 feb 2026)" class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue/50 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
-                <button onclick="loadPreviousLineup()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> Check Historie</button>
+            <div class="flex gap-2 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100 dark:bg-blue-900/20 dark:border-blue-800">
+                <input type="text" id="current-session-name" placeholder="Naam tabblad (bijv. 10 mrt 2026)" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white">
+                <button onclick="loadCurrentSession()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center gap-2">
+                    <i data-lucide="download-cloud" class="w-4 h-4"></i> Sessie Laden
+                </button>
             </div>
 
-            <div id="lineup-list-container" class="space-y-2">
-                <!-- Lineup items injected here -->
-            </div>
+            <div id="lineup-editor-container" class="hidden">
+                <div class="flex gap-2 mb-6 bg-gray-50 p-3 rounded-lg border border-gray-200 dark:bg-gray-700/30 dark:border-gray-700">
+                    <input type="text" id="prev-sheet-name" placeholder="Naam tabblad vorige maand (bijv. 10 feb 2026)" class="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-apple-blue/50 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400">
+                    <button onclick="loadPreviousLineup()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-md text-sm font-medium transition-colors dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i> Check Historie</button>
+                </div>
 
-            <div id="reserve-list-container" ondragover="handleDragOver(event)" ondrop="handleDropOnReserve(event)" class="mt-8 p-4 border-2 border-dashed border-orange-200 bg-orange-50/30 rounded-lg dark:border-orange-900/50 dark:bg-orange-900/10 min-h-[100px] transition-colors">
-                <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center"><i data-lucide="clipboard-list" class="w-4 h-4 inline mr-2"></i> Reservelijst</h3>
-                <div id="reserve-list-content" class="space-y-2">
-                    <!-- Reserve items injected here -->
+                <div id="lineup-list-container" class="space-y-2">
+                    <!-- Lineup items injected here -->
+                </div>
+
+                <div id="reserve-list-container" ondragover="handleDragOver(event)" ondrop="handleDropOnReserve(event)" class="mt-8 p-4 border-2 border-dashed border-orange-200 bg-orange-50/30 rounded-lg dark:border-orange-900/50 dark:bg-orange-900/10 min-h-[100px] transition-colors">
+                    <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center"><i data-lucide="clipboard-list" class="w-4 h-4 inline mr-2"></i> Reservelijst</h3>
+                    <div id="reserve-list-content" class="space-y-2">
+                        <!-- Reserve items injected here -->
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-700/50 flex flex-col rounded-b-2xl">
-            <input type="text" id="lineup-sheet-name" placeholder="Naam tabblad (bijv. 10 maart 2026)" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 mb-3 bg-white dark:bg-gray-700 dark:text-white">
             <div class="flex justify-end gap-3 w-full">
                 <div class="mr-auto flex gap-2">
                     <button onclick="clearLineup()" class="px-3 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center" title="Alles wissen"><i data-lucide="trash-2" class="w-4 h-4"></i></button>

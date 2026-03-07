@@ -131,3 +131,4 @@ window.handleDropOnReserve = Lineup.handleDropOnReserve;
 window.handleDragEnd = Lineup.handleDragEnd;
 window.toggleTheme = Theme.toggleTheme;
 window.loadPreviousLineup = Lineup.loadPreviousLineup;
+window.loadCurrentSession = Lineup.loadCurrentSession;

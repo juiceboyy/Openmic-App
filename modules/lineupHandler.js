@@ -8,6 +8,7 @@ let currentLineup = new Array(12).fill(null);
 let reserveLineup = [];
 let playedLastMonth = [];
 let activeSlotIndex = null;
+let activeSessionName = '';
 let draggedItem = null; // { list: 'main'|'reserve', index: 0 }
 
 function saveToLocalStorage() {
@@ -46,6 +47,63 @@ export function openLineupModal() {
 
 export function closeLineupModal() {
     getEl('lineup-modal').classList.add('hidden');
+}
+
+export async function loadCurrentSession() {
+    const sessionName = getEl('current-session-name').value.trim();
+    
+    if (!sessionName) {
+        showToast("Vul eerst een sessie naam in.", "error");
+        return;
+    }
+
+    const btn = event.currentTarget;
+    const orig = btn.innerHTML;
+    toggleButtonLoading(btn, true);
+
+    try {
+        const result = await apiRequest({ _action: 'get_current_lineup', sheetName: sessionName });
+        
+        if (result.status === "success") {
+            if (result.isNew) {
+                currentLineup = new Array(12).fill(null);
+                showToast('Nieuwe sessie gestart.', 'success');
+            } else {
+                // Reconstruct lineup from sheet data
+                currentLineup = new Array(12).fill(null);
+                
+                if (result.data && Array.isArray(result.data)) {
+                    result.data.forEach((item, i) => {
+                        if (i < 12 && item && item.name) {
+                            const searchName = item.name.toLowerCase();
+                            const artist = state.allArtists.find(a => 
+                                (a.artistName && a.artistName.toLowerCase() === searchName) || 
+                                (`${a.firstName} ${a.lastName}`.toLowerCase() === searchName)
+                            );
+
+                            if (artist) {
+                                currentLineup[i] = artist;
+                            } else {
+                                currentLineup[i] = { artistName: item.name, notes: item.notes || '', fallback: true };
+                            }
+                        }
+                    });
+                }
+                showToast('Bestaande sessie ingeladen!', 'success');
+            }
+
+            activeSessionName = sessionName;
+            getEl('lineup-editor-container').classList.remove('hidden');
+            renderLineupUI();
+        } else {
+            showToast("Fout: " + result.message, "error");
+        }
+    } catch (e) {
+        showToast("Kon sessie niet laden.", "error");
+        console.error(e);
+    } finally {
+        toggleButtonLoading(btn, false, orig);
+    }
 }
 
 export async function loadPreviousLineup() {
@@ -326,9 +384,8 @@ export function handleDragEnd(event) {
 }
 
 export async function saveLineupToDatabase() {
-    const sheetName = getEl('lineup-sheet-name').value.trim();
-    if (!sheetName) {
-        showToast('Vul eerst de naam van het tabblad in.', 'error');
+    if (!activeSessionName) {
+        showToast('Laad eerst een sessie voordat je opslaat.', 'error');
         return;
     }
 
@@ -339,7 +396,7 @@ export async function saveLineupToDatabase() {
     try {
         const result = await apiRequest({ 
             _action: 'save_lineup', 
-            sheetName: sheetName,
+            sheetName: activeSessionName,
             lineup: currentLineup,
             reserve: reserveLineup
         });
@@ -351,7 +408,9 @@ export async function saveLineupToDatabase() {
             localStorage.removeItem(LS_KEY);
             currentLineup = new Array(12).fill(null);
             reserveLineup = [];
-            getEl('lineup-sheet-name').value = '';
+            activeSessionName = '';
+            getEl('current-session-name').value = '';
+            getEl('lineup-editor-container').classList.add('hidden');
             renderLineupUI();
             
             closeLineupModal();
