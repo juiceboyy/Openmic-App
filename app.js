@@ -34,16 +34,22 @@ const App = {
             if (el) el.addEventListener(id === 'search-input' ? 'input' : 'change', UI.applyFilters);
         });
 
-        // Modal Openers
-        getEl('btn-open-sync').addEventListener('click', Sync.openSyncModal);
-        getEl('btn-open-mailing').addEventListener('click', Mailing.openMailingModal);
-        getEl('btn-open-lineup').addEventListener('click', Lineup.openLineupModal);
-        getEl('btn-open-photo').addEventListener('click', Photo.openPhotoModal);
-        getEl('btn-open-add').addEventListener('click', () => Contact.openModal());
+        // Global Action Handler (Delegation for Navigation & Tools)
+        document.body.addEventListener('click', (e) => {
+            const actionElement = e.target.closest('[data-action]');
+            if (!actionElement) return;
+            
+            const action = actionElement.dataset.action;
+            if (action === 'toggleTheme') Theme.toggleTheme();
+            else if (action === 'openSettings') Settings.openSettingsModal();
+            else if (action === 'openSync') Sync.openSyncModal();
+            else if (action === 'openMailing') Mailing.openMailingModal();
+            else if (action === 'openLineup') Lineup.openLineupModal();
+            else if (action === 'openPhoto') Photo.openPhotoModal();
+            else if (action === 'openAddContact') Contact.openModal();
+        });
 
         // Feature Specific Actions
-        getEl('btn-toggle-theme').addEventListener('click', Theme.toggleTheme);
-        getEl('btn-open-settings').addEventListener('click', Settings.openSettingsModal);
         getEl('btn-sync-start').addEventListener('click', Sync.fetchGoogleContacts);
         getEl('sync-select-all').addEventListener('change', (e) => Sync.toggleAllSyncCheckboxes(e.target));
         getEl('btn-import-contacts').addEventListener('click', Sync.importSelectedContacts);
