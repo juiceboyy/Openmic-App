@@ -6,6 +6,7 @@ import * as Sync from './modules/syncHandler.js';
 import * as Mailing from './modules/mailingHandler.js';
 import * as Photo from './modules/photoHandler.js';
 import * as Lineup from './modules/lineupHandler.js';
+import * as Theme from './modules/themeHandler.js';
 
 // --- Initialization ---
 
@@ -80,6 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initApp();
 });
 
+// Initialize theme immediately to prevent flash
+Theme.initTheme();
+
 // --- Window Expose (For inline handlers if needed) ---
 window.openModal = Contact.openModal;
 window.closeModal = (id) => {
@@ -123,3 +127,4 @@ window.handleDragEnter = Lineup.handleDragEnter;
 window.handleDragLeave = Lineup.handleDragLeave;
 window.handleDrop = Lineup.handleDrop;
 window.handleDragEnd = Lineup.handleDragEnd;
+window.toggleTheme = Theme.toggleTheme;

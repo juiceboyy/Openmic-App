@@ -46,12 +46,12 @@ export function renderTable(dataToRender, elements) {
         const fullName = `${artist.firstName} ${artist.lastName}`.trim();
         let regionTags = []; if (artist.regionDH) regionTags.push('Den Haag'); if (artist.regionRdam) regionTags.push('Rotterdam');
         
-        let artistNameHTML = artist.artistName && artist.artistName !== '-' ? `<div class="inline-flex items-center mt-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-apple-blue text-xs font-medium border border-blue-100"><i data-lucide="mic-2" class="w-2.5 h-2.5 mr-1.5"></i>${artist.artistName}</div>` : '';
-        let instaHTML = artist.instagram && artist.instagram !== '-' ? `<div class="flex items-center text-gray-600 text-xs"><i data-lucide="instagram" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> <a href="${artist.instagram.includes('http') ? artist.instagram : 'https://instagram.com/'+artist.instagram.replace('@','')}" target="_blank" class="hover:text-apple-blue hover:underline truncate max-w-[160px]">${artist.instagram.replace(/https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '')}</a></div>` : '';
+        let artistNameHTML = artist.artistName && artist.artistName !== '-' ? `<div class="inline-flex items-center mt-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-xs font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2.5 h-2.5 mr-1.5"></i>${artist.artistName}</div>` : '';
+        let instaHTML = artist.instagram && artist.instagram !== '-' ? `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs"><i data-lucide="instagram" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> <a href="${artist.instagram.includes('http') ? artist.instagram : 'https://instagram.com/'+artist.instagram.replace('@','')}" target="_blank" class="hover:text-apple-blue hover:underline truncate max-w-[160px]">${artist.instagram.replace(/https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '')}</a></div>` : '';
         
         let detailsHTML = '';
-        if (artist.setLength && artist.setLength !== '-') detailsHTML += `<div class="flex items-center mb-1 text-xs text-gray-600"><i data-lucide="clock" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> Speelduur: <strong class="ml-1 text-gray-900">${artist.setLength}</strong></div>`;
-        if (artist.workshops) detailsHTML += `<div class="flex items-center mb-1 text-xs text-gray-600"><i data-lucide="hammer" class="w-3.5 h-3.5 mr-2 text-blue-500"></i> Interesse in workshops</div>`;
+        if (artist.setLength && artist.setLength !== '-') detailsHTML += `<div class="flex items-center mb-1 text-xs text-gray-600 dark:text-gray-400"><i data-lucide="clock" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> Speelduur: <strong class="ml-1 text-gray-900 dark:text-gray-200">${artist.setLength}</strong></div>`;
+        if (artist.workshops) detailsHTML += `<div class="flex items-center mb-1 text-xs text-gray-600 dark:text-gray-400"><i data-lucide="hammer" class="w-3.5 h-3.5 mr-2 text-blue-500"></i> Interesse in workshops</div>`;
         if (artist.workshop7Nov) detailsHTML += `<div class="flex items-center text-xs"><i data-lucide="calendar-check" class="w-3.5 h-3.5 mr-2 text-green-500"></i> <span class="text-green-600 font-medium">Interesse 7 nov</span></div>`;
         if (!detailsHTML) detailsHTML = '<span class="text-gray-400 text-xs">-</span>';
 
@@ -59,22 +59,22 @@ export function renderTable(dataToRender, elements) {
         if (artist.notes && artist.notes !== '-') {
             const isLong = artist.notes.length > 90 || artist.notes.includes('\n');
             notesHTML = isLong 
-                ? `<div class="group cursor-pointer rounded hover:bg-gray-100/50 p-1.5 -ml-1.5 transition-colors note-toggle"><div class="note-text text-xs text-gray-600 line-clamp-3 whitespace-pre-wrap leading-relaxed">${artist.notes}</div><div class="note-hint text-[10px] text-apple-blue mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-medium flex items-center"><i data-lucide="chevron-down" class="w-3 h-3 mr-1"></i> Lees meer</div></div>`
-                : `<div class="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed px-1.5 -ml-1.5 py-1.5">${artist.notes}</div>`;
+                ? `<div class="group cursor-pointer rounded hover:bg-gray-100/50 dark:hover:bg-gray-700/50 p-1.5 -ml-1.5 transition-colors note-toggle"><div class="note-text text-xs text-gray-600 dark:text-gray-400 line-clamp-3 whitespace-pre-wrap leading-relaxed">${artist.notes}</div><div class="note-hint text-[10px] text-apple-blue mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-medium flex items-center"><i data-lucide="chevron-down" class="w-3 h-3 mr-1"></i> Lees meer</div></div>`
+                : `<div class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed px-1.5 -ml-1.5 py-1.5">${artist.notes}</div>`;
         }
 
-        const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50 transition-colors group align-top";
+        const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group align-top border-b border-gray-100 dark:border-gray-800 last:border-0";
         tr.innerHTML = `
-            <td class="px-6 py-4"><div class="font-medium text-gray-900">${fullName || '-'}</div>${artistNameHTML}</td>
-            <td class="px-6 py-4"><div class="flex flex-col gap-1.5"><div class="flex items-center text-gray-600 text-xs"><i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> <span class="truncate max-w-[180px]" title="${artist.email}">${artist.email}</span></div><div class="flex items-center text-gray-600 text-xs"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> ${artist.phone}</div>${instaHTML}</div></td>
-            <td class="px-6 py-4"><div class="font-medium text-gray-900">${artist.type}</div><div class="flex items-center text-xs text-gray-500 mt-1"><i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> ${regionTags.join(' & ') || '-'}</div></td>
+            <td class="px-6 py-4"><div class="font-medium text-gray-900 dark:text-gray-100">${fullName || '-'}</div>${artistNameHTML}</td>
+            <td class="px-6 py-4"><div class="flex flex-col gap-1.5"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs"><i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> <span class="truncate max-w-[180px]" title="${artist.email}">${artist.email}</span></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> ${artist.phone}</div>${instaHTML}</div></td>
+            <td class="px-6 py-4"><div class="font-medium text-gray-900 dark:text-gray-100">${artist.type}</div><div class="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1"><i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> ${regionTags.join(' & ') || '-'}</div></td>
             <td class="px-6 py-4"><div class="flex flex-col">${detailsHTML}</div></td>
-            <td class="px-6 py-4"><div class="flex flex-wrap gap-1">${renderBadges(artist)} ${artist.unsubscribed ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 mb-1">Unsubscribed</span>` : ''}</div></td>
+            <td class="px-6 py-4"><div class="flex flex-wrap gap-1">${ui.renderBadges(artist)} ${artist.unsubscribed ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 mb-1">Unsubscribed</span>` : ''}</div></td>
             <td class="px-6 py-4 max-w-[200px]">${notesHTML}</td>
             <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
-                    <button data-index="${artist.rowIndex}" class="btn-edit text-apple-blue bg-blue-50 border border-blue-100 hover:bg-apple-blue hover:text-white transition-colors px-3 py-1.5 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i><span class="text-xs font-medium ml-1">Bewerk</span></button>
-                    <button data-index="${artist.rowIndex}" class="btn-delete text-red-500 bg-red-50 border border-red-100 hover:bg-red-500 hover:text-white transition-colors p-2 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                    <button data-index="${artist.rowIndex}" class="btn-edit text-apple-blue bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 hover:bg-apple-blue hover:text-white dark:hover:bg-blue-600 transition-colors px-3 py-1.5 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i><span class="text-xs font-medium ml-1">Bewerk</span></button>
+                    <button data-index="${artist.rowIndex}" class="btn-delete text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 transition-colors p-2 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             </td>`;
         artistTableBody.appendChild(tr);

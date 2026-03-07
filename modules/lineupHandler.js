@@ -82,12 +82,12 @@ export function handleLineupSearch(event) {
             const isAlreadyInLineup = currentLineup.some(slot => slot && slot.rowIndex === artist.rowIndex);
 
             if (isAlreadyInLineup) {
-                html += `<div class="px-4 py-3 bg-gray-50 opacity-60 cursor-not-allowed flex justify-between items-center">
-                            <div><div class="font-medium text-gray-500">${displayName}</div><div class="text-xs text-gray-400">${artist.firstName} ${artist.lastName}</div></div>
-                            <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded">Al in lijst</span>
+                html += `<div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 opacity-60 cursor-not-allowed flex justify-between items-center">
+                            <div><div class="font-medium text-gray-500 dark:text-gray-400">${displayName}</div><div class="text-xs text-gray-400 dark:text-gray-500">${artist.firstName} ${artist.lastName}</div></div>
+                            <span class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Al in lijst</span>
                         </div>`;
             } else {
-                html += `<div onclick="selectLineupArtist(${artist.rowIndex})" class="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors"> <div class="font-medium text-gray-900">${displayName}</div> <div class="text-xs text-gray-500">${artist.firstName} ${artist.lastName}</div> </div>`;
+                html += `<div onclick="selectLineupArtist(${artist.rowIndex})" class="px-4 py-3 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"> <div class="font-medium text-gray-900 dark:text-gray-100">${displayName}</div> <div class="text-xs text-gray-500 dark:text-gray-400">${artist.firstName} ${artist.lastName}</div> </div>`;
             }
         });
     }
@@ -281,7 +281,7 @@ export function renderLineupUI() {
     let html = '';
     for (let i = 0; i < 12; i++) {
         if (i === 6) {
-            html += `<div class="pauze-divider flex items-center justify-center py-3 my-2 border-y border-dashed border-gray-300 bg-gray-50/50 rounded-lg"> <span class="text-gray-500 font-medium text-sm">☕ Pauze</span> </div>`;
+            html += `<div class="pauze-divider flex items-center justify-center py-3 my-2 border-y border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/30 rounded-lg"> <span class="text-gray-500 dark:text-gray-400 font-medium text-sm">☕ Pauze</span> </div>`;
         }
         const artist = currentLineup[i];
         const num = i + 1;
@@ -295,18 +295,18 @@ export function renderLineupUI() {
                  ondragleave="handleDragLeave(event)" 
                  ondrop="handleDrop(event, ${i})" 
                  ondragend="handleDragEnd(event)"
-                 class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 group transition-all hover:border-apple-blue/30 cursor-move">
+                 class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-700 group transition-all hover:border-apple-blue/30 cursor-move">
                 <i data-lucide="grip-vertical" class="w-4 h-4 text-gray-300 cursor-grab mr-1"></i>
-                <div class="w-8 h-8 flex items-center justify-center bg-white rounded-full border border-gray-200 font-semibold text-gray-500 text-sm shadow-sm shrink-0">${num}</div>
+                <div class="w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-600 font-semibold text-gray-500 dark:text-gray-400 text-sm shadow-sm shrink-0">${num}</div>
                 <div class="flex-1 min-w-0">
-                    <div class="font-medium text-gray-900 truncate">${displayName}</div>
-                    <div class="text-xs text-gray-500 truncate">${artist.email || '-'}</div>
+                    <div class="font-medium text-gray-900 dark:text-gray-100 truncate">${displayName}</div>
+                    <div class="text-xs text-gray-500 dark:text-gray-400 truncate">${artist.email || '-'}</div>
                 </div>
-                <div class="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"><button onclick="moveArtistUp(${i})" class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${i === 0 ? 'invisible' : ''}" title="Omhoog"><i data-lucide="arrow-up" class="w-4 h-4"></i></button><button onclick="moveArtistDown(${i})" class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${i === currentLineup.length - 1 ? 'invisible' : ''}" title="Omlaag"><i data-lucide="arrow-down" class="w-4 h-4"></i></button><button onclick="removeArtistFromLineup(${i})" class="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors ml-1" title="Verwijder"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+                <div class="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"><button onclick="moveArtistUp(${i})" class="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors ${i === 0 ? 'invisible' : ''}" title="Omhoog"><i data-lucide="arrow-up" class="w-4 h-4"></i></button><button onclick="moveArtistDown(${i})" class="p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors ${i === currentLineup.length - 1 ? 'invisible' : ''}" title="Omlaag"><i data-lucide="arrow-down" class="w-4 h-4"></i></button><button onclick="removeArtistFromLineup(${i})" class="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors ml-1" title="Verwijder"><i data-lucide="x" class="w-4 h-4"></i></button></div>
             </div>`;
         } else {
             // Lege slots zijn ook drop-zones (zodat je naar het einde kunt slepen), maar niet draggable
-            html += `<div onclick="openSlotSearch(${i})" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-600 cursor-pointer transition-colors" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${i})"> <i data-lucide="plus" class="w-5 h-5 mr-2"></i> Kies een artiest voor slot ${num} </div>`;
+            html += `<div onclick="openSlotSearch(${i})" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer transition-colors" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${i})"> <i data-lucide="plus" class="w-5 h-5 mr-2"></i> Kies een artiest voor slot ${num} </div>`;
         }
     }
     container.innerHTML = html;
