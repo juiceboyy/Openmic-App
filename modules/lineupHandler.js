@@ -111,6 +111,9 @@ export function renderLineupUI() {
 
     let html = '';
     for (let i = 0; i < 12; i++) {
+        if (i === 6) {
+            html += `<div class="flex items-center justify-center py-3 my-2 border-y border-dashed border-gray-300 bg-gray-50/50 rounded-lg"> <span class="text-gray-500 font-medium text-sm">☕ Pauze (Na 6 artiesten)</span> </div>`;
+        }
         const artist = currentLineup[i];
         const num = i + 1;
         if (artist) {
