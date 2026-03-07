@@ -3,7 +3,7 @@ import { apiRequest } from './api.js';
 import { showToast } from './notifications.js';
 import { getEl, toggleButtonLoading } from './utils.js';
 
-let currentLineup = [];
+let currentLineup = new Array(12).fill(null);
 let selectedArtistRowIndex = null;
 let draggedItemIndex = null;
 
@@ -72,25 +72,26 @@ export function addArtistToLineup(rowIndexInput) {
         return;
     }
 
-    if (currentLineup.length >= 12) {
-        showToast("De lineup zit vol (max 12).", "error");
-        return;
-    }
-
     const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
     if (!artist) return;
 
-    if (currentLineup.some(a => a.rowIndex === artist.rowIndex)) {
+    const emptyIndex = currentLineup.findIndex(slot => slot === null);
+    if (emptyIndex === -1) {
+        showToast("Het speelschema is vol (max 12).", "error");
+        return;
+    }
+
+    if (currentLineup.some(a => a && a.rowIndex === artist.rowIndex)) {
         showToast("Deze artiest staat al in de lijst.", "error");
         return;
     }
 
-    currentLineup.push(artist);
+    currentLineup[emptyIndex] = artist;
     renderLineupUI();
 }
 
 export function removeArtistFromLineup(index) {
-    currentLineup.splice(index, 1);
+    currentLineup[index] = null;
     renderLineupUI();
 }
 
@@ -135,9 +136,10 @@ export function handleDrop(event, targetIndex) {
 
     if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
 
-    // Verplaats item in array
-    const item = currentLineup.splice(draggedItemIndex, 1)[0];
-    currentLineup.splice(targetIndex, 0, item);
+    // Swap items (omwisselen)
+    const temp = currentLineup[targetIndex];
+    currentLineup[targetIndex] = currentLineup[draggedItemIndex];
+    currentLineup[draggedItemIndex] = temp;
 
     draggedItemIndex = null;
     renderLineupUI();
@@ -186,7 +188,7 @@ export function renderLineupUI() {
     let html = '';
     for (let i = 0; i < 12; i++) {
         if (i === 6) {
-            html += `<div class="flex items-center justify-center py-3 my-2 border-y border-dashed border-gray-300 bg-gray-50/50 rounded-lg"> <span class="text-gray-500 font-medium text-sm">☕ Pauze (Na 6 artiesten)</span> </div>`;
+            html += `<div class="pauze-divider flex items-center justify-center py-3 my-2 border-y border-dashed border-gray-300 bg-gray-50/50 rounded-lg"> <span class="text-gray-500 font-medium text-sm">☕ Pauze</span> </div>`;
         }
         const artist = currentLineup[i];
         const num = i + 1;
@@ -211,7 +213,7 @@ export function renderLineupUI() {
             </div>`;
         } else {
             // Lege slots zijn ook drop-zones (zodat je naar het einde kunt slepen), maar niet draggable
-            html += `<div ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${i})" class="flex items-center gap-3 p-3 border border-dashed border-gray-200 rounded-lg transition-colors"><div class="w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full border border-gray-100 font-semibold text-gray-300 text-sm ml-6">${num}</div><div class="text-sm text-gray-400 italic">Leeg slot</div></div>`;
+            html += `<div ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${i})" class="flex items-center gap-3 p-3 border border-dashed border-gray-200 rounded-lg transition-colors bg-gray-50/30 hover:bg-gray-50"><div class="w-8 h-8 flex items-center justify-center bg-white rounded-full border border-gray-200 font-semibold text-gray-300 text-sm ml-6">${num}</div><div class="text-sm text-gray-400 italic">Leeg slot ${num}</div></div>`;
         }
     }
     container.innerHTML = html;
