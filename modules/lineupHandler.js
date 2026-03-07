@@ -197,7 +197,7 @@ export async function fetchAvailableSheets() {
     try {
         const result = await apiRequest({ _action: 'get_sheet_names' });
         if (result.status === "success" && Array.isArray(result.sheetNames)) {
-            const sheets = result.sheetNames.reverse();
+            const sheets = result.sheetNames;
             const options = sheets.map(name => `<option value="${name}">${name}</option>`).join('');
             
             const currentSelect = getEl('current-session-name');
