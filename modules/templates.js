@@ -183,11 +183,14 @@ export const lineupModalTemplate = /*html*/`
             </div>
         </div>
 
-        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3 rounded-b-2xl">
-            <button onclick="closeLineupModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors mr-auto">Annuleren</button>
-            <button id="btn-save-lineup" onclick="saveLineupToDatabase()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
-                <i data-lucide="save" class="w-4 h-4 mr-2"></i> Opslaan in Aanmeldlijst
-            </button>
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex flex-col rounded-b-2xl">
+            <input type="text" id="lineup-sheet-name" placeholder="Naam tabblad (bijv. 10 maart 2026)" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 mb-3">
+            <div class="flex justify-end gap-3 w-full">
+                <button onclick="closeLineupModal()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-200 rounded-lg transition-colors mr-auto">Annuleren</button>
+                <button id="btn-save-lineup" onclick="saveLineupToDatabase()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center justify-center">
+                    <i data-lucide="save" class="w-4 h-4 mr-2"></i> Opslaan in Aanmeldlijst
+                </button>
+            </div>
         </div>
     </div>
 </div>`;

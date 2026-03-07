@@ -62,6 +62,12 @@ export function moveArtistDown(index) {
 }
 
 export async function saveLineupToDatabase() {
+    const sheetName = getEl('lineup-sheet-name').value.trim();
+    if (!sheetName) {
+        showToast('Vul eerst de naam van het tabblad in.', 'error');
+        return;
+    }
+
     const btn = getEl('btn-save-lineup');
     const orig = btn.innerHTML;
     toggleButtonLoading(btn, true);
@@ -69,6 +75,7 @@ export async function saveLineupToDatabase() {
     try {
         const result = await apiRequest({ 
             _action: 'save_lineup', 
+            sheetName: sheetName,
             lineup: currentLineup 
         });
 
