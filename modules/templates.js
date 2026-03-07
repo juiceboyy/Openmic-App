@@ -217,8 +217,8 @@ export const lineupSearchModalTemplate = /*html*/`
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-gray-700 transition-colors">
         <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3">
             <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
-            <input type="text" id="slot-search-input" oninput="handleLineupSearch(event)" placeholder="Zoek artiest of naam..." class="flex-1 text-lg outline-none bg-transparent dark:text-white dark:placeholder-gray-500" autocomplete="off">
-            <button onclick="closeSlotSearch()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            <input type="text" id="slot-search-input" placeholder="Zoek artiest of naam..." class="flex-1 text-lg outline-none bg-transparent dark:text-white dark:placeholder-gray-500" autocomplete="off">
+            <button id="btn-close-slot-search" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div id="slot-search-results" class="max-h-64 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700"></div>
     </div>

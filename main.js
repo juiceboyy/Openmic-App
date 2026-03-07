@@ -71,9 +71,15 @@ const App = {
         getEl('btn-copy-lineup').addEventListener('click', Lineup.exportLineupToClipboard);
         getEl('btn-save-lineup').addEventListener('click', Lineup.saveLineupToDatabase);
         
+        // Lineup Search Actions
+        getEl('slot-search-input').addEventListener('input', Lineup.handleLineupSearch);
+        getEl('btn-close-slot-search').addEventListener('click', Lineup.closeSlotSearch);
+
         const reserveContainer = getEl('reserve-list-container');
         if (reserveContainer) {
             reserveContainer.addEventListener('dragover', Lineup.handleDragOver);
+            reserveContainer.addEventListener('dragenter', Lineup.handleDragEnter);
+            reserveContainer.addEventListener('dragleave', Lineup.handleDragLeave);
             reserveContainer.addEventListener('drop', Lineup.handleDropOnReserve);
         }
 
@@ -119,10 +125,8 @@ const App = {
         window.closeLineupModal = Lineup.closeLineupModal;
         window.loadCurrentSession = Lineup.loadCurrentSession;
         window.loadPreviousLineup = Lineup.loadPreviousLineup;
-        window.handleLineupSearch = Lineup.handleLineupSearch;
         window.selectLineupArtist = Lineup.selectLineupArtist;
         window.openSlotSearch = Lineup.openSlotSearch;
-        window.closeSlotSearch = Lineup.closeSlotSearch;
         window.addArtistToLineup = Lineup.addArtistToLineup;
         window.removeArtistFromLineup = Lineup.removeArtistFromLineup;
         window.removeArtistFromReserve = Lineup.removeArtistFromReserve;
