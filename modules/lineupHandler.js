@@ -5,6 +5,7 @@ import { getEl, toggleButtonLoading } from './utils.js';
 
 let currentLineup = [];
 let selectedArtistRowIndex = null;
+let draggedItemIndex = null;
 
 export function openLineupModal() {
     getEl('lineup-modal').classList.remove('hidden');
@@ -107,6 +108,46 @@ export function moveArtistDown(index) {
     }
 }
 
+export function handleDragStart(event, index) {
+    draggedItemIndex = index;
+    event.dataTransfer.effectAllowed = 'move';
+    // Visuele feedback (even wachten zodat de 'ghost' image wel de volle opacity heeft)
+    setTimeout(() => event.target.classList.add('opacity-40', 'scale-95'), 0);
+}
+
+export function handleDragOver(event) {
+    event.preventDefault(); // Nodig om te kunnen droppen
+    event.dataTransfer.dropEffect = 'move';
+}
+
+export function handleDragEnter(event) {
+    event.preventDefault();
+    event.currentTarget.classList.add('border-blue-400', 'bg-blue-50/50');
+}
+
+export function handleDragLeave(event) {
+    event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/50');
+}
+
+export function handleDrop(event, targetIndex) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/50');
+
+    if (draggedItemIndex === null || draggedItemIndex === targetIndex) return;
+
+    // Verplaats item in array
+    const item = currentLineup.splice(draggedItemIndex, 1)[0];
+    currentLineup.splice(targetIndex, 0, item);
+
+    draggedItemIndex = null;
+    renderLineupUI();
+}
+
+export function handleDragEnd(event) {
+    event.target.classList.remove('opacity-40', 'scale-95');
+    draggedItemIndex = null;
+}
+
 export async function saveLineupToDatabase() {
     const sheetName = getEl('lineup-sheet-name').value.trim();
     if (!sheetName) {
@@ -151,9 +192,26 @@ export function renderLineupUI() {
         const num = i + 1;
         if (artist) {
             const displayName = artist.artistName !== '-' ? artist.artistName : `${artist.firstName} ${artist.lastName}`;
-            html += `<div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 group transition-all hover:border-apple-blue/30"><div class="w-8 h-8 flex items-center justify-center bg-white rounded-full border border-gray-200 font-semibold text-gray-500 text-sm shadow-sm">${num}</div><div class="flex-1 min-w-0"><div class="font-medium text-gray-900 truncate">${displayName}</div><div class="text-xs text-gray-500 truncate">${artist.email || '-'}</div></div><div class="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"><button onclick="moveArtistUp(${i})" class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${i === 0 ? 'invisible' : ''}" title="Omhoog"><i data-lucide="arrow-up" class="w-4 h-4"></i></button><button onclick="moveArtistDown(${i})" class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${i === currentLineup.length - 1 ? 'invisible' : ''}" title="Omlaag"><i data-lucide="arrow-down" class="w-4 h-4"></i></button><button onclick="removeArtistFromLineup(${i})" class="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors ml-1" title="Verwijder"><i data-lucide="x" class="w-4 h-4"></i></button></div></div>`;
+            html += `
+            <div draggable="true" 
+                 ondragstart="handleDragStart(event, ${i})" 
+                 ondragover="handleDragOver(event)" 
+                 ondragenter="handleDragEnter(event)" 
+                 ondragleave="handleDragLeave(event)" 
+                 ondrop="handleDrop(event, ${i})" 
+                 ondragend="handleDragEnd(event)"
+                 class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200 group transition-all hover:border-apple-blue/30 cursor-move">
+                <i data-lucide="grip-vertical" class="w-4 h-4 text-gray-300 cursor-grab mr-1"></i>
+                <div class="w-8 h-8 flex items-center justify-center bg-white rounded-full border border-gray-200 font-semibold text-gray-500 text-sm shadow-sm shrink-0">${num}</div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-medium text-gray-900 truncate">${displayName}</div>
+                    <div class="text-xs text-gray-500 truncate">${artist.email || '-'}</div>
+                </div>
+                <div class="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"><button onclick="moveArtistUp(${i})" class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${i === 0 ? 'invisible' : ''}" title="Omhoog"><i data-lucide="arrow-up" class="w-4 h-4"></i></button><button onclick="moveArtistDown(${i})" class="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200 rounded-md transition-colors ${i === currentLineup.length - 1 ? 'invisible' : ''}" title="Omlaag"><i data-lucide="arrow-down" class="w-4 h-4"></i></button><button onclick="removeArtistFromLineup(${i})" class="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors ml-1" title="Verwijder"><i data-lucide="x" class="w-4 h-4"></i></button></div>
+            </div>`;
         } else {
-            html += `<div class="flex items-center gap-3 p-3 border border-dashed border-gray-200 rounded-lg"><div class="w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full border border-gray-100 font-semibold text-gray-300 text-sm">${num}</div><div class="text-sm text-gray-400 italic">Leeg slot</div></div>`;
+            // Lege slots zijn ook drop-zones (zodat je naar het einde kunt slepen), maar niet draggable
+            html += `<div ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${i})" class="flex items-center gap-3 p-3 border border-dashed border-gray-200 rounded-lg transition-colors"><div class="w-8 h-8 flex items-center justify-center bg-gray-50 rounded-full border border-gray-100 font-semibold text-gray-300 text-sm ml-6">${num}</div><div class="text-sm text-gray-400 italic">Leeg slot</div></div>`;
         }
     }
     container.innerHTML = html;
