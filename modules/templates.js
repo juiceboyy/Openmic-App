@@ -166,18 +166,6 @@ export const lineupModalTemplate = /*html*/`
         </div>
         
         <div class="p-6 overflow-y-auto modal-scroll bg-white flex-1">
-            <div class="relative flex items-start gap-2 mb-6">
-                <div class="relative flex-1">
-                    <div class="relative">
-                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
-                        <input type="text" id="lineup-search-input" oninput="handleLineupSearch(event)" placeholder="Zoek op artiest of naam..." class="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow" autocomplete="off">
-                    </div>
-                    <div id="lineup-search-results" class="absolute z-50 w-full bg-white border border-gray-200 rounded-lg shadow-xl hidden max-h-48 overflow-y-auto mt-1 divide-y divide-gray-100"></div>
-                </div>
-                <button onclick="addSelectedArtistToLineup()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap">
-                    <i data-lucide="plus" class="w-4 h-4"></i> Toevoegen
-                </button>
-            </div>
 
             <div id="lineup-list-container" class="space-y-2">
                 <!-- Lineup items injected here -->
@@ -193,5 +181,17 @@ export const lineupModalTemplate = /*html*/`
                 </button>
             </div>
         </div>
+    </div>
+</div>`;
+
+export const lineupSearchModalTemplate = /*html*/`
+<div id="lineup-search-modal" class="hidden fixed inset-0 z-[60] flex items-start justify-center pt-20 bg-gray-900/40 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden border border-gray-100">
+        <div class="p-4 border-b border-gray-100 flex items-center gap-3">
+            <i data-lucide="search" class="w-5 h-5 text-gray-400"></i>
+            <input type="text" id="slot-search-input" oninput="handleLineupSearch(event)" placeholder="Zoek artiest of naam..." class="flex-1 text-lg outline-none bg-transparent" autocomplete="off">
+            <button onclick="closeSlotSearch()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div id="slot-search-results" class="max-h-64 overflow-y-auto divide-y divide-gray-100"></div>
     </div>
 </div>`;

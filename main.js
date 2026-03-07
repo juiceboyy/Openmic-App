@@ -1,5 +1,5 @@
 import { getEl } from './modules/utils.js';
-import { photoModalTemplate, contactModalTemplate, syncModalTemplate, mailingModalTemplate, lineupModalTemplate } from './modules/templates.js';
+import { photoModalTemplate, contactModalTemplate, syncModalTemplate, mailingModalTemplate, lineupModalTemplate, lineupSearchModalTemplate } from './modules/templates.js';
 import * as UI from './modules/uiHandler.js';
 import * as Contact from './modules/contactsHandler.js';
 import * as Sync from './modules/syncHandler.js';
@@ -16,6 +16,7 @@ async function initApp() {
     document.body.insertAdjacentHTML('beforeend', syncModalTemplate);
     document.body.insertAdjacentHTML('beforeend', mailingModalTemplate);
     document.body.insertAdjacentHTML('beforeend', lineupModalTemplate);
+    document.body.insertAdjacentHTML('beforeend', lineupSearchModalTemplate);
 
     // Attach listeners to elements from the templates now that they exist
     getEl('btn-sync-start').addEventListener('click', Sync.fetchGoogleContacts);
@@ -108,11 +109,12 @@ window.closeLineupModal = Lineup.closeLineupModal;
 window.addArtistToLineup = Lineup.addArtistToLineup;
 window.handleLineupSearch = Lineup.handleLineupSearch;
 window.selectLineupArtist = Lineup.selectLineupArtist;
-window.addSelectedArtistToLineup = Lineup.addSelectedArtistToLineup;
 window.removeArtistFromLineup = Lineup.removeArtistFromLineup;
 window.moveArtistUp = Lineup.moveArtistUp;
 window.moveArtistDown = Lineup.moveArtistDown;
 window.saveLineupToDatabase = Lineup.saveLineupToDatabase;
+window.openSlotSearch = Lineup.openSlotSearch;
+window.closeSlotSearch = Lineup.closeSlotSearch;
 window.handleDragStart = Lineup.handleDragStart;
 window.handleDragOver = Lineup.handleDragOver;
 window.handleDragEnter = Lineup.handleDragEnter;

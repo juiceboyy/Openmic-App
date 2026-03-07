@@ -4,7 +4,7 @@ import { showToast } from './notifications.js';
 import { getEl, toggleButtonLoading } from './utils.js';
 
 let currentLineup = new Array(12).fill(null);
-let selectedArtistRowIndex = null;
+let activeSlotIndex = null;
 let draggedItemIndex = null;
 
 export function openLineupModal() {
@@ -17,12 +17,28 @@ export function closeLineupModal() {
     getEl('lineup-modal').classList.add('hidden');
 }
 
+export function openSlotSearch(index) {
+    activeSlotIndex = index;
+    const modal = getEl('lineup-search-modal');
+    const input = getEl('slot-search-input');
+    const results = getEl('slot-search-results');
+    
+    modal.classList.remove('hidden');
+    input.value = '';
+    results.innerHTML = '';
+    input.focus();
+}
+
+export function closeSlotSearch() {
+    getEl('lineup-search-modal').classList.add('hidden');
+    activeSlotIndex = null;
+}
+
 export function handleLineupSearch(event) {
     const query = event.target.value.toLowerCase().trim();
-    const resultsDiv = getEl('lineup-search-results');
+    const resultsDiv = getEl('slot-search-results');
 
     if (!query) {
-        resultsDiv.classList.add('hidden');
         resultsDiv.innerHTML = '';
         return;
     }
@@ -45,26 +61,21 @@ export function handleLineupSearch(event) {
     }
 
     resultsDiv.innerHTML = html;
-    resultsDiv.classList.remove('hidden');
 }
 
-export function selectLineupArtist(rowIndex, displayName) {
-    selectedArtistRowIndex = rowIndex;
-    getEl('lineup-search-input').value = displayName;
-    getEl('lineup-search-results').classList.add('hidden');
-}
-
-export function addSelectedArtistToLineup() {
-    if (selectedArtistRowIndex === null) {
-        showToast('Zoek en selecteer eerst een artiest.', 'error');
-        return;
+export function selectLineupArtist(rowIndex) {
+    const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
+    
+    if (artist && activeSlotIndex !== null) {
+        currentLineup[activeSlotIndex] = artist;
+        closeSlotSearch();
+        renderLineupUI();
     }
-    addArtistToLineup(selectedArtistRowIndex);
-    selectedArtistRowIndex = null;
-    getEl('lineup-search-input').value = '';
 }
 
 export function addArtistToLineup(rowIndexInput) {
+    // Deze functie wordt nu minder gebruikt door de nieuwe UI, 
+    // maar kan blijven bestaan voor eventuele andere flows of backward compatibility
     const rowIndex = parseInt(rowIndexInput);
     
     if (isNaN(rowIndex)) {
@@ -213,7 +224,7 @@ export function renderLineupUI() {
             </div>`;
         } else {
             // Lege slots zijn ook drop-zones (zodat je naar het einde kunt slepen), maar niet draggable
-            html += `<div ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${i})" class="flex items-center gap-3 p-3 border border-dashed border-gray-200 rounded-lg transition-colors bg-gray-50/30 hover:bg-gray-50"><div class="w-8 h-8 flex items-center justify-center bg-white rounded-full border border-gray-200 font-semibold text-gray-300 text-sm ml-6">${num}</div><div class="text-sm text-gray-400 italic">Leeg slot ${num}</div></div>`;
+            html += `<div onclick="openSlotSearch(${i})" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 hover:border-blue-400 hover:text-blue-600 cursor-pointer transition-colors" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${i})"> <i data-lucide="plus" class="w-5 h-5 mr-2"></i> Kies een artiest voor slot ${num} </div>`;
         }
     }
     container.innerHTML = html;
