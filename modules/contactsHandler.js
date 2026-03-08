@@ -113,12 +113,17 @@ export async function toggleAllMailingSelection(isChecked) {
 
     // Save to backend
     showToast(`Bezig met opslaan van ${contactsToUpdate.length} wijzigingen...`, 'info');
-    const promises = contactsToUpdate.map(a => apiRequest({ _action: 'edit', _rowIndex: a.rowIndex, 'Mailing Selectie': isChecked }));
     
     try {
-        await Promise.all(promises);
+        // Batch requests to avoid hitting API rate limits
+        const BATCH_SIZE = 5;
+        for (let i = 0; i < contactsToUpdate.length; i += BATCH_SIZE) {
+            const batch = contactsToUpdate.slice(i, i + BATCH_SIZE);
+            await Promise.all(batch.map(a => apiRequest({ _action: 'edit', _rowIndex: a.rowIndex, 'Mailing Selectie': isChecked })));
+        }
         showToast("Selectie opgeslagen.", "success");
     } catch (e) {
+        console.error("Batch save failed:", e);
         showToast("Er ging iets mis bij het opslaan.", "error");
     }
 }
