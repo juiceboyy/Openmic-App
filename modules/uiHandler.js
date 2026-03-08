@@ -34,6 +34,14 @@ export function renderTable(dataToRender, elements) {
     contactCount.innerText = dataToRender.length;
     artistTableBody.innerHTML = '';
     
+    // Update header checkbox state based on visible rows
+    const selectAllCb = document.getElementById('select-all-mailing');
+    if (selectAllCb) {
+        const allSelected = dataToRender.length > 0 && dataToRender.every(a => a.mailingSelection);
+        selectAllCb.checked = allSelected;
+        selectAllCb.indeterminate = !allSelected && dataToRender.some(a => a.mailingSelection);
+    }
+
     if (dataToRender.length === 0) { 
         emptyState.classList.remove('hidden'); 
         return; 

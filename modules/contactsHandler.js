@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { getEl, toggleButtonLoading } from './utils.js';
-import { loadArtists, toggleGlobalLoading } from './uiHandler.js';
+import { loadArtists, toggleGlobalLoading, renderTable } from './uiHandler.js';
 import { showToast, showConfirm } from './notifications.js';
 
 export function openModal(rowIndex = null) {
@@ -77,6 +77,16 @@ export async function toggleMailingSelection(rowIndex, isChecked) {
     const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
     if (artist) {
         artist.mailingSelection = isChecked;
+        
+        // Update header checkbox state (visual sync)
+        const currentData = state.currentFilteredData;
+        const selectAllCb = document.getElementById('select-all-mailing');
+        if (selectAllCb && currentData.length > 0) {
+            const all = currentData.every(a => a.mailingSelection);
+            selectAllCb.checked = all;
+            selectAllCb.indeterminate = !all && currentData.some(a => a.mailingSelection);
+        }
+
         try {
             await apiRequest({ _action: 'edit', _rowIndex: rowIndex, 'Mailing Selectie': isChecked });
         } catch (e) {
@@ -85,3 +95,31 @@ export async function toggleMailingSelection(rowIndex, isChecked) {
     }
 }
 window.toggleMailingSelection = toggleMailingSelection;
+
+export async function toggleAllMailingSelection(isChecked) {
+    const contacts = state.currentFilteredData;
+    if (contacts.length === 0) return;
+
+    // Filter only contacts that actually need a change to save API calls
+    const contactsToUpdate = contacts.filter(a => a.mailingSelection !== isChecked);
+    
+    // Update local state for ALL visible contacts immediately
+    contacts.forEach(artist => artist.mailingSelection = isChecked);
+    
+    // Refresh UI (checkboxes)
+    renderTable(state.currentFilteredData, { artistTableBody: getEl('artist-table-body'), emptyState: getEl('empty-state'), contactCount: getEl('contact-count') });
+
+    if (contactsToUpdate.length === 0) return;
+
+    // Save to backend
+    showToast(`Bezig met opslaan van ${contactsToUpdate.length} wijzigingen...`, 'info');
+    const promises = contactsToUpdate.map(a => apiRequest({ _action: 'edit', _rowIndex: a.rowIndex, 'Mailing Selectie': isChecked }));
+    
+    try {
+        await Promise.all(promises);
+        showToast("Selectie opgeslagen.", "success");
+    } catch (e) {
+        showToast("Er ging iets mis bij het opslaan.", "error");
+    }
+}
+window.toggleAllMailingSelection = toggleAllMailingSelection;
