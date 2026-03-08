@@ -88,7 +88,7 @@ export async function toggleMailingSelection(rowIndex, isChecked) {
         }
 
         try {
-            await apiRequest({ _action: 'edit', _rowIndex: rowIndex, 'Mailing Selectie': isChecked });
+            await apiRequest({ _action: 'edit', _rowIndex: rowIndex, ...getArtistPayload(artist) });
         } catch (e) {
             showToast("Kon selectie niet opslaan.", "error");
         }
@@ -119,7 +119,7 @@ export async function toggleAllMailingSelection(isChecked) {
         const BATCH_SIZE = 5;
         for (let i = 0; i < contactsToUpdate.length; i += BATCH_SIZE) {
             const batch = contactsToUpdate.slice(i, i + BATCH_SIZE);
-            await Promise.all(batch.map(a => apiRequest({ _action: 'edit', _rowIndex: a.rowIndex, 'Mailing Selectie': isChecked })));
+            await Promise.all(batch.map(a => apiRequest({ _action: 'edit', _rowIndex: a.rowIndex, ...getArtistPayload(a) })));
         }
         showToast("Selectie opgeslagen.", "success");
     } catch (e) {
@@ -128,3 +128,27 @@ export async function toggleAllMailingSelection(isChecked) {
     }
 }
 window.toggleAllMailingSelection = toggleAllMailingSelection;
+
+function getArtistPayload(artist) {
+    return {
+        'Voornaam': artist.firstName,
+        'Achternaam': artist.lastName,
+        'Artiestennaam': artist.artistName,
+        'E-mailadres': artist.email,
+        'Telefoonnummer': artist.phone,
+        'Instagram account': artist.instagram,
+        'Soort contact': artist.type,
+        'Speelduur': artist.setLength,
+        'Notities': artist.notes,
+        'Regio Den Haag': artist.regionDH,
+        'Regio Rotterdam': artist.regionRdam,
+        'Boekbaar (Ja/Nee)': artist.bookable,
+        'Favoriet Gijs (Ja/Nee)': artist.favGijs,
+        'Favoriet Ro (Ja/Nee)': artist.favRo,
+        'Interesse in workshops (Ja/Nee)': artist.workshops,
+        'Workshop 7 nov (Ja/Nee)': artist.workshop7Nov,
+        'Unsubscribed (Ja/Nee)': artist.unsubscribed,
+        'Blacklist (Ja/Nee)': artist.blacklist,
+        'Mailing Selectie': artist.mailingSelection
+    };
+}
