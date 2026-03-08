@@ -92,6 +92,15 @@ const App = {
             btn.addEventListener('click', () => this.closeModal(btn.getAttribute('data-close')));
         });
 
+        // Handle Resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                Lineup.renderLineupUI();
+            }, 250);
+        });
+
         // Expose to Window for HTML inline calls (legacy support)
         this.exposeToWindow();
     },
@@ -134,6 +143,7 @@ const App = {
         window.moveArtistDown = Lineup.moveArtistDown;
         window.saveLineupToDatabase = Lineup.saveLineupToDatabase;
         window.clearLineup = Lineup.clearLineup;
+        window.resizeLineup = Lineup.resizeLineup;
         window.exportLineupToClipboard = Lineup.exportLineupToClipboard;
         window.handleDragStart = Lineup.handleDragStart;
         window.handleDragOver = Lineup.handleDragOver;
