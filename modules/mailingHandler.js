@@ -5,7 +5,7 @@ import { showToast, showConfirm } from './notifications.js';
 
 export function openMailingModal() {
     state.mailingRecipients = state.currentFilteredData
-        .filter(a => a.email && a.email !== '-' && !a.unsubscribed && !a.blacklist)
+        .filter(a => a.email && a.email !== '-' && !a.unsubscribed && !a.blacklist && a.mailingSelection)
         .map(a => ({ email: a.email, name: a.artistName !== '-' ? a.artistName : a.firstName }));
     
     getEl('mailing-count').innerText = state.mailingRecipients.length;

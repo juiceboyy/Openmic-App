@@ -72,3 +72,16 @@ export async function deleteContact(rowIndex) {
         if (res.status === "success") { loadArtists(); showToast("Contact verwijderd", "success"); }
     } catch (e) { showToast("Fout bij verwijderen.", "error"); toggleGlobalLoading(getEl('loading-state'), false); }
 }
+
+export async function toggleMailingSelection(rowIndex, isChecked) {
+    const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
+    if (artist) {
+        artist.mailingSelection = isChecked;
+        try {
+            await apiRequest({ _action: 'edit', _rowIndex: rowIndex, 'Mailing Selectie': isChecked });
+        } catch (e) {
+            showToast("Kon selectie niet opslaan.", "error");
+        }
+    }
+}
+window.toggleMailingSelection = toggleMailingSelection;

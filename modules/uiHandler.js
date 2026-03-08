@@ -65,6 +65,7 @@ export function renderTable(dataToRender, elements) {
 
         const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group align-top border-b border-gray-100 dark:border-gray-800 last:border-0";
         tr.innerHTML = `
+            <td class="px-4 py-4 text-center"><input type="checkbox" class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer" ${artist.mailingSelection ? 'checked' : ''} onchange="window.toggleMailingSelection(${artist.rowIndex}, this.checked)"></td>
             <td class="px-6 py-4"><div class="font-medium text-gray-900 dark:text-gray-100">${fullName || '-'}</div>${artistNameHTML}</td>
             <td class="px-6 py-4"><div class="flex flex-col gap-1.5"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs"><i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> <span class="truncate max-w-[180px]" title="${artist.email}">${artist.email}</span></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> ${artist.phone}</div>${instaHTML}</div></td>
             <td class="px-6 py-4"><div class="font-medium text-gray-900 dark:text-gray-100">${artist.type}</div><div class="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1"><i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> ${regionTags.join(' & ') || '-'}</div></td>
@@ -93,7 +94,8 @@ export async function loadArtists() {
             setLength: String(row['Speelduur'] || '-'), regionDH: isTrue(row['Regio Den Haag']), regionRdam: isTrue(row['Regio Rotterdam']),
             workshops: isTrue(row['Interesse in workshops (Ja/Nee)']), workshop7Nov: isTrue(row['Workshop 7 nov (Ja/Nee)']),
             unsubscribed: isTrue(row['Unsubscribed (Ja/Nee)']), type: String(row['Soort contact'] || '-').trim(),
-            blacklist: isTrue(row['Blacklist (Ja/Nee)']), notes: String(row['Notities'] || '-')
+            blacklist: isTrue(row['Blacklist (Ja/Nee)']), notes: String(row['Notities'] || '-'),
+            mailingSelection: isTrue(row['Mailing Selectie'])
         }));
         toggleGlobalLoading(loadingState, false);
         applyFilters();
