@@ -342,10 +342,10 @@ app.post('/api/speelschema/save', async (req, res) => {
 // ==========================================
 // SERVER STARTEN
 // ==========================================
-app.listen(PORT, () => {
+// Door '0.0.0.0' toe te voegen, openen we de deuren voor de Railway Proxy!
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`=========================================`);
   console.log(`🎤 Haagse Open Mic Backend is LIVE!`);
-  console.log(`🌐 Frontend: http://localhost:${PORT}`);
-  console.log(`⚙️  API Status: http://localhost:${PORT}/api/status`);
+  console.log(`🌐 Server luistert op poort: ${PORT}`);
   console.log(`=========================================`);
 });
