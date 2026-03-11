@@ -11,29 +11,29 @@ export async function apiRequest(payload) {
 
         // Taak 3: Routeren van edits naar lokale Node.js backend
         if (payload._action === 'edit') {
-            url = 'http://localhost:3000/api/artists/edit';
+            url = '/api/artists/edit';
             options.headers = { 'Content-Type': 'application/json' };
             // Payload is al JSON stringified in options.body
         } else if (payload._action === 'add') {
-            url = 'http://localhost:3000/api/artists/add';
+            url = '/api/artists/add';
             options.headers = { 'Content-Type': 'application/json' };
         } else if (payload._action === 'scan_folder') {
-            url = 'http://localhost:3000/api/photos/scan';
+            url = '/api/photos/scan';
             options.headers = { 'Content-Type': 'application/json' };
         } else if (payload._action === 'send_emails') {
-            url = 'http://localhost:3000/api/photos/send';
+            url = '/api/photos/send';
             options.headers = { 'Content-Type': 'application/json' };
         } else if (payload._action === 'get_sheet_names') {
-            url = 'http://localhost:3000/api/speelschema/sheets';
+            url = '/api/speelschema/sheets';
             options.headers = { 'Content-Type': 'application/json' };
         } else if (payload._action === 'get_previous_lineup') {
-            url = 'http://localhost:3000/api/speelschema/previous';
+            url = '/api/speelschema/previous';
             options.headers = { 'Content-Type': 'application/json' };
         } else if (payload._action === 'get_current_lineup') {
-            url = 'http://localhost:3000/api/speelschema/current';
+            url = '/api/speelschema/current';
             options.headers = { 'Content-Type': 'application/json' };
         } else if (payload._action === 'save_lineup') {
-            url = 'http://localhost:3000/api/speelschema/save';
+            url = '/api/speelschema/save';
             options.headers = { 'Content-Type': 'application/json' };
         }
 
@@ -48,7 +48,7 @@ export async function apiRequest(payload) {
 export async function fetchArtistsData() {
     try {
         // Taak 2: Data ophalen van lokale backend
-        const response = await fetch('http://localhost:3000/api/artists');
+        const response = await fetch('/api/artists');
         return await response.json();
     } catch (error) {
         console.error('Fetch Artists failed:', error);

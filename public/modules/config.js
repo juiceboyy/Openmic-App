@@ -1,7 +1,7 @@
 export const API_CONFIG = {
     // WEB_APP_URL was the old Google Apps Script URL. 
     // Now it points to our local Node.js server!
-    WEB_APP_URL: 'http://localhost:3000',
+    WEB_APP_URL: '',
 };
 
 export const STORAGE_KEYS = {
