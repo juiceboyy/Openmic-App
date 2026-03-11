@@ -1,5 +1,7 @@
 export const API_CONFIG = {
-    WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzk7SHUUOUEhgMAgKZ9XUUgna3oz_1XDa5Na8m4a5VV7TbTa0lpB7Ku_6SOgmaMIGxE/exec',
+    // WEB_APP_URL was the old Google Apps Script URL. 
+    // Now it points to our local Node.js server!
+    WEB_APP_URL: 'http://localhost:3000',
 };
 
 export const STORAGE_KEYS = {
