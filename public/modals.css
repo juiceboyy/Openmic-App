@@ -44,14 +44,23 @@
 
     /* Inputs & Knoppen (Stapelen) voor Sessie Laden etc. */
     [id$="-modal"] .flex.items-end,
-    [id$="-modal"] .flex.items-center:has(select) {
+    [id$="-modal"] .flex:has(select) {
         flex-direction: column !important;
         align-items: stretch !important;
-        gap: 12px !important;
+        gap: 10px !important;
     }
 
-    [id$="-modal"] select, [id$="-modal"] .flex.items-end button, [id$="-modal"] .flex:has(select) button {
-        width: 100% !important; margin-left: 0 !important; margin-top: 4px !important;
+    [id$="-modal"] .flex.items-end > select,
+    [id$="-modal"] .flex.items-end > button,
+    [id$="-modal"] .flex.items-end > div,
+    [id$="-modal"] .flex.items-end > input,
+    [id$="-modal"] .flex:has(select) > select,
+    [id$="-modal"] .flex:has(select) > button,
+    [id$="-modal"] .flex:has(select) > div,
+    [id$="-modal"] .flex:has(select) > input {
+        width: 100% !important;
+        flex: none !important;
+        min-width: 0 !important;
     }
 
     /* Footer Actieknoppen: Verticaal stapelen, primaire knop bovenaan via column-reverse */
