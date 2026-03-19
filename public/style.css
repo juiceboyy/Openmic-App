@@ -72,4 +72,63 @@ select,
     body {
         font-size: 18px !important;
     }
+
+    /* =========================================================
+       TABEL NAAR CARDS CONVERSIE (Mobiel)
+       ========================================================= */
+    /* Forceer de tabel om zich als blokken te gedragen */
+    table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+    }
+
+    /* Overschrijf Tailwind's vaste 'min-w-[1250px]' die het uitzoomen veroorzaakte */
+    table {
+        min-width: 0 !important;
+    }
+
+    /* Verberg de originele tabel headers op mobiel */
+    thead {
+        display: none;
+    }
+
+    /* Maak van elke artiest-rij een afzonderlijke 'card' */
+    tbody tr {
+        margin-bottom: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Dark mode styling voor cards */
+    html.dark tbody tr {
+        background-color: #1f2937;
+        border-color: #374151;
+    }
+
+    /* Cellen netjes onder elkaar zetten zonder standaard tabelranden */
+    tbody td {
+        border: none !important;
+        padding: 8px 0 !important;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Scheidinglijn vlak boven de Acties-knoppen voor een clean design */
+    tbody td:last-child {
+        margin-top: 12px;
+        padding-top: 16px !important;
+        border-top: 1px solid #f3f4f6 !important;
+    }
+
+    html.dark tbody td:last-child {
+        border-top-color: #374151 !important;
+    }
+    
+    /* Actieknoppen (Bewerk/Verwijder) links uitlijnen binnen de mobiele card */
+    tbody td:last-child > div {
+        justify-content: flex-start !important;
+    }
 }
