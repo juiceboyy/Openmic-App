@@ -60,6 +60,29 @@ select,
     width: 100%;
 }
 
+/* =========================================================
+   MODALS: DESKTOP & TABLET FIXES
+   ========================================================= */
+@media (min-width: 769px) {
+    /* Zorg dat in formulieren (zoals Sessie Laden) het linker input-vak maximale ruimte pakt */
+    [id$="-modal"] .flex.items-end > div,
+    [id$="-modal"] .flex.items-center:has(select) > div,
+    [id$="-modal"] .flex.items-end > select,
+    [id$="-modal"] .flex.items-center:has(select) > select {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Voorkom dat de blauwe actieknop teveel onnodige ruimte pakt */
+    [id$="-modal"] .flex.items-end > button,
+    [id$="-modal"] .flex.items-center:has(select) > button {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        white-space: nowrap !important;
+    }
+}
+
 /* Mobile Layout adjustments */
 @media (max-width: 768px) {
     /* Stack side-by-side columns vertically on smaller screens */
