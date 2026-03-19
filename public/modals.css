@@ -1,0 +1,66 @@
+/* =========================================================
+   MODALS: DESKTOP & TABLET FIXES
+   ========================================================= */
+@media (min-width: 769px) {
+    /* Zorg dat in formulieren (zoals Sessie Laden) het linker input-vak maximale ruimte pakt */
+    [id$="-modal"] .flex.items-end > div,
+    [id$="-modal"] .flex.items-center:has(select) > div,
+    [id$="-modal"] .flex.items-end > select,
+    [id$="-modal"] .flex.items-center:has(select) > select {
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    /* Voorkom dat de blauwe actieknop teveel onnodige ruimte pakt */
+    [id$="-modal"] .flex.items-end > button,
+    [id$="-modal"] .flex.items-center:has(select) > button {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        white-space: nowrap !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+        font-size: 14px !important;
+    }
+}
+
+/* =========================================================
+   MODALS: RESPONSIVE & TOUCH-FRIENDLY (MOBIEL)
+   ========================================================= */
+@media (max-width: 768px) {
+    /* Modal Container: Maximaal 95vw breedte om binnen scherm te passen */
+    [id$="-modal"] .max-w-sm, [id$="-modal"] .max-w-md, [id$="-modal"] .max-w-lg,
+    [id$="-modal"] .max-w-xl, [id$="-modal"] .max-w-2xl, [id$="-modal"] .max-w-3xl,
+    [id$="-modal"] .max-w-4xl, [id$="-modal"] .max-w-5xl, [id$="-modal"] .max-w-full {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    /* Inputs & Knoppen (Stapelen) voor Sessie Laden etc. */
+    [id$="-modal"] .flex.items-end,
+    [id$="-modal"] .flex.items-center:has(select) {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    [id$="-modal"] select, [id$="-modal"] .flex.items-end button, [id$="-modal"] .flex:has(select) button {
+        width: 100% !important; margin-left: 0 !important; margin-top: 4px !important;
+    }
+
+    /* Footer Actieknoppen: Verticaal stapelen, primaire knop bovenaan via column-reverse */
+    [id$="-modal"] .flex.justify-end {
+        flex-direction: column-reverse !important; align-items: stretch !important; gap: 12px !important;
+    }
+
+    [id$="-modal"] .flex.justify-end button {
+        width: 100% !important; margin-left: 0 !important; margin-bottom: 0 !important;
+    }
+
+    /* Uitzondering voor de kruisje-knop (sluiten) rechtsboven */
+    [id$="-modal"] button[data-close] {
+        width: 44px !important; margin-top: 0 !important; margin-bottom: 0 !important;
+    }
+}
