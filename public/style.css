@@ -74,6 +74,34 @@ select,
     }
 
     /* =========================================================
+       FIX NATIVE PULL-TO-REFRESH & PAGE SCROLLING
+       ========================================================= */
+    /* Verwijder de lock op de body zodat iOS native kan bouncen en scrollen */
+    html, body {
+        height: auto !important;
+        overflow: visible !important;
+        overscroll-behavior-y: auto !important;
+    }
+    
+    main {
+        height: auto !important;
+        overflow: visible !important;
+        flex: none !important;
+    }
+
+    /* =========================================================
+       FIX ONKLIKBARE ZWEVENDE KNOP (FAB)
+       ========================================================= */
+    /* Zorg dat de FAB altijd boven alles ligt en interactief is als hij zichtbaar is */
+    #btn-scroll-top {
+        z-index: 9999 !important;
+    }
+    
+    #btn-scroll-top.opacity-100 {
+        pointer-events: auto !important;
+    }
+
+    /* =========================================================
        TABEL NAAR CARDS CONVERSIE (Mobiel)
        ========================================================= */
     /* Forceer de tabel om zich als blokken te gedragen */

@@ -174,8 +174,8 @@
             setTimeout(updatePadding, 100);
             window.addEventListener('resize', updatePadding);
 
-            main.addEventListener('scroll', () => {
-                const currentScrollY = Math.max(0, main.scrollTop); // Math.max vangt iOS 'rubber-banding' op
+            const handleScroll = () => {
+                const currentScrollY = Math.max(0, window.scrollY || main.scrollTop); // Ondersteunt nu mobile én desktop
                 const isInputFocused = document.activeElement && header.contains(document.activeElement);
                 
                 if (currentScrollY <= 0) {
@@ -196,11 +196,15 @@
                 }
                 
                 lastScrollY = currentScrollY;
-            });
+            };
+
+            main.addEventListener('scroll', handleScroll);
+            window.addEventListener('scroll', handleScroll);
         });
         
         // Smooth scroll to top actie
         scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // Mobile
             main.scrollTo({ top: 0, behavior: 'smooth' });
         });
 
@@ -218,8 +222,9 @@
         const PTR_THRESHOLD = 70;
 
         main.addEventListener('touchstart', (e) => {
+            const currentScrollY = window.scrollY || main.scrollTop;
             // Alleen starten als we helemaal bovenaan zijn en we niet al refreshen
-            if (main.scrollTop <= 0 && !ptrRefreshing) {
+            if (currentScrollY <= 0 && !ptrRefreshing) {
                 ptrStartY = e.touches[0].clientY;
                 ptrIsPulling = true;
                 ptrThresholdReached = false;
@@ -231,9 +236,10 @@
             if (!ptrIsPulling || ptrRefreshing) return;
             ptrCurrentY = e.touches[0].clientY;
             const pullDistance = ptrCurrentY - ptrStartY;
+            const currentScrollY = window.scrollY || main.scrollTop;
             
             // Alleen pull-to-refresh activeren als we omlaag slepen
-            if (pullDistance > 0 && main.scrollTop <= 0) {
+            if (pullDistance > 0 && currentScrollY <= 0) {
                 const translateY = Math.min(pullDistance * 0.4, PTR_THRESHOLD + 20); // Geef een lichte weerstand (0.4)
                 ptrContainer.style.transform = `translateY(calc(-100% + ${translateY}px))`;
                 
