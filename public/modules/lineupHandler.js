@@ -162,14 +162,6 @@ export async function exportLineupToClipboard() {
     else showToast("Kon niet kopiëren of lijst is leeg.", "error");
 }
 
-export function moveArtistUp(index) {
-    if (index > 0) { [currentLineup[index - 1], currentLineup[index]] = [currentLineup[index], currentLineup[index - 1]]; save(); renderLineupUI(); }
-}
-
-export function moveArtistDown(index) {
-    if (index < LINEUP_CONFIG.MAX_SLOTS - 1) { [currentLineup[index + 1], currentLineup[index]] = [currentLineup[index], currentLineup[index + 1]]; save(); renderLineupUI(); }
-}
-
 export function handleDropOnMain(event, targetIndex) {
     event.preventDefault();
     event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/50');
