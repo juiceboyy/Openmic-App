@@ -6,9 +6,11 @@
     [id$="-modal"] .flex.items-end > div,
     [id$="-modal"] .flex:has(select) > div,
     [id$="-modal"] .flex.items-end > select,
-    [id$="-modal"] .flex:has(select) > select {
-        flex: 1 1 auto !important;
-        min-width: 0 !important;
+    [id$="-modal"] .flex:has(select) > select,
+    [id$="-modal"] .flex.items-end > input,
+    [id$="-modal"] .flex:has(select) > input {
+        flex: 1 1 0% !important;
+        min-width: 200px !important;
         width: 100% !important;
     }
 
@@ -96,8 +98,7 @@ body.speelschema-view #lineup-modal > div.relative {
     box-shadow: none !important;
 }
 
-/* Verberg het sluit-kruisje en eventuele donkere achtergrond-overlay */
-body.speelschema-view button[data-close="lineup-modal"],
+/* Verberg eventuele donkere achtergrond-overlay (kruisje blijft zichtbaar om te sluiten/terug te gaan!) */
 body.speelschema-view #lineup-modal > div.fixed.inset-0,
 body.speelschema-view #lineup-modal > div.absolute.inset-0 {
     display: none !important;

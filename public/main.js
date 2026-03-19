@@ -24,13 +24,6 @@ const App = {
             // Initial Load
             lucide.createIcons();
             await UI.loadArtists();
-
-            // Check of we in de "Speelschema" weergave zitten (Nieuw tabblad)
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('view') === 'speelschema') {
-                document.body.classList.add('speelschema-view');
-                Lineup.openLineupModal();
-            }
         });
     },
 
@@ -51,7 +44,10 @@ const App = {
             else if (action === 'openSettings') Settings.openSettingsModal();
             else if (action === 'openSync') Sync.openSyncModal();
             else if (action === 'openMailing') Mailing.openMailingModal();
-            else if (action === 'openLineup') Lineup.openLineupModal();
+            else if (action === 'openLineup') {
+                document.body.classList.add('speelschema-view');
+                Lineup.openLineupModal();
+            }
             else if (action === 'openPhoto') Photo.openPhotoModal();
             else if (action === 'openAddContact') Contact.openModal();
         });
@@ -133,7 +129,10 @@ const App = {
         if(id === 'sync-modal') Sync.closeSyncModal('sync-modal');
         if(id === 'mailing-modal') Mailing.closeMailingModal('mailing-modal');
         if(id === 'photo-modal') Photo.closePhotoModal('photo-modal');
-        if(id === 'lineup-modal') Lineup.closeLineupModal();
+        if(id === 'lineup-modal') {
+            Lineup.closeLineupModal();
+            document.body.classList.remove('speelschema-view');
+        }
         if(id === 'settings-modal') Settings.closeSettingsModal();
     },
 
