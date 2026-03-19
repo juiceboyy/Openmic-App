@@ -11,6 +11,12 @@ import * as Settings from './modules/settingsHandler.js';
 
 const App = {
     init() {
+        // Initialiseer Mobile Drag & Drop Polyfill met auto-scroll
+        MobileDragDrop.polyfill({
+            dragImageTranslateOverride: MobileDragDrop.scrollBehaviourDragImageTranslateOverride
+        });
+        window.addEventListener('touchmove', function() {}, {passive: false});
+
         document.addEventListener('DOMContentLoaded', async () => {
             Theme.initTheme();
             
@@ -145,8 +151,6 @@ const App = {
         window.addArtistToLineup = Lineup.addArtistToLineup;
         window.removeArtistFromLineup = Lineup.removeArtistFromLineup;
         window.removeArtistFromReserve = Lineup.removeArtistFromReserve;
-        window.moveArtistUp = Lineup.moveArtistUp;
-        window.moveArtistDown = Lineup.moveArtistDown;
         window.saveLineupToDatabase = Lineup.saveLineupToDatabase;
         window.clearLineup = Lineup.clearLineup;
         window.resizeLineup = Lineup.resizeLineup;

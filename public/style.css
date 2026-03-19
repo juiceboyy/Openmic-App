@@ -44,6 +44,16 @@ select,
 }
 
 /* =========================================================
+   TOUCH DRAG & DROP FIXES
+   ========================================================= */
+/* Voorkomt dat de browser de pagina scrollt wanneer je exact op een drag-element of handle drukt */
+[draggable="true"],
+.drag-handle {
+    touch-action: none !important;
+    -webkit-user-select: none;
+}
+
+/* =========================================================
    FLEXBOX LAYOUT (Desktop vs. Mobile)
    ========================================================= */
 /* Default Desktop Layout: Side-by-side columns */
