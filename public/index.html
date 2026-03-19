@@ -221,7 +221,7 @@
         let ptrThresholdReached = false;
         const PTR_THRESHOLD = 70;
 
-        main.addEventListener('touchstart', (e) => {
+        document.addEventListener('touchstart', (e) => {
             const currentScrollY = window.scrollY || main.scrollTop;
             // Alleen starten als we helemaal bovenaan zijn en we niet al refreshen
             if (currentScrollY <= 0 && !ptrRefreshing) {
@@ -232,7 +232,7 @@
             }
         }, { passive: true });
 
-        main.addEventListener('touchmove', (e) => {
+        document.addEventListener('touchmove', (e) => {
             if (!ptrIsPulling || ptrRefreshing) return;
             ptrCurrentY = e.touches[0].clientY;
             const pullDistance = ptrCurrentY - ptrStartY;
@@ -258,7 +258,7 @@
             }
         }, { passive: true });
 
-        main.addEventListener('touchend', async () => {
+        document.addEventListener('touchend', async () => {
             if (!ptrIsPulling || ptrRefreshing) return;
             ptrIsPulling = false;
             

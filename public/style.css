@@ -95,6 +95,8 @@ select,
     /* Zorg dat de FAB altijd boven alles ligt en interactief is als hij zichtbaar is */
     #btn-scroll-top {
         z-index: 9999 !important;
+        bottom: 100px !important;
+        cursor: pointer;
     }
     
     #btn-scroll-top.opacity-100 {
