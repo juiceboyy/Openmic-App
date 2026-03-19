@@ -28,8 +28,8 @@
 <body
     class="antialiased h-screen flex flex-col font-sans overflow-hidden bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200 text-[16px] md:text-sm">
 
-    <header
-        class="glass-header sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors overflow-x-auto scrollbar-hide">
+    <header id="main-header"
+        class="glass-header fixed top-0 w-full z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-all duration-300 overflow-x-auto scrollbar-hide">
         <div class="flex justify-between items-center px-4 md:px-8 py-4 md:py-5 min-w-max w-full">
             <div class="flex items-center gap-2 md:gap-3 mr-4 md:mr-8">
             <div class="bg-apple-blue p-2 rounded-lg text-white shadow-sm">
@@ -139,7 +139,156 @@
         </div>
     </main>
 
+    <!-- Scroll to Top Button -->
+    <button id="btn-scroll-top"
+        class="fixed bottom-6 right-6 md:bottom-8 md:right-8 p-3 min-h-[44px] min-w-[44px] bg-apple-blue text-white rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 z-40 opacity-0 pointer-events-none translate-y-4 flex items-center justify-center"
+        title="Terug naar boven">
+        <i data-lucide="arrow-up" class="w-5 h-5"></i>
+    </button>
+
+    <!-- Pull to Refresh Indicator -->
+    <div id="ptr-container" class="fixed top-0 left-0 w-full flex justify-center z-40 pt-4" style="transform: translateY(-100%); transition: transform 0.2s ease-out; pointer-events: none;">
+        <div class="bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 flex items-center gap-2">
+            <svg id="ptr-spinner" class="w-4 h-4 text-apple-blue hidden animate-spin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
+            <svg id="ptr-arrow" class="w-4 h-4 text-apple-blue transition-transform duration-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+            <span id="ptr-text" class="text-sm font-medium text-gray-600 dark:text-gray-300">Trek omlaag...</span>
+        </div>
+    </div>
+
     <script type="module" src="main.js"></script>
+
+    <script>
+        // Smart Header Hide/Show on Scroll
+        document.addEventListener("DOMContentLoaded", () => {
+            const main = document.querySelector('main');
+            const header = document.querySelector('header');
+            const scrollTopBtn = document.getElementById('btn-scroll-top');
+            let lastScrollY = main.scrollTop;
+
+            const updatePadding = () => {
+                const isDesktop = window.innerWidth >= 768;
+                const basePadding = isDesktop ? 32 : 16; // Komt overeen met originele p-4 of md:p-8 padding
+                main.style.paddingTop = `${header.offsetHeight + basePadding}px`;
+            };
+            
+            setTimeout(updatePadding, 100);
+            window.addEventListener('resize', updatePadding);
+
+            main.addEventListener('scroll', () => {
+                const currentScrollY = Math.max(0, main.scrollTop); // Math.max vangt iOS 'rubber-banding' op
+                const isInputFocused = document.activeElement && header.contains(document.activeElement);
+                
+                if (currentScrollY <= 0) {
+                    header.style.transform = 'translateY(0)';
+                } else if (!isInputFocused && currentScrollY > lastScrollY && currentScrollY > header.offsetHeight) {
+                    header.style.transform = 'translateY(-100%)'; // Omlaag scrollen -> verberg menu
+                } else if (currentScrollY < lastScrollY) {
+                    header.style.transform = 'translateY(0)'; // Omhoog scrollen -> toon menu
+                }
+                
+                // Toggle scroll-to-top button
+                if (currentScrollY > 300) {
+                    scrollTopBtn.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+                    scrollTopBtn.classList.add('opacity-100', 'translate-y-0');
+                } else {
+                    scrollTopBtn.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+                    scrollTopBtn.classList.remove('opacity-100', 'translate-y-0');
+                }
+                
+                lastScrollY = currentScrollY;
+            });
+        });
+        
+        // Smooth scroll to top actie
+        scrollTopBtn.addEventListener('click', () => {
+            main.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Pull to Refresh Logica
+        const ptrContainer = document.getElementById('ptr-container');
+        const ptrArrow = document.getElementById('ptr-arrow');
+        const ptrSpinner = document.getElementById('ptr-spinner');
+        const ptrText = document.getElementById('ptr-text');
+        
+        let ptrStartY = 0;
+        let ptrCurrentY = 0;
+        let ptrIsPulling = false;
+        let ptrRefreshing = false;
+        let ptrThresholdReached = false;
+        const PTR_THRESHOLD = 70;
+
+        main.addEventListener('touchstart', (e) => {
+            // Alleen starten als we helemaal bovenaan zijn en we niet al refreshen
+            if (main.scrollTop <= 0 && !ptrRefreshing) {
+                ptrStartY = e.touches[0].clientY;
+                ptrIsPulling = true;
+                ptrThresholdReached = false;
+                ptrContainer.style.transition = 'none'; // Snappy reactie tijdens slepen
+            }
+        }, { passive: true });
+
+        main.addEventListener('touchmove', (e) => {
+            if (!ptrIsPulling || ptrRefreshing) return;
+            ptrCurrentY = e.touches[0].clientY;
+            const pullDistance = ptrCurrentY - ptrStartY;
+            
+            // Alleen pull-to-refresh activeren als we omlaag slepen
+            if (pullDistance > 0 && main.scrollTop <= 0) {
+                const translateY = Math.min(pullDistance * 0.4, PTR_THRESHOLD + 20); // Geef een lichte weerstand (0.4)
+                ptrContainer.style.transform = `translateY(calc(-100% + ${translateY}px))`;
+                
+                if (translateY >= PTR_THRESHOLD) {
+                    ptrArrow.style.transform = 'rotate(180deg)';
+                    ptrText.textContent = 'Laat los om te vernieuwen';
+                    if (!ptrThresholdReached) {
+                        ptrThresholdReached = true;
+                        if (navigator.vibrate) navigator.vibrate(15); // Subtiel tikje (ca. 15ms)
+                    }
+                } else {
+                    ptrArrow.style.transform = 'rotate(0deg)';
+                    ptrText.textContent = 'Trek omlaag...';
+                    ptrThresholdReached = false;
+                }
+            }
+        }, { passive: true });
+
+        main.addEventListener('touchend', async () => {
+            if (!ptrIsPulling || ptrRefreshing) return;
+            ptrIsPulling = false;
+            
+            const pullDistance = ptrCurrentY - ptrStartY;
+            const translateY = pullDistance * 0.4;
+            
+            ptrContainer.style.transition = 'transform 0.3s ease-out';
+            
+            // Refresh actie uitvoeren als de drempel (PTR_THRESHOLD) is overschreden
+            if (translateY >= PTR_THRESHOLD) {
+                ptrRefreshing = true;
+                ptrContainer.style.transform = `translateY(20px)`; // Houd in beeld tijdens het laden
+                
+                ptrArrow.classList.add('hidden');
+                ptrSpinner.classList.remove('hidden');
+                ptrText.textContent = 'Vernieuwen...';
+                
+                // Data daadwerkelijk ophalen op de achtergrond
+                if (window.loadArtists) await window.loadArtists();
+                
+                ptrContainer.style.transform = 'translateY(-100%)';
+                setTimeout(() => {
+                    ptrArrow.classList.remove('hidden');
+                    ptrSpinner.classList.add('hidden');
+                    ptrArrow.style.transform = 'rotate(0deg)';
+                    ptrText.textContent = 'Trek omlaag...';
+                    ptrRefreshing = false;
+                }, 300);
+            } else {
+                ptrContainer.style.transform = 'translateY(-100%)'; // Verberg terug als je niet ver genoeg trok
+            }
+            
+            ptrCurrentY = 0;
+            ptrStartY = 0;
+        });
+    </script>
 </body>
 
 </html>

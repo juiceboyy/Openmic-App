@@ -135,11 +135,6 @@ select,
     /* =========================================================
        FIX HORIZONTAAL SCROLLEN (Header & Filters)
        ========================================================= */
-    /* Un-sticky menu: Laat de header wegscrollen voor meer schermruimte op mobiel */
-    header.glass-header {
-        position: static !important;
-    }
-
     /* Container in header laten wrappen en uitzoomen/horizontaal scrollen fixen */
     header > div.flex {
         flex-wrap: wrap !important;

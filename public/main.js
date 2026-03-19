@@ -153,6 +153,7 @@ const App = {
         window.handleDropOnReserve = Lineup.handleDropOnReserve;
         window.handleDragEnd = Lineup.handleDragEnd;
         window.toggleTheme = Theme.toggleTheme;
+        window.loadArtists = UI.loadArtists;
     }
 };
 
