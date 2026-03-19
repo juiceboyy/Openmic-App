@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Haagse Open Mic - Artiesten Database</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -26,85 +26,85 @@
 </head>
 
 <body
-    class="antialiased h-screen flex flex-col font-sans overflow-hidden bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    class="antialiased h-screen flex flex-col font-sans overflow-hidden bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200 text-[16px] md:text-sm">
 
     <header
-        class="glass-header sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors overflow-x-auto">
-        <div class="flex justify-between items-center px-8 py-5 min-w-max w-full">
-            <div class="flex items-center gap-3 mr-8">
+        class="glass-header sticky top-0 z-30 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 transition-colors overflow-x-auto scrollbar-hide">
+        <div class="flex justify-between items-center px-4 md:px-8 py-4 md:py-5 min-w-max w-full">
+            <div class="flex items-center gap-2 md:gap-3 mr-4 md:mr-8">
             <div class="bg-apple-blue p-2 rounded-lg text-white shadow-sm">
                 <i data-lucide="mic-2" class="w-5 h-5"></i>
             </div>
-            <h1 class="text-xl font-semibold tracking-tight text-gray-900 dark:text-white">Haagse Open Mic</h1>
+            <h1 class="text-lg md:text-xl font-semibold tracking-tight text-gray-900 dark:text-white">Haagse Open Mic</h1>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2 md:gap-3">
             <div class="relative">
                 <i data-lucide="search"
                     class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
                 <input type="text" id="search-input" placeholder="Zoek op naam, act of e-mail..."
-                    class="pl-9 pr-4 py-2 border border-gray-200 dark:border-gray-700 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 w-40 md:w-64 lg:w-72 bg-white dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 transition-all">
+                    class="pl-9 pr-4 py-2 min-h-[44px] border border-gray-200 dark:border-gray-700 rounded-full text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 w-48 md:w-64 lg:w-72 bg-white dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 transition-all">
             </div>
 
             <button id="btn-toggle-theme" data-action="toggleTheme"
-                class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                class="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
                 title="Toggle Dark Mode">
                 <i data-lucide="moon" id="theme-icon" class="w-5 h-5"></i>
             </button>
 
             <button id="btn-open-settings" data-action="openSettings"
-                class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" title="Instellingen">
+                class="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-800" title="Instellingen">
                 <i data-lucide="settings" class="w-5 h-5"></i>
             </button>
 
             <button id="btn-open-sync" data-action="openSync"
-                class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
+                class="min-h-[44px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-base md:text-sm font-medium transition-colors shadow-sm flex items-center gap-2"
                 title="Haal nieuwe contacten uit je adresboek">
                 <i data-lucide="refresh-cw" class="w-4 h-4"></i> Sync
             </button>
 
-            <button id="btn-open-mailing" data-action="openMailing" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+            <button id="btn-open-mailing" data-action="openMailing" class="min-h-[44px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-base md:text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
                 <i data-lucide="mail" class="w-4 h-4"></i> Mailing
             </button>
 
-            <button id="btn-open-lineup" data-action="openLineup" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+            <button id="btn-open-lineup" data-action="openLineup" class="min-h-[44px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-base md:text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
                 <i data-lucide="list-ordered" class="w-4 h-4"></i> Speelschema
             </button>
 
-            <button id="btn-open-photo" data-action="openPhoto" class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+            <button id="btn-open-photo" data-action="openPhoto" class="min-h-[44px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-full text-base md:text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
                 <i data-lucide="camera" class="w-4 h-4"></i> Foto's
             </button>
 
             <button id="btn-open-add" data-action="openAddContact"
-                class="bg-apple-blue hover:bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+                class="min-h-[44px] bg-apple-blue hover:bg-blue-600 text-white px-5 py-2 rounded-full text-base md:text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
                 <i data-lucide="plus" class="w-4 h-4"></i> Nieuw Contact
             </button>
         </div>
         </div>
     </header>
 
-    <main class="flex-1 overflow-x-auto overflow-y-auto p-8 relative">
+    <main class="flex-1 overflow-x-auto overflow-y-auto p-4 md:p-8 relative">
         <div class="max-w-[1500px] mx-auto">
 
-            <div class="flex flex-wrap items-center gap-3 mb-6">
-                <select id="filter-region" class="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-apple-blue/50">
+            <div class="flex flex-wrap items-center gap-3 mb-4 md:mb-6">
+                <select id="filter-region" class="min-h-[44px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-base md:text-sm font-medium text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-apple-blue/50">
                     <option value="all">Alle Regio's</option>
                     <option value="Den Haag">Den Haag</option>
                     <option value="Rotterdam">Rotterdam</option>
                 </select>
-                <select id="filter-type" class="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-apple-blue/50">
+                <select id="filter-type" class="min-h-[44px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-base md:text-sm font-medium text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-apple-blue/50">
                     <option value="all">Alle Types</option>
                     <option value="Artiest">Artiest</option>
                     <option value="Bobo">Bobo</option>
                     <option value="Supplier">Supplier</option>
                     <option value="Publiek">Publiek</option>
                 </select>
-                <select id="filter-bookable" class="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-apple-blue/50">
+                <select id="filter-bookable" class="min-h-[44px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg px-3 py-2 text-base md:text-sm font-medium text-gray-600 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-apple-blue/50">
                     <option value="all">Boekbaar: Alle</option>
                     <option value="ja">Boekbaar: Ja</option>
                     <option value="nee">Boekbaar: Nee</option>
                 </select>
 
-                <div class="ml-auto text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-2">
+                <div class="ml-auto text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 px-4 py-2 min-h-[44px] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm flex items-center gap-2">
                     Gevonden: <span id="contact-count" class="font-semibold text-apple-blue text-base">0</span>
                 </div>
             </div>
@@ -122,14 +122,14 @@
                 <table class="w-full text-left border-collapse min-w-[1250px]">
                     <thead>
                         <tr class="bg-gray-50/50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
-                            <th class="px-4 py-4 font-semibold w-12 text-center"><input type="checkbox" id="select-all-mailing" class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer" onchange="window.toggleAllMailingSelection(this.checked)"></th>
-                            <th class="px-6 py-4 font-semibold w-1/6">Naam & Act</th>
-                            <th class="px-6 py-4 font-semibold w-1/6">Contact</th>
-                            <th class="px-6 py-4 font-semibold w-1/8">Type & Regio</th>
-                            <th class="px-6 py-4 font-semibold w-1/6">Details</th>
-                            <th class="px-6 py-4 font-semibold w-1/6">Status / Favs</th>
-                            <th class="px-6 py-4 font-semibold w-1/6">Notities</th>
-                            <th class="px-6 py-4 font-semibold text-right min-w-[120px]">Acties</th>
+                        <th class="px-3 md:px-4 py-4 font-semibold w-12 text-center"><input type="checkbox" id="select-all-mailing" class="rounded text-apple-blue focus:ring-apple-blue w-5 h-5 md:w-4 md:h-4 cursor-pointer" onchange="window.toggleAllMailingSelection(this.checked)"></th>
+                        <th class="px-4 md:px-6 py-4 font-semibold w-1/6">Naam & Act</th>
+                        <th class="px-4 md:px-6 py-4 font-semibold w-1/6">Contact</th>
+                        <th class="px-4 md:px-6 py-4 font-semibold w-1/8">Type & Regio</th>
+                        <th class="px-4 md:px-6 py-4 font-semibold w-1/6">Details</th>
+                        <th class="px-4 md:px-6 py-4 font-semibold w-1/6">Status / Favs</th>
+                        <th class="px-4 md:px-6 py-4 font-semibold w-1/6">Notities</th>
+                        <th class="px-4 md:px-6 py-4 font-semibold text-right min-w-[120px]">Acties</th>
                         </tr>
                     </thead>
                     <tbody id="artist-table-body" class="text-sm divide-y divide-gray-100 dark:divide-gray-700">

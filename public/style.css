@@ -22,3 +22,54 @@ body {
 .modal-scroll::-webkit-scrollbar-track { background: transparent; }
 .modal-scroll::-webkit-scrollbar-thumb { background-color: #d1d5db; border-radius: 20px; }
 .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* =========================================================
+   TOUCH-FRIENDLY UI (Apple HIG Standards)
+   ========================================================= */
+/* Ensure all interactive and draggable elements are at least 44px tall */
+button,
+input,
+select,
+.lineup-item,
+.reserve-item,
+.artist-row {
+    min-height: 44px;
+}
+
+/* Add margin-bottom between list items to prevent touch misclicks and ease dragging */
+.lineup-item,
+.reserve-item {
+    margin-bottom: 12px;
+    border-radius: 8px; /* Smooth corners for an iOS feel */
+}
+
+/* =========================================================
+   FLEXBOX LAYOUT (Desktop vs. Mobile)
+   ========================================================= */
+/* Default Desktop Layout: Side-by-side columns */
+.lineup-editor-container {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.main-lineup-column,
+.reserve-lineup-column {
+    flex: 1;
+    width: 100%;
+}
+
+/* Mobile Layout adjustments */
+@media (max-width: 768px) {
+    /* Stack side-by-side columns vertically on smaller screens */
+    .lineup-editor-container {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* Slightly increase base font size for easy reading in dark venues */
+    body {
+        font-size: 18px !important;
+    }
+}

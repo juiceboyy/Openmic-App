@@ -64,16 +64,16 @@ export const ui = {
 
             const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50 transition-colors group align-top";
             tr.innerHTML = `
-                <td class="px-6 py-4"><div class="font-medium text-gray-900">${fullName || '-'}</div>${artistNameHTML}</td>
-                <td class="px-6 py-4"><div class="flex flex-col gap-1.5"><div class="flex items-center text-gray-600 text-xs"><i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> <span class="truncate max-w-[180px]" title="${artist.email}">${artist.email}</span></div><div class="flex items-center text-gray-600 text-xs"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> ${artist.phone}</div>${instaHTML}</div></td>
-                <td class="px-6 py-4"><div class="font-medium text-gray-900">${artist.type}</div><div class="flex items-center text-xs text-gray-500 mt-1"><i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> ${regionTags.join(' & ') || '-'}</div></td>
-                <td class="px-6 py-4"><div class="flex flex-col">${detailsHTML}</div></td>
-                <td class="px-6 py-4"><div class="flex flex-wrap gap-1">${ui.renderBadges(artist)} ${artist.unsubscribed ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 mb-1">Unsubscribed</span>` : ''}</div></td>
-                <td class="px-6 py-4 max-w-[200px]">${notesHTML}</td>
-                <td class="px-6 py-4 text-right">
+                <td class="px-4 md:px-6 py-4"><div class="font-medium text-gray-900 text-base md:text-sm">${fullName || '-'}</div>${artistNameHTML}</td>
+                <td class="px-4 md:px-6 py-4"><div class="flex flex-col gap-1.5"><div class="flex items-center text-gray-600 text-xs md:text-sm"><i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> <span class="truncate max-w-[180px]" title="${artist.email}">${artist.email}</span></div><div class="flex items-center text-gray-600 text-xs md:text-sm"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> ${artist.phone}</div>${instaHTML}</div></td>
+                <td class="px-4 md:px-6 py-4"><div class="font-medium text-gray-900 text-base md:text-sm">${artist.type}</div><div class="flex items-center text-xs md:text-sm text-gray-500 mt-1"><i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> ${regionTags.join(' & ') || '-'}</div></td>
+                <td class="px-4 md:px-6 py-4"><div class="flex flex-col">${detailsHTML}</div></td>
+                <td class="px-4 md:px-6 py-4"><div class="flex flex-wrap gap-1">${ui.renderBadges(artist)} ${artist.unsubscribed ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 mb-1">Unsubscribed</span>` : ''}</div></td>
+                <td class="px-4 md:px-6 py-4 max-w-[200px]">${notesHTML}</td>
+                <td class="px-4 md:px-6 py-4 text-right">
                     <div class="flex items-center justify-end gap-2">
-                        <button data-index="${artist.rowIndex}" class="btn-edit text-apple-blue bg-blue-50 border border-blue-100 hover:bg-apple-blue hover:text-white transition-colors px-3 py-1.5 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i><span class="text-xs font-medium ml-1">Bewerk</span></button>
-                        <button data-index="${artist.rowIndex}" class="btn-delete text-red-500 bg-red-50 border border-red-100 hover:bg-red-500 hover:text-white transition-colors p-2 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        <button data-index="${artist.rowIndex}" class="btn-edit min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-apple-blue bg-blue-50 border border-blue-100 hover:bg-apple-blue hover:text-white transition-colors px-3 py-1.5 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i><span class="hidden md:inline text-xs font-medium ml-1">Bewerk</span></button>
+                        <button data-index="${artist.rowIndex}" class="btn-delete min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-red-500 bg-red-50 border border-red-100 hover:bg-red-500 hover:text-white transition-colors p-2 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 </td>`;
             artistTableBody.appendChild(tr);
@@ -98,7 +98,7 @@ export const ui = {
             syncContactsBody.innerHTML += `
                 <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-4 py-3 text-center align-top pt-3.5">
-                        <input type="checkbox" id="sync-cb-${index}" checked class="sync-checkbox rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer">
+                    <input type="checkbox" id="sync-cb-${index}" checked class="sync-checkbox rounded text-apple-blue focus:ring-apple-blue w-5 h-5 md:w-4 md:h-4 cursor-pointer">
                     </td>
                     <td class="px-4 py-3 font-medium text-gray-800 align-top pt-3">${nameStr}</td>
                     <td class="px-4 py-3 text-gray-600 text-xs align-top pt-3.5 space-y-1">${contactStr || '-'}</td>
@@ -114,12 +114,12 @@ export const ui = {
         if(matches.length === 0) { photoMatchesBody.innerHTML = `<tr><td colspan="3" class="px-4 py-4 text-center text-gray-500">Geen submappen gevonden.</td></tr>`; return; }
         matches.forEach((match, index) => {
             let isValid = match.matchFound && !match.multipleMatches && match.email && match.email !== '-';
-            let checkbox = `<input type="checkbox" id="match-cb-${index}" class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer" ${isValid ? 'checked' : 'disabled'}>`;
+        let checkbox = `<input type="checkbox" id="match-cb-${index}" class="rounded text-apple-blue focus:ring-apple-blue w-5 h-5 md:w-4 md:h-4 cursor-pointer" ${isValid ? 'checked' : 'disabled'}>`;
             let matchText = '';
             
             if (match.multipleMatches) {
                 let options = `<option value="">Kies de juiste artiest...</option>` + match.candidates.map((c, i) => `<option value="${i}">${c.artistName} (${c.email || 'Geen e-mail'})</option>`).join('');
-                matchText = `<div class="flex flex-col gap-1.5"><span class="text-orange-600 font-medium text-xs"><i data-lucide="help-circle" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i> Meerdere matches:</span><select data-index="${index}" class="match-resolver border border-orange-300 bg-orange-50 text-orange-800 rounded px-2 py-1 text-xs focus:outline-none w-full max-w-[280px]">${options}</select></div>`;
+            matchText = `<div class="flex flex-col gap-1.5"><span class="text-orange-600 font-medium text-xs"><i data-lucide="help-circle" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i> Meerdere matches:</span><select data-index="${index}" class="match-resolver border border-orange-300 bg-orange-50 text-orange-800 rounded px-2 py-1 min-h-[44px] md:min-h-0 text-base md:text-xs focus:outline-none w-full max-w-[280px]">${options}</select></div>`;
             } else if(isValid) { matchText = `<span class="text-green-600 font-medium"><i data-lucide="check-circle-2" class="w-4 h-4 inline mr-1 -mt-0.5"></i> ${match.artistName} <span class="text-xs font-normal">(${match.email})</span></span>`; } 
             else if (match.matchFound) { matchText = `<span class="text-orange-500 font-medium"><i data-lucide="alert-triangle" class="w-4 h-4 inline mr-1 -mt-0.5"></i> ${match.artistName} <span class="text-xs font-normal">(Geen E-mail)</span></span>`; } 
             else { matchText = `<span class="text-red-500"><i data-lucide="x-circle" class="w-4 h-4 inline mr-1 -mt-0.5"></i> Geen match</span>`; }
