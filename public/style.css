@@ -131,4 +131,69 @@ select,
     tbody td:last-child > div {
         justify-content: flex-start !important;
     }
+
+    /* =========================================================
+       FIX HORIZONTAAL SCROLLEN (Header & Filters)
+       ========================================================= */
+    /* Container in header laten wrappen en uitzoomen/horizontaal scrollen fixen */
+    header > div.flex {
+        flex-wrap: wrap !important;
+        min-width: 0 !important; /* Overschrijft Tailwind's 'min-w-max' */
+    }
+    
+    /* Knop-containers laten wrappen */
+    header .flex {
+        flex-wrap: wrap !important;
+    }
+
+    /* Zoekbalk 100% breedte, verplaats naar eigen regel onderaan de header */
+    header .relative {
+        width: 100% !important;
+        flex-basis: 100% !important;
+        margin-top: 12px;
+        order: 99;
+    }
+    
+    #search-input {
+        width: 100% !important;
+        max-width: none !important;
+    }
+
+    /* Zorg dat de filters in het main gedeelte netjes wrappen */
+    main .flex {
+        flex-wrap: wrap !important;
+    }
+
+    /* Dropdowns (Regio, Type, Boekbaar) 2 op een rij en fix nowrap issues */
+    select {
+        flex: 1 1 calc(50% - 12px);
+        max-width: 100%;
+        white-space: normal !important;
+    }
+
+    /* =========================================================
+       LEESBAARHEID & IOS OPTIMALISATIE
+       ========================================================= */
+    /* Forceer 16px font-size op formulieren om iOS auto-zoom compleet te blokkeren */
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+
+    /* Vergroot de reguliere tekst van artist cards met ~2px tot 4px */
+    tbody td,
+    tbody td div,
+    tbody td span {
+        font-size: 16px !important;
+        line-height: 1.5;
+    }
+
+    /* Titels (Artiestnamen) extra groot maken voor makkelijk scannen in de zaal */
+    tbody td .font-medium {
+        font-size: 18px !important;
+    }
+
+    /* Labels met class 'text-xs' (zoals e-mail, tel, notes) opschalen naar 14px */
+    tbody td .text-xs {
+        font-size: 14px !important;
+    }
 }
