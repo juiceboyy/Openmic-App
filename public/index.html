@@ -200,99 +200,99 @@
 
             main.addEventListener('scroll', handleScroll);
             window.addEventListener('scroll', handleScroll);
-        });
         
-        // Smooth scroll to top actie
-        scrollTopBtn.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' }); // Mobile
-            main.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+            // Smooth scroll to top actie
+            scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' }); // Mobile
+                main.scrollTo({ top: 0, behavior: 'smooth' });
+            });
 
-        // Pull to Refresh Logica
-        const ptrContainer = document.getElementById('ptr-container');
-        const ptrArrow = document.getElementById('ptr-arrow');
-        const ptrSpinner = document.getElementById('ptr-spinner');
-        const ptrText = document.getElementById('ptr-text');
-        
-        let ptrStartY = 0;
-        let ptrCurrentY = 0;
-        let ptrIsPulling = false;
-        let ptrRefreshing = false;
-        let ptrThresholdReached = false;
-        const PTR_THRESHOLD = 70;
-
-        document.addEventListener('touchstart', (e) => {
-            const currentScrollY = window.scrollY || main.scrollTop;
-            // Alleen starten als we helemaal bovenaan zijn en we niet al refreshen
-            if (currentScrollY <= 0 && !ptrRefreshing) {
-                ptrStartY = e.touches[0].clientY;
-                ptrIsPulling = true;
-                ptrThresholdReached = false;
-                ptrContainer.style.transition = 'none'; // Snappy reactie tijdens slepen
-            }
-        }, { passive: true });
-
-        document.addEventListener('touchmove', (e) => {
-            if (!ptrIsPulling || ptrRefreshing) return;
-            ptrCurrentY = e.touches[0].clientY;
-            const pullDistance = ptrCurrentY - ptrStartY;
-            const currentScrollY = window.scrollY || main.scrollTop;
+            // Pull to Refresh Logica
+            const ptrContainer = document.getElementById('ptr-container');
+            const ptrArrow = document.getElementById('ptr-arrow');
+            const ptrSpinner = document.getElementById('ptr-spinner');
+            const ptrText = document.getElementById('ptr-text');
             
-            // Alleen pull-to-refresh activeren als we omlaag slepen
-            if (pullDistance > 0 && currentScrollY <= 0) {
-                const translateY = Math.min(pullDistance * 0.4, PTR_THRESHOLD + 20); // Geef een lichte weerstand (0.4)
-                ptrContainer.style.transform = `translateY(calc(-100% + ${translateY}px))`;
-                
-                if (translateY >= PTR_THRESHOLD) {
-                    ptrArrow.style.transform = 'rotate(180deg)';
-                    ptrText.textContent = 'Laat los om te vernieuwen';
-                    if (!ptrThresholdReached) {
-                        ptrThresholdReached = true;
-                        if (navigator.vibrate) navigator.vibrate(15); // Subtiel tikje (ca. 15ms)
-                    }
-                } else {
-                    ptrArrow.style.transform = 'rotate(0deg)';
-                    ptrText.textContent = 'Trek omlaag...';
+            let ptrStartY = 0;
+            let ptrCurrentY = 0;
+            let ptrIsPulling = false;
+            let ptrRefreshing = false;
+            let ptrThresholdReached = false;
+            const PTR_THRESHOLD = 70;
+
+            document.addEventListener('touchstart', (e) => {
+                const currentScrollY = window.scrollY || main.scrollTop;
+                // Alleen starten als we helemaal bovenaan zijn en we niet al refreshen
+                if (currentScrollY <= 0 && !ptrRefreshing) {
+                    ptrStartY = e.touches[0].clientY;
+                    ptrIsPulling = true;
                     ptrThresholdReached = false;
+                    ptrContainer.style.transition = 'none'; // Snappy reactie tijdens slepen
                 }
-            }
-        }, { passive: true });
+            }, { passive: true });
 
-        document.addEventListener('touchend', async () => {
-            if (!ptrIsPulling || ptrRefreshing) return;
-            ptrIsPulling = false;
-            
-            const pullDistance = ptrCurrentY - ptrStartY;
-            const translateY = pullDistance * 0.4;
-            
-            ptrContainer.style.transition = 'transform 0.3s ease-out';
-            
-            // Refresh actie uitvoeren als de drempel (PTR_THRESHOLD) is overschreden
-            if (translateY >= PTR_THRESHOLD) {
-                ptrRefreshing = true;
-                ptrContainer.style.transform = `translateY(20px)`; // Houd in beeld tijdens het laden
+            document.addEventListener('touchmove', (e) => {
+                if (!ptrIsPulling || ptrRefreshing) return;
+                ptrCurrentY = e.touches[0].clientY;
+                const pullDistance = ptrCurrentY - ptrStartY;
+                const currentScrollY = window.scrollY || main.scrollTop;
                 
-                ptrArrow.classList.add('hidden');
-                ptrSpinner.classList.remove('hidden');
-                ptrText.textContent = 'Vernieuwen...';
+                // Alleen pull-to-refresh activeren als we omlaag slepen
+                if (pullDistance > 0 && currentScrollY <= 0) {
+                    const translateY = Math.min(pullDistance * 0.4, PTR_THRESHOLD + 20); // Geef een lichte weerstand (0.4)
+                    ptrContainer.style.transform = `translateY(calc(-100% + ${translateY}px))`;
+                    
+                    if (translateY >= PTR_THRESHOLD) {
+                        ptrArrow.style.transform = 'rotate(180deg)';
+                        ptrText.textContent = 'Laat los om te vernieuwen';
+                        if (!ptrThresholdReached) {
+                            ptrThresholdReached = true;
+                            if (navigator.vibrate) navigator.vibrate(15); // Subtiel tikje (ca. 15ms)
+                        }
+                    } else {
+                        ptrArrow.style.transform = 'rotate(0deg)';
+                        ptrText.textContent = 'Trek omlaag...';
+                        ptrThresholdReached = false;
+                    }
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', async () => {
+                if (!ptrIsPulling || ptrRefreshing) return;
+                ptrIsPulling = false;
                 
-                // Data daadwerkelijk ophalen op de achtergrond
-                if (window.loadArtists) await window.loadArtists();
+                const pullDistance = ptrCurrentY - ptrStartY;
+                const translateY = pullDistance * 0.4;
                 
-                ptrContainer.style.transform = 'translateY(-100%)';
-                setTimeout(() => {
-                    ptrArrow.classList.remove('hidden');
-                    ptrSpinner.classList.add('hidden');
-                    ptrArrow.style.transform = 'rotate(0deg)';
-                    ptrText.textContent = 'Trek omlaag...';
-                    ptrRefreshing = false;
-                }, 300);
-            } else {
-                ptrContainer.style.transform = 'translateY(-100%)'; // Verberg terug als je niet ver genoeg trok
-            }
-            
-            ptrCurrentY = 0;
-            ptrStartY = 0;
+                ptrContainer.style.transition = 'transform 0.3s ease-out';
+                
+                // Refresh actie uitvoeren als de drempel (PTR_THRESHOLD) is overschreden
+                if (translateY >= PTR_THRESHOLD) {
+                    ptrRefreshing = true;
+                    ptrContainer.style.transform = `translateY(20px)`; // Houd in beeld tijdens het laden
+                    
+                    ptrArrow.classList.add('hidden');
+                    ptrSpinner.classList.remove('hidden');
+                    ptrText.textContent = 'Vernieuwen...';
+                    
+                    // Data daadwerkelijk ophalen op de achtergrond
+                    if (window.loadArtists) await window.loadArtists();
+                    
+                    ptrContainer.style.transform = 'translateY(-100%)';
+                    setTimeout(() => {
+                        ptrArrow.classList.remove('hidden');
+                        ptrSpinner.classList.add('hidden');
+                        ptrArrow.style.transform = 'rotate(0deg)';
+                        ptrText.textContent = 'Trek omlaag...';
+                        ptrRefreshing = false;
+                    }, 300);
+                } else {
+                    ptrContainer.style.transform = 'translateY(-100%)'; // Verberg terug als je niet ver genoeg trok
+                }
+                
+                ptrCurrentY = 0;
+                ptrStartY = 0;
+            });
         });
     </script>
 </body>
