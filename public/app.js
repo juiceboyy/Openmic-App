@@ -24,6 +24,13 @@ const App = {
             // Initial Load
             lucide.createIcons();
             await UI.loadArtists();
+
+            // Check of we in de "Speelschema" weergave zitten (Nieuw tabblad)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('view') === 'speelschema') {
+                document.body.classList.add('speelschema-view');
+                Lineup.openLineupModal();
+            }
         });
     },
 

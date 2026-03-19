@@ -66,3 +66,39 @@
         width: 44px !important; margin-top: 0 !important; margin-bottom: 0 !important;
     }
 }
+
+/* =========================================================
+   FULL-PAGE VIEW (Speelschema in nieuw tabblad)
+   ========================================================= */
+body.speelschema-view > header,
+body.speelschema-view > main,
+body.speelschema-view > #btn-scroll-top,
+body.speelschema-view > #ptr-container {
+    display: none !important;
+}
+
+/* Forceert dat de modal ALTIJD open is in deze weergave */
+body.speelschema-view #lineup-modal {
+    display: flex !important; 
+    background: transparent !important;
+}
+
+/* Forceer de daadwerkelijke card om het hele scherm over te nemen */
+body.speelschema-view #lineup-modal > div:not(.fixed):not(.absolute),
+body.speelschema-view #lineup-modal > div.relative {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* Verberg het sluit-kruisje en eventuele donkere achtergrond-overlay */
+body.speelschema-view button[data-close="lineup-modal"],
+body.speelschema-view #lineup-modal > div.fixed.inset-0,
+body.speelschema-view #lineup-modal > div.absolute.inset-0 {
+    display: none !important;
+}
