@@ -227,4 +227,59 @@ select,
     tbody td .text-xs {
         font-size: 16px !important;
     }
+
+    /* =========================================================
+       MODALS RESPONSIVE & TOUCH-FRIENDLY (MOBIEL)
+       ========================================================= */
+    /* Modal Container: Maximaal 95vw breedte om binnen scherm te passen */
+    [id$="-modal"] .max-w-sm,
+    [id$="-modal"] .max-w-md,
+    [id$="-modal"] .max-w-lg,
+    [id$="-modal"] .max-w-xl,
+    [id$="-modal"] .max-w-2xl,
+    [id$="-modal"] .max-w-3xl,
+    [id$="-modal"] .max-w-4xl,
+    [id$="-modal"] .max-w-5xl,
+    [id$="-modal"] .max-w-full {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    /* Inputs & Knoppen (Stapelen) voor Sessie Laden etc. */
+    [id$="-modal"] .flex.items-end,
+    [id$="-modal"] .flex.items-center:has(select) {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    [id$="-modal"] select,
+    [id$="-modal"] .flex.items-end button,
+    [id$="-modal"] .flex:has(select) button {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-top: 4px !important;
+    }
+
+    /* Footer Actieknoppen: Verticaal stapelen, primaire knop bovenaan via column-reverse */
+    [id$="-modal"] .flex.justify-end {
+        flex-direction: column-reverse !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    [id$="-modal"] .flex.justify-end button {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* Uitzondering voor de kruisje-knop (sluiten) rechtsboven */
+    [id$="-modal"] button[data-close] {
+        width: 44px !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
 }

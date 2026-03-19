@@ -201,13 +201,13 @@
             main.addEventListener('scroll', handleScroll);
             window.addEventListener('scroll', handleScroll);
         
-            // Smooth scroll to top actie
+            // 1. Smooth Scroll-to-Top actie
             scrollTopBtn.addEventListener('click', () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' }); // Mobile
                 main.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
-            // Pull to Refresh Logica
+            // 2. Pull-to-Refresh (PTR) Logica
             const ptrContainer = document.getElementById('ptr-container');
             const ptrArrow = document.getElementById('ptr-arrow');
             const ptrSpinner = document.getElementById('ptr-spinner');
