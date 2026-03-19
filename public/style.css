@@ -135,6 +135,11 @@ select,
     /* =========================================================
        FIX HORIZONTAAL SCROLLEN (Header & Filters)
        ========================================================= */
+    /* Un-sticky menu: Laat de header wegscrollen voor meer schermruimte op mobiel */
+    header.glass-header {
+        position: static !important;
+    }
+
     /* Container in header laten wrappen en uitzoomen/horizontaal scrollen fixen */
     header > div.flex {
         flex-wrap: wrap !important;
@@ -189,11 +194,12 @@ select,
 
     /* Titels (Artiestnamen) extra groot maken voor makkelijk scannen in de zaal */
     tbody td .font-medium {
-        font-size: 18px !important;
+        font-size: 20px !important;
+        font-weight: bold !important;
     }
 
-    /* Labels met class 'text-xs' (zoals e-mail, tel, notes) opschalen naar 14px */
+    /* Labels met class 'text-xs' (zoals e-mail, tel, notes) opschalen naar 16px */
     tbody td .text-xs {
-        font-size: 14px !important;
+        font-size: 16px !important;
     }
 }
