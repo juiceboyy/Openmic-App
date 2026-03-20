@@ -8,6 +8,7 @@ import * as Photo from './modules/photoHandler.js';
 import * as Lineup from './modules/lineupHandler.js';
 import * as Theme from './modules/themeHandler.js';
 import * as Settings from './modules/settingsHandler.js';
+import { initAuth } from './modules/authHandler.js';
 
 const App = {
     init() {
@@ -29,7 +30,9 @@ const App = {
 
             // Initial Load
             lucide.createIcons();
-            await UI.loadArtists();
+            initAuth(async () => {
+                await UI.loadArtists();
+            });
         });
     },
 
