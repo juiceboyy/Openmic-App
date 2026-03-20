@@ -20,7 +20,7 @@ export async function apiRequest(payload) {
         } else if (payload._action === 'add') {
             url = '/api/artists/add';
             options.headers = { 'Content-Type': 'application/json' };
-        } else if (payload._action === 'mailing') {
+        } else if (payload._action === 'send_mailing') {
             url = '/api/mailing';
             options.headers = { 'Content-Type': 'application/json' };
         } else if (payload._action === 'get_sheet_names') {
