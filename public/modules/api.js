@@ -40,7 +40,17 @@ export async function apiRequest(payload) {
             options.headers = { 'Content-Type': 'application/json' };
         }
 
+        // Voeg de PIN altijd stateless toe aan de headers
+        options.headers['x-app-pin'] = localStorage.getItem('appPin') || '';
+
         const response = await fetch(url, options);
+        
+        if (response.status === 401 && payload._action !== 'verify_pin') {
+            localStorage.removeItem('appPin');
+            window.location.reload();
+            throw new Error('Sessie verlopen of PIN onjuist');
+        }
+        
         return await response.json();
     } catch (error) {
         console.error('API Request failed:', error);
@@ -51,7 +61,16 @@ export async function apiRequest(payload) {
 export async function fetchArtistsData() {
     try {
         // Taak 2: Data ophalen van lokale backend
-        const response = await fetch('/api/artists');
+        const response = await fetch('/api/artists', {
+            headers: { 'x-app-pin': localStorage.getItem('appPin') || '' }
+        });
+        
+        if (response.status === 401) {
+            localStorage.removeItem('appPin');
+            window.location.reload();
+            return [];
+        }
+        
         return await response.json();
     } catch (error) {
         console.error('Fetch Artists failed:', error);

@@ -2,9 +2,9 @@ import { apiRequest } from './api.js';
 import { toggleButtonLoading } from './utils.js';
 
 export async function initAuth(onSuccessCallback) {
-    const isUnlocked = localStorage.getItem('appUnlocked') === 'true';
+    const savedPin = localStorage.getItem('appPin');
 
-    if (isUnlocked) {
+    if (savedPin) {
         if (onSuccessCallback) onSuccessCallback();
         return;
     }
@@ -67,8 +67,9 @@ export async function initAuth(onSuccessCallback) {
 
         try {
             const response = await apiRequest({ _action: 'verify_pin', pin });
-            if (response.status === 'success') {
-                localStorage.setItem('appUnlocked', 'true');
+            if (response.success || response.status === 'success') {
+                localStorage.setItem('appPin', pin);
+                localStorage.removeItem('appUnlocked'); // Ruim oude legacy state op
                 overlay.classList.add('opacity-0');
                 setTimeout(() => { overlay.remove(); onSuccessCallback(); }, 300);
             } else { throw new Error('Onjuist'); }
