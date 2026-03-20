@@ -35,6 +35,9 @@ export async function apiRequest(payload) {
         } else if (payload._action === 'save_lineup') {
             url = '/api/speelschema/save';
             options.headers = { 'Content-Type': 'application/json' };
+        } else if (payload._action === 'verify_pin') {
+            url = '/api/verify-pin';
+            options.headers = { 'Content-Type': 'application/json' };
         }
 
         const response = await fetch(url, options);

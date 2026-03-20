@@ -61,6 +61,16 @@ app.get('/api/artists', async (req, res) => {
   }
 });
 
+// Verify PIN-route: Toegangscontrole voor de app
+app.post('/api/verify-pin', (req, res) => {
+  const { pin } = req.body;
+  if (pin && pin === process.env.APP_PIN) {
+    res.json({ status: 'success', message: 'Toegang verleend' });
+  } else {
+    res.status(401).json({ status: 'error', message: 'Onjuiste pincode' });
+  }
+});
+
 // Edit-route: Ontvangt wijzigingen van de frontend en stuurt ze naar de Sheet
 app.post('/api/artists/edit', async (req, res) => {
   try {
