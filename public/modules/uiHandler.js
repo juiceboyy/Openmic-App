@@ -21,12 +21,19 @@ export function toggleNote(element) {
 }
 
 export function renderBadges(artist) {
-    let badges = '';
-    if (artist.blacklist) badges += `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800 border border-red-200 mb-1">Blacklist</span> `;
-    else if (artist.bookable) badges += `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200 mb-1">Boekbaar</span> `;
-    if (artist.favGijs) badges += `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 mb-1" title="Fav Gijs"><i data-lucide="star" class="w-3 h-3 mr-1"></i> Gijs</span> `;
-    if (artist.favRo) badges += `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200 mb-1" title="Fav Ro"><i data-lucide="star" class="w-3 h-3 mr-1"></i> Ro</span> `;
-    return badges;
+    const makeCb = (field, label, checked, colorClass) => `
+        <label class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border mb-1 cursor-pointer transition-colors ${colorClass}">
+            <input type="checkbox" class="mr-1.5 rounded" data-row="${artist.rowIndex}" data-field="${field}" ${checked ? 'checked' : ''} onchange="window.updateArtistField(event)">
+            ${label}
+        </label>
+    `;
+
+    let html = '';
+    html += makeCb('Boekbaar (Ja/Nee)', 'Boekbaar', artist.bookable, 'text-green-700 border-green-200 bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:border-green-800 dark:text-green-300');
+    html += makeCb('Favoriet Gijs (Ja/Nee)', '<i data-lucide="star" class="w-3 h-3 mr-1"></i> Gijs', artist.favGijs, 'text-purple-700 border-purple-200 bg-purple-50 hover:bg-purple-100 dark:bg-purple-900/30 dark:border-purple-800 dark:text-purple-300');
+    html += makeCb('Favoriet Ro (Ja/Nee)', '<i data-lucide="star" class="w-3 h-3 mr-1"></i> Ro', artist.favRo, 'text-orange-700 border-orange-200 bg-orange-50 hover:bg-orange-100 dark:bg-orange-900/30 dark:border-orange-800 dark:text-orange-300');
+    html += makeCb('Blacklist (Ja/Nee)', 'Blacklist', artist.blacklist, 'text-red-800 border-red-200 bg-red-50 hover:bg-red-100 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300');
+    return html;
 }
 
 export function renderTable(dataToRender, elements) {
@@ -42,6 +49,16 @@ export function renderTable(dataToRender, elements) {
         selectAllCb.indeterminate = !allSelected && dataToRender.some(a => a.mailingSelection);
     }
 
+    // Maak de header sticky (spreadsheet feeling) en bedek rijen netjes
+    const table = artistTableBody.closest('table');
+    if (table) {
+        const thead = table.querySelector('thead');
+        if (thead && !thead.classList.contains('sticky')) {
+            thead.classList.add('sticky', 'top-0', 'z-20', 'shadow-sm');
+            thead.querySelectorAll('th').forEach(th => th.classList.add('bg-gray-50', 'dark:bg-gray-800'));
+        }
+    }
+
     if (dataToRender.length === 0) { 
         emptyState.classList.remove('hidden'); 
         return; 
@@ -51,39 +68,44 @@ export function renderTable(dataToRender, elements) {
     const sortedData = [...dataToRender].sort((a, b) => (a.firstName + a.lastName).localeCompare(b.firstName + b.lastName));
 
     sortedData.forEach(artist => {
-        const fullName = `${artist.firstName} ${artist.lastName}`.trim();
-        let regionTags = []; if (artist.regionDH) regionTags.push('Den Haag'); if (artist.regionRdam) regionTags.push('Rotterdam');
+        const editableSpan = (field, val, placeholder="...") => `<span contenteditable="true" data-field="${field}" data-row="${artist.rowIndex}" class="editable-text outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-1 focus:ring-apple-blue rounded px-1 min-w-[20px] inline-block empty:before:content-['${placeholder}'] empty:before:text-gray-400 empty:before:pointer-events-none cursor-text transition-colors" onblur="window.handleFieldBlur(event)">${val !== '-' ? val : ''}</span>`;
+
+        let artistNameHTML = `<div class="inline-flex items-center mt-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-xs font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2.5 h-2.5 mr-1.5"></i>${editableSpan('Artiestennaam', artist.artistName, 'Artiestennaam')}</div>`;
         
-        let artistNameHTML = artist.artistName && artist.artistName !== '-' ? `<div class="inline-flex items-center mt-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-xs font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2.5 h-2.5 mr-1.5"></i>${artist.artistName}</div>` : '';
-        let instaHTML = artist.instagram && artist.instagram !== '-' ? `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs"><i data-lucide="instagram" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> <a href="${artist.instagram.includes('http') ? artist.instagram : 'https://instagram.com/'+artist.instagram.replace('@','')}" target="_blank" class="hover:text-apple-blue hover:underline truncate max-w-[160px]">${artist.instagram.replace(/https?:\/\/(www\.)?instagram\.com\//i, '').replace(/\/$/, '')}</a></div>` : '';
+        let instaHTML = `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs mt-1.5"><i data-lucide="instagram" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> ${editableSpan('Instagram account', artist.instagram !== '-' ? artist.instagram : '', '@insta')}</div>`;
         
         let detailsHTML = '';
-        if (artist.setLength && artist.setLength !== '-') detailsHTML += `<div class="flex items-center mb-1 text-xs text-gray-600 dark:text-gray-400"><i data-lucide="clock" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> Speelduur: <strong class="ml-1 text-gray-900 dark:text-gray-200">${artist.setLength}</strong></div>`;
-        if (artist.workshops) detailsHTML += `<div class="flex items-center mb-1 text-xs text-gray-600 dark:text-gray-400"><i data-lucide="hammer" class="w-3.5 h-3.5 mr-2 text-blue-500"></i> Interesse in workshops</div>`;
-        if (artist.workshop7Nov) detailsHTML += `<div class="flex items-center text-xs"><i data-lucide="calendar-check" class="w-3.5 h-3.5 mr-2 text-green-500"></i> <span class="text-green-600 font-medium">Interesse 7 nov</span></div>`;
-        if (!detailsHTML) detailsHTML = '<span class="text-gray-400 text-xs">-</span>';
+        detailsHTML += `<div class="flex items-center mb-2 text-xs text-gray-600 dark:text-gray-400"><i data-lucide="clock" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> Speelduur: <strong class="ml-1 text-gray-900 dark:text-gray-200">${editableSpan('Speelduur', artist.setLength, '...')}</strong></div>`;
+        detailsHTML += `<label class="flex items-center mb-1 text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3.5 w-3.5 mr-2 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Interesse in workshops (Ja/Nee)" ${artist.workshops ? 'checked' : ''} onchange="window.updateArtistField(event)"> Interesse in workshops</label>`;
+        detailsHTML += `<label class="flex items-center text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3.5 w-3.5 mr-2 rounded text-green-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-green-500" data-row="${artist.rowIndex}" data-field="Workshop 7 nov (Ja/Nee)" ${artist.workshop7Nov ? 'checked' : ''} onchange="window.updateArtistField(event)"> Workshop 7 nov</label>`;
 
-        let notesHTML = '<span class="text-gray-400 text-xs">-</span>';
-        if (artist.notes && artist.notes !== '-') {
-            const isLong = artist.notes.length > 90 || artist.notes.includes('\n');
-            notesHTML = isLong 
-                ? `<div class="group cursor-pointer rounded hover:bg-gray-100/50 dark:hover:bg-gray-700/50 p-1.5 -ml-1.5 transition-colors note-toggle"><div class="note-text text-xs text-gray-600 dark:text-gray-400 line-clamp-3 whitespace-pre-wrap leading-relaxed">${artist.notes}</div><div class="note-hint text-[10px] text-apple-blue mt-1 opacity-0 group-hover:opacity-100 transition-opacity font-medium flex items-center"><i data-lucide="chevron-down" class="w-3 h-3 mr-1"></i> Lees meer</div></div>`
-                : `<div class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed px-1.5 -ml-1.5 py-1.5">${artist.notes}</div>`;
-        }
+        let notesHTML = `<div class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed px-2 py-1.5 editable-text outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-1 focus:ring-apple-blue rounded border border-transparent hover:border-gray-200 dark:hover:border-gray-600 cursor-text min-h-[60px] empty:before:content-['Notities...'] empty:before:text-gray-400 transition-colors" contenteditable="true" data-field="Notities" data-row="${artist.rowIndex}" onblur="window.handleFieldBlur(event)">${artist.notes !== '-' ? artist.notes : ''}</div>`;
+        
+        let typeSelect = `<select data-field="Soort contact" data-row="${artist.rowIndex}" onchange="window.updateArtistField(event)" class="bg-transparent font-medium text-gray-900 dark:text-gray-100 text-base md:text-sm outline-none cursor-pointer focus:ring-1 focus:ring-apple-blue rounded hover:bg-gray-100 dark:hover:bg-gray-700 py-0.5 px-1 -ml-1 transition-colors">
+            <option value="Artiest" ${artist.type === 'Artiest' ? 'selected' : ''} class="dark:bg-gray-800">Artiest</option>
+            <option value="Bobo" ${artist.type === 'Bobo' ? 'selected' : ''} class="dark:bg-gray-800">Bobo</option>
+            <option value="Supplier" ${artist.type === 'Supplier' ? 'selected' : ''} class="dark:bg-gray-800">Supplier</option>
+            <option value="Publiek" ${artist.type === 'Publiek' ? 'selected' : ''} class="dark:bg-gray-800">Publiek</option>
+            <option value="-" ${artist.type === '-' ? 'selected' : ''} class="dark:bg-gray-800">-</option>
+        </select>`;
 
-        const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group align-top border-b border-gray-100 dark:border-gray-800 last:border-0";
+        let unsubHTML = `<label class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border mb-1 cursor-pointer transition-colors text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">
+            <input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-gray-500 focus:ring-gray-500" data-row="${artist.rowIndex}" data-field="Unsubscribed (Ja/Nee)" ${artist.unsubscribed ? 'checked' : ''} onchange="window.updateArtistField(event)">
+            Unsubscribed
+        </label>`;
+
+        const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50/80 dark:hover:bg-gray-800/80 transition-colors group align-top border-b border-gray-100 dark:border-gray-800 last:border-0";
         tr.innerHTML = `
             <td class="px-3 md:px-4 py-4 text-center"><input type="checkbox" class="rounded text-apple-blue focus:ring-apple-blue w-5 h-5 md:w-4 md:h-4 cursor-pointer" ${artist.mailingSelection ? 'checked' : ''} onchange="window.toggleMailingSelection(${artist.rowIndex}, this.checked)"></td>
-            <td class="px-4 md:px-6 py-4"><div class="font-medium text-gray-900 dark:text-gray-100 text-base md:text-sm">${fullName || '-'}</div>${artistNameHTML}</td>
-            <td class="px-4 md:px-6 py-4"><div class="flex flex-col gap-1.5"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs md:text-sm"><i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> <span class="truncate max-w-[180px]" title="${artist.email}">${artist.email}</span></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs md:text-sm"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400"></i> ${artist.phone}</div>${instaHTML}</div></td>
-            <td class="px-4 md:px-6 py-4"><div class="font-medium text-gray-900 dark:text-gray-100 text-base md:text-sm">${artist.type}</div><div class="flex items-center text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1"><i data-lucide="map-pin" class="w-3 h-3 mr-1"></i> ${regionTags.join(' & ') || '-'}</div></td>
+            <td class="px-4 md:px-6 py-4"><div class="font-medium text-gray-900 dark:text-gray-100 text-base md:text-sm flex flex-wrap gap-1 mb-1">${editableSpan('Voornaam', artist.firstName, 'Voor')} ${editableSpan('Achternaam', artist.lastName, 'Achter')}</div>${artistNameHTML}</td>
+            <td class="px-4 md:px-6 py-4"><div class="flex flex-col gap-2"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs md:text-sm"><i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400 shrink-0"></i> <div class="truncate max-w-[180px]">${editableSpan('E-mailadres', artist.email, 'E-mail')}</div></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs md:text-sm"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400 shrink-0"></i> ${editableSpan('Telefoonnummer', artist.phone, 'Tel')}</div>${instaHTML}</div></td>
+            <td class="px-4 md:px-6 py-4"><div class="mb-2">${typeSelect}</div><div class="flex flex-col gap-1.5 text-xs md:text-sm text-gray-500 dark:text-gray-400"><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3.5 w-3.5 mr-2 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Den Haag" ${artist.regionDH ? 'checked' : ''} onchange="window.updateArtistField(event)"> Den Haag</label><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3.5 w-3.5 mr-2 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Rotterdam" ${artist.regionRdam ? 'checked' : ''} onchange="window.updateArtistField(event)"> Rotterdam</label></div></td>
             <td class="px-4 md:px-6 py-4"><div class="flex flex-col">${detailsHTML}</div></td>
-            <td class="px-4 md:px-6 py-4"><div class="flex flex-wrap gap-1">${renderBadges(artist)} ${artist.unsubscribed ? `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-600 mb-1">Unsubscribed</span>` : ''}</div></td>
-            <td class="px-4 md:px-6 py-4 max-w-[200px]">${notesHTML}</td>
+            <td class="px-4 md:px-6 py-4"><div class="flex flex-col gap-1 items-start">${renderBadges(artist)} ${unsubHTML}</div></td>
+            <td class="px-4 md:px-6 py-4 max-w-[200px] w-full">${notesHTML}</td>
             <td class="px-4 md:px-6 py-4 text-right">
-                <div class="flex items-center justify-end gap-2">
-                    <button data-index="${artist.rowIndex}" class="btn-edit min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-apple-blue bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 hover:bg-apple-blue hover:text-white dark:hover:bg-blue-600 transition-colors px-3 py-1.5 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i><span class="hidden md:inline text-xs font-medium ml-1">Bewerk</span></button>
-                    <button data-index="${artist.rowIndex}" class="btn-delete min-h-[44px] min-w-[44px] md:min-h-0 md:min-w-0 text-red-500 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 hover:bg-red-500 hover:text-white dark:hover:bg-red-600 transition-colors p-2 rounded-lg focus:outline-none flex items-center justify-center shadow-sm"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                <div class="flex flex-col items-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button data-index="${artist.rowIndex}" class="btn-delete text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition-colors focus:outline-none flex items-center justify-center" title="Verwijder Rij"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             </td>`;
         artistTableBody.appendChild(tr);

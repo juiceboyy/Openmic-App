@@ -129,6 +129,81 @@ export async function toggleAllMailingSelection(isChecked) {
 }
 window.toggleAllMailingSelection = toggleAllMailingSelection;
 
+export async function handleFieldBlur(event) {
+    const el = event.target;
+    const rowIndex = parseInt(el.getAttribute('data-row'));
+    const field = el.getAttribute('data-field');
+    
+    // Haal de nieuwe waarde op. Bij reguliere velden (zoals Voornaam) halen we per ongeluk getypte enters/newlines eruit om breuk te voorkomen.
+    const newValue = field === 'Notities' ? el.innerText.trim() : el.innerText.replace(/\n/g, ' ').trim();
+    
+    const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
+    if (!artist) return;
+    
+    const propMap = {
+        'Voornaam': 'firstName', 'Achternaam': 'lastName', 'Artiestennaam': 'artistName',
+        'E-mailadres': 'email', 'Telefoonnummer': 'phone', 'Instagram account': 'instagram',
+        'Speelduur': 'setLength', 'Notities': 'notes'
+    };
+    
+    const prop = propMap[field];
+    const oldValue = artist[prop] === '-' ? '' : artist[prop];
+    
+    // Bespaar een netwerk request als er niets daadwerkelijk is veranderd.
+    if (newValue === oldValue) return;
+    
+    artist[prop] = newValue || '-';
+    await saveArtistUpdate(rowIndex, artist, el);
+}
+window.handleFieldBlur = handleFieldBlur;
+
+export async function updateArtistField(event) {
+    const el = event.target;
+    const rowIndex = parseInt(el.getAttribute('data-row'));
+    const field = el.getAttribute('data-field');
+    const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
+    if (!artist) return;
+
+    if (el.type === 'checkbox') {
+        const propMap = {
+            'Regio Den Haag': 'regionDH', 'Regio Rotterdam': 'regionRdam', 'Boekbaar (Ja/Nee)': 'bookable',
+            'Favoriet Gijs (Ja/Nee)': 'favGijs', 'Favoriet Ro (Ja/Nee)': 'favRo', 'Interesse in workshops (Ja/Nee)': 'workshops',
+            'Workshop 7 nov (Ja/Nee)': 'workshop7Nov', 'Unsubscribed (Ja/Nee)': 'unsubscribed', 'Blacklist (Ja/Nee)': 'blacklist'
+        };
+        artist[propMap[field]] = el.checked;
+    } else if (el.tagName === 'SELECT') {
+        if (field === 'Soort contact') artist.type = el.value;
+    }
+    
+    await saveArtistUpdate(rowIndex, artist, el.closest('td') || el.closest('label'));
+}
+window.updateArtistField = updateArtistField;
+
+async function saveArtistUpdate(rowIndex, artist, visualElement) {
+    try {
+        const payload = { _action: 'edit', _rowIndex: rowIndex, ...getArtistPayload(artist) };
+        const response = await apiRequest(payload);
+        
+        if (response.status === 'success') {
+            // Subtiele visuele feedback (even kort oplichten)
+            if (visualElement) {
+                const origBg = visualElement.style.backgroundColor;
+                visualElement.style.transition = 'background-color 0.4s ease';
+                visualElement.style.backgroundColor = document.documentElement.classList.contains('dark') ? 'rgba(34, 197, 94, 0.15)' : 'rgba(220, 252, 231, 1)'; // Lichtgroen
+                
+                setTimeout(() => {
+                    visualElement.style.backgroundColor = origBg;
+                    visualElement.style.transition = 'background-color 0.8s ease';
+                }, 600);
+            }
+        } else {
+            showToast('Opslaan mislukt: ' + response.message, 'error');
+        }
+    } catch (e) {
+        showToast('Er ging iets mis bij het opslaan.', 'error');
+    }
+}
+
 function getArtistPayload(artist) {
     return {
         'Voornaam': artist.firstName,
