@@ -22,8 +22,8 @@ export function toggleNote(element) {
 
 export function renderBadges(artist) {
     const makeCb = (field, label, checked, colorClass) => `
-        <label class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border mb-1 cursor-pointer transition-colors ${colorClass}">
-            <input type="checkbox" class="mr-1.5 rounded" data-row="${artist.rowIndex}" data-field="${field}" ${checked ? 'checked' : ''} onchange="window.updateArtistField(event)">
+        <label class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border cursor-pointer transition-colors ${colorClass}">
+            <input type="checkbox" class="mr-1 h-3 w-3 rounded" data-row="${artist.rowIndex}" data-field="${field}" ${checked ? 'checked' : ''} onchange="window.updateArtistField(event)">
             ${label}
         </label>
     `;
@@ -72,21 +72,21 @@ export function renderTable(dataToRender, elements) {
             <option value="-" ${artist.type === '-' ? 'selected' : ''} class="dark:bg-gray-800">-</option>
         </select>`;
 
-        let unsubHTML = `<label class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border mb-1 cursor-pointer transition-colors text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">
-            <input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-gray-500 focus:ring-gray-500" data-row="${artist.rowIndex}" data-field="Unsubscribed (Ja/Nee)" ${artist.unsubscribed ? 'checked' : ''} onchange="window.updateArtistField(event)">
+        let unsubHTML = `<label class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border cursor-pointer transition-colors text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">
+            <input type="checkbox" class="form-checkbox h-3 w-3 mr-1 rounded text-gray-500 focus:ring-gray-500" data-row="${artist.rowIndex}" data-field="Unsubscribed (Ja/Nee)" ${artist.unsubscribed ? 'checked' : ''} onchange="window.updateArtistField(event)">
             Unsubscribed
         </label>`;
 
         const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50/80 dark:hover:bg-gray-800/80 transition-colors group align-top border-b border-gray-100 dark:border-gray-800 last:border-0";
         tr.innerHTML = `
-            <td class="px-3 md:px-4 py-4 text-center"><input type="checkbox" class="rounded text-apple-blue focus:ring-apple-blue w-5 h-5 md:w-4 md:h-4 cursor-pointer" ${artist.mailingSelection ? 'checked' : ''} onchange="window.toggleMailingSelection(${artist.rowIndex}, this.checked)"></td>
-            <td class="px-4 md:px-6 py-4"><div class="font-medium text-gray-900 dark:text-gray-100 text-base md:text-sm flex flex-wrap gap-1 mb-1">${editableSpan('Voornaam', artist.firstName, 'Voor')} ${editableSpan('Achternaam', artist.lastName, 'Achter')}</div>${artistNameHTML}</td>
-            <td class="px-4 md:px-6 py-4"><div class="flex flex-col gap-2"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs md:text-sm"><i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400 shrink-0"></i> <div class="truncate max-w-[180px]">${editableSpan('E-mailadres', artist.email, 'E-mail')}</div></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs md:text-sm"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400 shrink-0"></i> ${editableSpan('Telefoonnummer', artist.phone, 'Tel')}</div>${instaHTML}</div></td>
-            <td class="px-4 md:px-6 py-4"><div class="mb-2">${typeSelect}</div><div class="flex flex-col gap-1.5 text-xs md:text-sm text-gray-500 dark:text-gray-400"><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3.5 w-3.5 mr-2 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Den Haag" ${artist.regionDH ? 'checked' : ''} onchange="window.updateArtistField(event)"> Den Haag</label><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3.5 w-3.5 mr-2 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Rotterdam" ${artist.regionRdam ? 'checked' : ''} onchange="window.updateArtistField(event)"> Rotterdam</label></div></td>
-            <td class="px-4 md:px-6 py-4"><div class="flex flex-col">${detailsHTML}</div></td>
-            <td class="px-4 md:px-6 py-4"><div class="flex flex-col gap-1 items-start">${renderBadges(artist)} ${unsubHTML}</div></td>
-            <td class="px-4 md:px-6 py-4 max-w-[200px] w-full">${notesHTML}</td>
-            <td class="px-4 md:px-6 py-4 text-right">
+            <td class="px-3 md:px-4 py-2 text-center"><input type="checkbox" class="rounded text-apple-blue focus:ring-apple-blue w-5 h-5 md:w-4 md:h-4 cursor-pointer" ${artist.mailingSelection ? 'checked' : ''} onchange="window.toggleMailingSelection(${artist.rowIndex}, this.checked)"></td>
+            <td class="px-4 md:px-6 py-2"><div class="font-medium text-gray-900 dark:text-gray-100 text-base md:text-sm flex flex-wrap gap-1 mb-1">${editableSpan('Voornaam', artist.firstName, 'Voor')} ${editableSpan('Achternaam', artist.lastName, 'Achter')}</div>${artistNameHTML}</td>
+            <td class="px-4 md:px-6 py-2"><div class="flex flex-col gap-2"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs md:text-sm"><i data-lucide="mail" class="w-3.5 h-3.5 mr-2 text-gray-400 shrink-0"></i> <div class="truncate max-w-[180px]">${editableSpan('E-mailadres', artist.email, 'E-mail')}</div></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs md:text-sm"><i data-lucide="phone" class="w-3.5 h-3.5 mr-2 text-gray-400 shrink-0"></i> ${editableSpan('Telefoonnummer', artist.phone, 'Tel')}</div>${instaHTML}</div></td>
+            <td class="px-4 md:px-6 py-2"><div class="mb-2">${typeSelect}</div><div class="flex flex-col gap-1.5 text-xs md:text-sm text-gray-500 dark:text-gray-400"><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3.5 w-3.5 mr-2 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Den Haag" ${artist.regionDH ? 'checked' : ''} onchange="window.updateArtistField(event)"> Den Haag</label><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3.5 w-3.5 mr-2 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Rotterdam" ${artist.regionRdam ? 'checked' : ''} onchange="window.updateArtistField(event)"> Rotterdam</label></div></td>
+            <td class="px-4 md:px-6 py-2"><div class="flex flex-col">${detailsHTML}</div></td>
+            <td class="px-4 md:px-6 py-2"><div class="flex flex-wrap items-center gap-1.5 max-w-[200px]">${renderBadges(artist)} ${unsubHTML}</div></td>
+            <td class="px-4 md:px-6 py-2 max-w-[200px] w-full">${notesHTML}</td>
+            <td class="px-4 md:px-6 py-2 text-right">
                 <div class="flex flex-col items-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button data-index="${artist.rowIndex}" class="btn-delete text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 p-2 rounded-lg transition-colors focus:outline-none flex items-center justify-center" title="Verwijder Rij"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
