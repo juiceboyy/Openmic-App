@@ -41,23 +41,6 @@ export function renderTable(dataToRender, elements) {
     contactCount.innerText = dataToRender.length;
     artistTableBody.innerHTML = '';
     
-    // Update header checkbox state based on visible rows
-    const selectAllCb = document.getElementById('select-all-mailing');
-    if (selectAllCb) {
-        const allSelected = dataToRender.length > 0 && dataToRender.every(a => a.mailingSelection);
-        selectAllCb.checked = allSelected;
-        selectAllCb.indeterminate = !allSelected && dataToRender.some(a => a.mailingSelection);
-    }
-
-    // Maak de header sticky (spreadsheet feeling) en bedek rijen netjes
-    const table = artistTableBody.closest('table');
-    if (table) {
-        const thead = table.querySelector('thead');
-        if (thead && !thead.classList.contains('sticky')) {
-            thead.classList.add('sticky', 'top-0', 'z-20', 'shadow-sm');
-            thead.querySelectorAll('th').forEach(th => th.classList.add('bg-gray-50', 'dark:bg-gray-800'));
-        }
-    }
 
     if (dataToRender.length === 0) { 
         emptyState.classList.remove('hidden'); 

@@ -78,15 +78,6 @@ export async function toggleMailingSelection(rowIndex, isChecked) {
     if (artist) {
         artist.mailingSelection = isChecked;
         
-        // Update header checkbox state (visual sync)
-        const currentData = state.currentFilteredData;
-        const selectAllCb = document.getElementById('select-all-mailing');
-        if (selectAllCb && currentData.length > 0) {
-            const all = currentData.every(a => a.mailingSelection);
-            selectAllCb.checked = all;
-            selectAllCb.indeterminate = !all && currentData.some(a => a.mailingSelection);
-        }
-
         try {
             await apiRequest({ _action: 'edit', _rowIndex: rowIndex, ...getArtistPayload(artist) });
         } catch (e) {
@@ -95,39 +86,6 @@ export async function toggleMailingSelection(rowIndex, isChecked) {
     }
 }
 window.toggleMailingSelection = toggleMailingSelection;
-
-export async function toggleAllMailingSelection(isChecked) {
-    const contacts = state.currentFilteredData;
-    if (contacts.length === 0) return;
-
-    // Filter only contacts that actually need a change to save API calls
-    const contactsToUpdate = contacts.filter(a => a.mailingSelection !== isChecked);
-    
-    // Update local state for ALL visible contacts immediately
-    contacts.forEach(artist => artist.mailingSelection = isChecked);
-    
-    // Refresh UI (checkboxes)
-    renderTable(state.currentFilteredData, { artistTableBody: getEl('artist-table-body'), emptyState: getEl('empty-state'), contactCount: getEl('contact-count') });
-
-    if (contactsToUpdate.length === 0) return;
-
-    // Save to backend
-    showToast(`Bezig met opslaan van ${contactsToUpdate.length} wijzigingen...`, 'info');
-    
-    try {
-        // Batch requests to avoid hitting API rate limits
-        const BATCH_SIZE = 5;
-        for (let i = 0; i < contactsToUpdate.length; i += BATCH_SIZE) {
-            const batch = contactsToUpdate.slice(i, i + BATCH_SIZE);
-            await Promise.all(batch.map(a => apiRequest({ _action: 'edit', _rowIndex: a.rowIndex, ...getArtistPayload(a) })));
-        }
-        showToast("Selectie opgeslagen.", "success");
-    } catch (e) {
-        console.error("Batch save failed:", e);
-        showToast("Er ging iets mis bij het opslaan.", "error");
-    }
-}
-window.toggleAllMailingSelection = toggleAllMailingSelection;
 
 export async function handleFieldBlur(event) {
     const el = event.target;
