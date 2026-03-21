@@ -65,7 +65,7 @@ export function renderTable(dataToRender, elements) {
 
         let notesHTML = `<div class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-tight px-1.5 py-0.5 editable-text outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-1 focus:ring-apple-blue rounded border border-transparent hover:border-gray-200 dark:hover:border-gray-600 cursor-text min-h-[30px] empty:before:content-['Notities...'] empty:before:text-gray-400 transition-colors" contenteditable="true" data-field="Notities" data-row="${artist.rowIndex}" onblur="window.handleFieldBlur(event)">${artist.notes !== '-' ? artist.notes : ''}</div>`;
         
-        let typeSelect = `<select data-field="Soort contact" data-row="${artist.rowIndex}" onchange="window.updateArtistField(event)" class="bg-transparent font-medium text-gray-900 dark:text-gray-100 text-sm outline-none cursor-pointer focus:ring-1 focus:ring-apple-blue rounded hover:bg-gray-100 dark:hover:bg-gray-700 py-0 px-1 -ml-1 h-5 leading-none transition-colors">
+        let typeSelect = `<select data-field="Soort contact" data-row="${artist.rowIndex}" onchange="window.updateArtistField(event)" class="bg-transparent font-medium text-gray-900 dark:text-gray-100 text-xs outline-none cursor-pointer focus:ring-1 focus:ring-apple-blue rounded hover:bg-gray-100 dark:hover:bg-gray-700 py-0 m-0 px-1 -ml-1 h-auto leading-tight transition-colors">
             <option value="Artiest" ${artist.type === 'Artiest' ? 'selected' : ''} class="dark:bg-gray-800">Artiest</option>
             <option value="Bobo" ${artist.type === 'Bobo' ? 'selected' : ''} class="dark:bg-gray-800">Bobo</option>
             <option value="Supplier" ${artist.type === 'Supplier' ? 'selected' : ''} class="dark:bg-gray-800">Supplier</option>
