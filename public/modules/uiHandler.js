@@ -22,7 +22,7 @@ export function toggleNote(element) {
 
 export function renderBadges(artist) {
     const makeCb = (field, label, checked, colorClass) => `
-        <label class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border cursor-pointer transition-colors ${colorClass}">
+        <label class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium border cursor-pointer transition-colors ${colorClass}">
             <input type="checkbox" class="mr-1 h-3 w-3 rounded" data-row="${artist.rowIndex}" data-field="${field}" ${checked ? 'checked' : ''} onchange="window.updateArtistField(event)">
             ${label}
         </label>
@@ -37,6 +37,7 @@ export function renderBadges(artist) {
 }
 
 export function renderTable(dataToRender, elements) {
+    console.log('🚀 Nieuwe Spreadsheet UI geladen! Aantal artiesten:', dataToRender.length);
     const { artistTableBody, emptyState, contactCount } = elements;
     contactCount.innerText = dataToRender.length;
     artistTableBody.innerHTML = '';
@@ -72,7 +73,7 @@ export function renderTable(dataToRender, elements) {
             <option value="-" ${artist.type === '-' ? 'selected' : ''} class="dark:bg-gray-800">-</option>
         </select>`;
 
-        let unsubHTML = `<label class="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border cursor-pointer transition-colors text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">
+        let unsubHTML = `<label class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium border cursor-pointer transition-colors text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">
             <input type="checkbox" class="form-checkbox h-3 w-3 mr-1 rounded text-gray-500 focus:ring-gray-500" data-row="${artist.rowIndex}" data-field="Unsubscribed (Ja/Nee)" ${artist.unsubscribed ? 'checked' : ''} onchange="window.updateArtistField(event)">
             Unsubscribed
         </label>`;
