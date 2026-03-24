@@ -153,7 +153,7 @@ export async function savePhotoEdit() {
     // Converteer Google Drive share-links naar directe image-links
     const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (driveMatch && driveMatch[1]) {
-        url = `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+        url = `https://drive.google.com/thumbnail?id=${driveMatch[1]}&sz=w500`;
     }
     
     artist.profilePic = url || '-';
