@@ -72,10 +72,12 @@ export function renderTable(dataToRender, elements) {
         let artistNameHTML = `<div class="inline-flex items-center mt-0.5 px-1.5 py-0 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-[11px] font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2 h-2 mr-1"></i>${editableSpan('Artiestennaam', artist.artistName, 'Artiestennaam')}</div>`;
         
         let instaIconHTML = '';
+        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>`;
+
         if (igHandle) {
-            instaIconHTML = `<a href="https://instagram.com/${igHandle}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-400 hover:text-apple-blue dark:hover:text-blue-400 transition-colors" title="Bekijk op Instagram"><i data-lucide="instagram" class="w-3 h-3"></i></a>`;
+            instaIconHTML = `<a href="https://instagram.com/${igHandle}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-400 hover:text-apple-blue dark:hover:text-blue-400 transition-colors" title="Bekijk op Instagram">${svgIcon}</a>`;
         } else {
-            instaIconHTML = `<i data-lucide="instagram" class="w-3 h-3 mr-1.5 text-gray-500/50 shrink-0"></i>`;
+            instaIconHTML = `<div class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-500/50">${svgIcon}</div>`;
         }
         let instaHTML = `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs mt-0.5 w-full overflow-hidden">
             ${instaIconHTML}
