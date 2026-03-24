@@ -55,14 +55,17 @@ export function renderTable(dataToRender, elements) {
         const editableSpan = (field, val, placeholder="...", extraClasses="") => `<span contenteditable="true" data-field="${field}" data-row="${artist.rowIndex}" class="editable-text outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-1 focus:ring-apple-blue rounded px-1 min-w-[20px] inline-block empty:before:content-['${placeholder}'] empty:before:text-gray-400 empty:before:pointer-events-none cursor-text transition-colors ${extraClasses}" onblur="window.handleFieldBlur(event)">${val !== '-' ? val : ''}</span>`;
 
         // 1. Logica voor Profielfoto bepalen
-        let igUser = '';
+        let igHandle = '';
         if (artist.instagram && artist.instagram !== '-') {
-            // Haal de pure gebruikersnaam uit een eventuele IG URL
-            igUser = artist.instagram.split('?')[0].replace(/https?:\/\/(www\.)?instagram\.com\//i, '').replace(/[\/@]/g, '').trim();
+            igHandle = artist.instagram
+                .replace(/(https?:\/\/)?(www\.)?instagram\.com\//i, '') // Verwijder domein
+                .replace(/\//g, '') // Verwijder trailing slashes
+                .replace('@', '') // Verwijder @ 
+                .split('?')[0] // Verwijder tracking parameters zoals ?igshid=...
+                .trim();
         }
-        const safeName = encodeURIComponent((artist.firstName + ' ' + artist.lastName).trim() || 'Onbekend');
-        const fallbackUrl = `https://ui-avatars.com/api/?name=${safeName}&background=random&color=fff&size=128`;
-        const photoUrl = artist.profilePic && artist.profilePic !== '-' ? artist.profilePic : (igUser ? `https://unavatar.io/instagram/${igUser}` : fallbackUrl);
+        const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.firstName || '')}+${encodeURIComponent(artist.lastName || 'X')}&background=random`;
+        const photoUrl = artist.profilePic && artist.profilePic !== '-' ? artist.profilePic : (igHandle ? `https://unavatar.io/instagram/${igHandle}` : fallbackUrl);
         const photoHTML = `<img src="${photoUrl}" onerror="this.onerror=null; this.src='${fallbackUrl}';" onclick="window.promptCustomPhoto(${artist.rowIndex}, '${artist.profilePic !== '-' ? artist.profilePic : ''}')" class="w-9 h-9 rounded-full object-cover border border-gray-200 dark:border-gray-700 cursor-pointer shadow-sm shrink-0 hover:opacity-80 transition-opacity" title="Klik om profielfoto aan te passen" alt="Foto">`;
 
         let artistNameHTML = `<div class="inline-flex items-center mt-0.5 px-1.5 py-0 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-[11px] font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2 h-2 mr-1"></i>${editableSpan('Artiestennaam', artist.artistName, 'Artiestennaam')}</div>`;
