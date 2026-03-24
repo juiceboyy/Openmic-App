@@ -71,7 +71,10 @@ export function renderTable(dataToRender, elements) {
 
         let artistNameHTML = `<div class="inline-flex items-center mt-0.5 px-1.5 py-0 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-[11px] font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2 h-2 mr-1"></i>${editableSpan('Artiestennaam', artist.artistName, 'Artiestennaam')}</div>`;
         
-        let instaHTML = `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs mt-0.5 w-full overflow-hidden"><i data-lucide="instagram" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i> <div class="w-full overflow-hidden">${editableSpan('Instagram account', artist.instagram !== '-' ? artist.instagram : '', '@insta', 'block truncate w-full')}</div></div>`;
+        let instaIconHTML = igHandle 
+            ? `<a href="https://instagram.com/${igHandle}" target="_blank" rel="noopener noreferrer" class="shrink-0 mr-1.5 text-gray-400 hover:text-apple-blue transition-colors cursor-pointer" title="Open Instagram profiel"><i data-lucide="instagram" class="w-3 h-3"></i></a>`
+            : `<i data-lucide="instagram" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i>`;
+        let instaHTML = `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs mt-0.5 w-full overflow-hidden">${instaIconHTML} <div class="w-full overflow-hidden">${editableSpan('Instagram account', artist.instagram !== '-' ? artist.instagram : '', '@insta', 'block truncate w-full')}</div></div>`;
         
         let detailsHTML = '';
         detailsHTML += `<div class="flex items-center mb-0.5 text-xs text-gray-600 dark:text-gray-400"><i data-lucide="clock" class="w-3 h-3 mr-1.5 text-gray-400"></i> Speelduur: <strong class="ml-1 text-gray-900 dark:text-gray-200">${editableSpan('Speelduur', artist.setLength, '...')}</strong></div>`;
