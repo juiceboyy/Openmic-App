@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { getEl, toggleButtonLoading } from './utils.js';
-import { loadArtists, toggleGlobalLoading, renderTable } from './uiHandler.js';
+import { loadArtists, toggleGlobalLoading, renderTable, applyFilters } from './uiHandler.js';
 import { showToast, showConfirm } from './notifications.js';
 
 export function openModal(rowIndex = null) {
@@ -137,6 +137,21 @@ export async function updateArtistField(event) {
 }
 window.updateArtistField = updateArtistField;
 
+export async function promptCustomPhoto(rowIndex, currentUrl) {
+    const newUrl = prompt('Plak hier de directe link naar de foto (URL):', currentUrl || '');
+    if (newUrl === null) return; // Gebruiker heeft geannuleerd
+    
+    const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
+    if (!artist) return;
+    
+    artist.profilePic = newUrl.trim() || '-';
+    
+    applyFilters(); // Herteken de tabel direct zodat de foto lokaal meteen wijzigt
+    
+    await saveArtistUpdate(rowIndex, artist, null); // Stuur het stil naar de backend
+}
+window.promptCustomPhoto = promptCustomPhoto;
+
 async function saveArtistUpdate(rowIndex, artist, visualElement) {
     try {
         const payload = { _action: 'edit', _rowIndex: rowIndex, ...getArtistPayload(artist) };
@@ -173,6 +188,7 @@ function getArtistPayload(artist) {
         'Soort contact': artist.type,
         'Speelduur': artist.setLength,
         'Notities': artist.notes,
+        'Profielfoto': artist.profilePic,
         'Regio Den Haag': artist.regionDH,
         'Regio Rotterdam': artist.regionRdam,
         'Boekbaar (Ja/Nee)': artist.bookable,

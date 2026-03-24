@@ -54,6 +54,17 @@ export function renderTable(dataToRender, elements) {
     sortedData.forEach(artist => {
         const editableSpan = (field, val, placeholder="...", extraClasses="") => `<span contenteditable="true" data-field="${field}" data-row="${artist.rowIndex}" class="editable-text outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-1 focus:ring-apple-blue rounded px-1 min-w-[20px] inline-block empty:before:content-['${placeholder}'] empty:before:text-gray-400 empty:before:pointer-events-none cursor-text transition-colors ${extraClasses}" onblur="window.handleFieldBlur(event)">${val !== '-' ? val : ''}</span>`;
 
+        // 1. Logica voor Profielfoto bepalen
+        let igUser = '';
+        if (artist.instagram && artist.instagram !== '-') {
+            // Haal de pure gebruikersnaam uit een eventuele IG URL
+            igUser = artist.instagram.split('?')[0].replace(/https?:\/\/(www\.)?instagram\.com\//i, '').replace(/[\/@]/g, '').trim();
+        }
+        const safeName = encodeURIComponent((artist.firstName + ' ' + artist.lastName).trim() || 'Onbekend');
+        const fallbackUrl = `https://ui-avatars.com/api/?name=${safeName}&background=random&color=fff&size=128`;
+        const photoUrl = artist.profilePic && artist.profilePic !== '-' ? artist.profilePic : (igUser ? `https://unavatar.io/instagram/${igUser}` : fallbackUrl);
+        const photoHTML = `<img src="${photoUrl}" onerror="this.onerror=null; this.src='${fallbackUrl}';" onclick="window.promptCustomPhoto(${artist.rowIndex}, '${artist.profilePic !== '-' ? artist.profilePic : ''}')" class="w-9 h-9 rounded-full object-cover border border-gray-200 dark:border-gray-700 cursor-pointer shadow-sm shrink-0 hover:opacity-80 transition-opacity" title="Klik om profielfoto aan te passen" alt="Foto">`;
+
         let artistNameHTML = `<div class="inline-flex items-center mt-0.5 px-1.5 py-0 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-[11px] font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2 h-2 mr-1"></i>${editableSpan('Artiestennaam', artist.artistName, 'Artiestennaam')}</div>`;
         
         let instaHTML = `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs mt-0.5 w-full overflow-hidden"><i data-lucide="instagram" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i> <div class="w-full overflow-hidden">${editableSpan('Instagram account', artist.instagram !== '-' ? artist.instagram : '', '@insta', 'block truncate w-full')}</div></div>`;
@@ -81,7 +92,7 @@ export function renderTable(dataToRender, elements) {
         const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50/80 dark:hover:bg-gray-800/80 transition-colors group align-top border-b border-gray-100 dark:border-gray-800 last:border-0";
         tr.innerHTML = `
             <td class="px-2 py-1.5 text-center w-8 align-middle"><div class="flex flex-col items-center gap-2"><input type="checkbox" class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer" ${artist.mailingSelection ? 'checked' : ''} onchange="window.toggleMailingSelection(${artist.rowIndex}, this.checked)"><button data-index="${artist.rowIndex}" class="btn-delete text-red-300 hover:text-red-600 p-1 rounded transition-colors focus:outline-none opacity-0 group-hover:opacity-100" title="Verwijder Artiest"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
-            <td class="px-2 py-1.5 min-w-[140px]"><div class="font-medium text-gray-900 dark:text-gray-100 text-sm flex flex-wrap gap-1 mb-0">${editableSpan('Voornaam', artist.firstName, 'Voor')} ${editableSpan('Achternaam', artist.lastName, 'Achter')}</div>${artistNameHTML}</td>
+            <td class="px-2 py-1.5 min-w-[180px]"><div class="flex items-center gap-2.5">${photoHTML}<div class="flex flex-col items-start"><div class="font-medium text-gray-900 dark:text-gray-100 text-sm flex flex-wrap gap-1 mb-0">${editableSpan('Voornaam', artist.firstName, 'Voor')} ${editableSpan('Achternaam', artist.lastName, 'Achter')}</div>${artistNameHTML}</div></div></td>
             <td class="px-2 py-1.5 min-w-[200px] max-w-[250px]"><div class="flex flex-col gap-0.5 w-full overflow-hidden"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs w-full overflow-hidden"><i data-lucide="mail" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i> <div class="w-full overflow-hidden" title="${artist.email}">${editableSpan('E-mailadres', artist.email, 'E-mail', 'block truncate w-full')}</div></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs w-full overflow-hidden"><i data-lucide="phone" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i> <div class="w-full overflow-hidden">${editableSpan('Telefoonnummer', artist.phone, 'Tel', 'block truncate w-full')}</div></div>${instaHTML}</div></td>
             <td class="px-2 py-1.5 w-[140px]"><div class="mb-0">${typeSelect}</div><div class="flex flex-col gap-0 text-xs text-gray-500 dark:text-gray-400"><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors leading-tight"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Den Haag" ${artist.regionDH ? 'checked' : ''} onchange="window.updateArtistField(event)"> Den Haag</label><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors leading-tight"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Rotterdam" ${artist.regionRdam ? 'checked' : ''} onchange="window.updateArtistField(event)"> Rotterdam</label></div></td>
             <td class="px-2 py-1.5 w-[160px]"><div class="flex flex-col">${detailsHTML}</div></td>
@@ -103,7 +114,7 @@ export async function loadArtists() {
             setLength: String(row['Speelduur'] || '-'), regionDH: isTrue(row['Regio Den Haag']), regionRdam: isTrue(row['Regio Rotterdam']),
             workshops: isTrue(row['Interesse in workshops (Ja/Nee)']), workshop7Nov: isTrue(row['Workshop 7 nov (Ja/Nee)']),
             unsubscribed: isTrue(row['Unsubscribed (Ja/Nee)']), type: String(row['Soort contact'] || '-').trim(),
-            blacklist: isTrue(row['Blacklist (Ja/Nee)']), notes: String(row['Notities'] || '-'),
+            blacklist: isTrue(row['Blacklist (Ja/Nee)']), notes: String(row['Notities'] || '-'), profilePic: String(row['Profielfoto'] || '-').trim(),
             mailingSelection: isTrue(row['Mailing Selectie'])
         }));
         toggleGlobalLoading(loadingState, false);
