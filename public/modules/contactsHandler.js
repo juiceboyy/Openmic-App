@@ -138,17 +138,16 @@ export async function updateArtistField(event) {
 window.updateArtistField = updateArtistField;
 
 export async function promptCustomPhoto(rowIndex, currentUrl) {
-    const newUrl = prompt('Plak hier de directe link naar de foto (URL):', currentUrl || '');
-    if (newUrl === null) return; // Gebruiker heeft geannuleerd
-    
-    const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
-    if (!artist) return;
-    
-    artist.profilePic = newUrl.trim() || '-';
-    
-    applyFilters(); // Herteken de tabel direct zodat de foto lokaal meteen wijzigt
-    
-    await saveArtistUpdate(rowIndex, artist, null); // Stuur het stil naar de backend
+    const newUrl = prompt('Plak hier de directe link naar de profielfoto (URL):', currentUrl || '');
+    if (newUrl !== null) { // Als de gebruiker niet op annuleren klikt
+        const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
+        if (artist) {
+            artist.profilePic = newUrl.trim() || '-';
+            await saveArtistUpdate(rowIndex, artist, null);
+            // Herlaad de tabel om de nieuwe foto te tonen (via applyFilters)
+            applyFilters();
+        }
+    }
 }
 window.promptCustomPhoto = promptCustomPhoto;
 
