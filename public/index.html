@@ -146,6 +146,33 @@
         </div>
     </main>
 
+    <!-- Profielfoto Bewerken Modal -->
+    <div id="photo-edit-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[80] flex flex-col items-center justify-center p-4 transition-opacity">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm p-6 transform transition-transform duration-200 border border-gray-100 dark:border-gray-700 relative">
+            <button onclick="window.closePhotoEditModal()" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="flex flex-col items-center text-center mt-2">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Profielfoto Aanpassen</h3>
+                <div class="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-gray-100 dark:border-gray-700 mb-6 shadow-sm bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+                    <img id="photo-edit-preview" src="" alt="Preview" class="w-full h-full object-cover">
+                </div>
+                <div class="w-full mb-6 text-left">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Plak een directe afbeeldings-URL:</label>
+                    <input type="url" id="photo-edit-url" placeholder="https://example.com/foto.jpg" class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm transition-colors" oninput="document.getElementById('photo-edit-preview').src = this.value || this.dataset.fallback">
+                </div>
+                <div class="flex gap-3 w-full">
+                    <button onclick="window.closePhotoEditModal()" class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                        Annuleren
+                    </button>
+                    <button id="btn-save-photo" onclick="window.savePhotoEdit()" class="flex-1 px-4 py-2 text-sm font-medium text-white bg-apple-blue rounded-lg hover:bg-blue-600 transition-colors shadow-sm flex items-center justify-center min-h-[40px]">
+                        Opslaan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Scroll to Top Button -->
     <button id="btn-scroll-top"
         class="fixed bottom-6 right-6 md:bottom-8 md:right-8 p-3 min-h-[44px] min-w-[44px] bg-apple-blue text-white rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 z-40 opacity-0 pointer-events-none translate-y-4 flex items-center justify-center"

@@ -137,19 +137,43 @@ export async function updateArtistField(event) {
 }
 window.updateArtistField = updateArtistField;
 
-export async function promptCustomPhoto(rowIndex, currentUrl) {
-    const newUrl = prompt('Plak hier de directe link naar de profielfoto (URL):', currentUrl || '');
-    if (newUrl !== null) { // Als de gebruiker niet op annuleren klikt
-        const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
-        if (artist) {
-            artist.profilePic = newUrl.trim() || '-';
-            await saveArtistUpdate(rowIndex, artist, null);
-            // Herlaad de tabel om de nieuwe foto te tonen (via applyFilters)
-            applyFilters();
-        }
-    }
+let currentPhotoEditRow = null;
+
+export function openPhotoEditModal(rowIndex, currentUrl, fallbackUrl) {
+    currentPhotoEditRow = rowIndex;
+    const modal = getEl('photo-edit-modal');
+    const preview = getEl('photo-edit-preview');
+    const input = getEl('photo-edit-url');
+    
+    input.value = currentUrl || '';
+    input.dataset.fallback = fallbackUrl;
+    preview.src = currentUrl || fallbackUrl;
+    preview.onerror = () => { preview.src = fallbackUrl; }; // Als de geplakte url breekt
+
+    modal.classList.remove('hidden');
+    if (window.lucide) window.lucide.createIcons();
 }
-window.promptCustomPhoto = promptCustomPhoto;
+window.openPhotoEditModal = openPhotoEditModal;
+
+export function closePhotoEditModal() {
+    getEl('photo-edit-modal').classList.add('hidden');
+    currentPhotoEditRow = null;
+}
+window.closePhotoEditModal = closePhotoEditModal;
+
+export async function savePhotoEdit() {
+    if (currentPhotoEditRow === null) return;
+    const artist = state.allArtists.find(a => a.rowIndex === currentPhotoEditRow);
+    if (!artist) { closePhotoEditModal(); return; }
+    
+    artist.profilePic = getEl('photo-edit-url').value.trim() || '-';
+    const btn = getEl('btn-save-photo'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
+    
+    await saveArtistUpdate(currentPhotoEditRow, artist, null);
+    
+    toggleButtonLoading(btn, false, orig); closePhotoEditModal(); applyFilters();
+}
+window.savePhotoEdit = savePhotoEdit;
 
 async function saveArtistUpdate(rowIndex, artist, visualElement) {
     try {
