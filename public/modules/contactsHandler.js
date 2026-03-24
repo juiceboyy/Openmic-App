@@ -148,7 +148,15 @@ export async function savePhotoEdit() {
     const artist = state.allArtists.find(a => a.rowIndex === currentPhotoEditRow);
     if (!artist) { closePhotoEditModal(); return; }
     
-    artist.profilePic = getEl('photo-edit-url').value.trim() || '-';
+    let url = getEl('photo-edit-url').value.trim();
+    
+    // Converteer Google Drive share-links naar directe image-links
+    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (driveMatch && driveMatch[1]) {
+        url = `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+    }
+    
+    artist.profilePic = url || '-';
     const btn = getEl('btn-save-photo'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     
     await saveArtistUpdate(currentPhotoEditRow, artist, null);
