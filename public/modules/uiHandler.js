@@ -113,7 +113,9 @@ export function renderTable(dataToRender, elements) {
             <td class="px-2 py-1.5 max-w-[130px]">${notesHTML}</td>`;
         artistTableBody.appendChild(tr);
     });
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
 }
 
 export async function loadArtists() {
