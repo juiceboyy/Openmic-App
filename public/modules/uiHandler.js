@@ -147,13 +147,20 @@ export function applyFilters() {
     const regionFilter = getEl('filter-region').value;
     const typeFilter = getEl('filter-type').value;
     const bookableFilter = getEl('filter-bookable').value;
+    const favFilter = getEl('filter-favs') ? getEl('filter-favs').value : 'all';
 
     state.currentFilteredData = state.allArtists.filter(artist => {
         const matchesSearch = (artist.firstName + ' ' + artist.lastName + artist.artistName + artist.email).toLowerCase().includes(searchTerm);
         let matchesRegion = regionFilter === 'all' || (regionFilter === 'Den Haag' && artist.regionDH) || (regionFilter === 'Rotterdam' && artist.regionRdam);
         const matchesType = typeFilter === 'all' || artist.type === typeFilter;
         let matchesBookable = bookableFilter === 'all' || (bookableFilter === 'ja' && artist.bookable) || (bookableFilter === 'nee' && !artist.bookable);
-        return matchesSearch && matchesRegion && matchesType && matchesBookable;
+        
+        let matchesFavs = true;
+        if (favFilter === 'gijs') matchesFavs = artist.favGijs;
+        else if (favFilter === 'ro') matchesFavs = artist.favRo;
+        else if (favFilter === 'both') matchesFavs = artist.favGijs && artist.favRo;
+
+        return matchesSearch && matchesRegion && matchesType && matchesBookable && matchesFavs;
     });
 
     const domElements = {
