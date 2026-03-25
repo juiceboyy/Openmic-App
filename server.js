@@ -107,7 +107,7 @@ app.use('/api/mailing', require('./routes/mailing'));
 app.use('/api/speelschema', require('./routes/speelschema'));
 
 // 7. Statische bestanden Fallback (Voor Single Page Applications)
-app.get('*', (req, res) => {
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
