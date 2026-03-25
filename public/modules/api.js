@@ -44,16 +44,16 @@ export async function apiRequest(payload) {
         options.headers['x-app-pin'] = localStorage.getItem('appPin') || '';
 
         const response = await fetch(url, options);
-        
+
         if (response.status === 401 && payload._action !== 'verify_pin') {
             localStorage.removeItem('appPin');
             window.location.reload();
             throw new Error('Sessie verlopen of PIN onjuist');
         }
-        
+
         return await response.json();
     } catch (error) {
-        console.error('API Request failed:', error);
+        console.error('API Request failed for URL:', url, 'Error:', error);
         throw error;
     }
 }
@@ -64,13 +64,13 @@ export async function fetchArtistsData() {
         const response = await fetch('/api/artists', {
             headers: { 'x-app-pin': localStorage.getItem('appPin') || '' }
         });
-        
+
         if (response.status === 401) {
             localStorage.removeItem('appPin');
             window.location.reload();
             return [];
         }
-        
+
         return await response.json();
     } catch (error) {
         console.error('Fetch Artists failed:', error);
