@@ -10,7 +10,7 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000; // Poort 3000 voor lokaal testen
 
-// Zorgt dat de échte IP-adressen worden gelezen achter een proxy (zoals Railway)
+// Vertrouw de Railway proxy zodat we de échte client IP's krijgen voor de rate limiter
 app.set('trust proxy', 1);
 
 // 3. Middleware instellen (De portiers van je server)
