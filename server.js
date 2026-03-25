@@ -4,10 +4,14 @@ const express = require('express'); // Het web-framework
 const cors = require('cors'); // Zorgt dat je frontend met je backend mag praten
 const path = require('path');
 const { addArtistData } = require('./googleSheets.js');
+const rateLimit = require('express-rate-limit');
 
 // 2. De server (app) opstarten
 const app = express();
 const PORT = process.env.PORT || 3000; // Poort 3000 voor lokaal testen
+
+// Zorgt dat de échte IP-adressen worden gelezen achter een proxy (zoals Railway)
+app.set('trust proxy', 1);
 
 // 3. Middleware instellen (De portiers van je server)
 app.use(cors());
@@ -36,7 +40,16 @@ app.post('/api/verify-pin', (req, res) => {
   }
 });
 
-app.post('/api/public-subscribe', async (req, res) => {
+// Rate limiter specifiek voor de publieke aanmeld-route om spam te voorkomen
+const subscribeLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // Tijdsvak: 1 uur
+  max: 5, // Maximaal 5 aanmeldingen per IP-adres per uur
+  message: { success: false, message: 'Te veel aanmeldingen vanaf dit apparaat. Probeer het later opnieuw.' },
+  standardHeaders: true, // Geef rate limit info mee in the `RateLimit-*` headers
+  legacyHeaders: false, // Schakel de oude `X-RateLimit-*` headers uit
+});
+
+app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
   try {
     const { firstName, lastName, email } = req.body;
     
@@ -45,7 +58,6 @@ app.post('/api/public-subscribe', async (req, res) => {
       "Achternaam": lastName || "",
       "E-mailadres": email || "",
       "Soort contact": "Publiek",
-      "Mailinglijst": "TRUE",
       "Datum toegevoegd": new Date().toLocaleDateString('nl-NL')
     };
 
