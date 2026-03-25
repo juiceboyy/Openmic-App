@@ -47,7 +47,7 @@ app.post('/api/verify-pin', (req, res) => {
 const subscribeLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // Tijdsvak: 1 uur
   max: 5, // Maximaal 5 aanmeldingen per IP-adres per uur
-  message: { success: false, message: 'Te veel aanmeldingen vanaf dit apparaat. Probeer het later opnieuw.' },
+  message: { success: false, message: 'Te veel aanmeldingen. Probeer het over een uur weer.' },
   standardHeaders: true, // Geef rate limit info mee in the `RateLimit-*` headers
   legacyHeaders: false, // Schakel de oude `X-RateLimit-*` headers uit
 });
@@ -105,6 +105,11 @@ app.use('/api/artists', require('./routes/artists'));
 app.use('/api/photos', require('./routes/photos'));
 app.use('/api/mailing', require('./routes/mailing'));
 app.use('/api/speelschema', require('./routes/speelschema'));
+
+// 7. Statische bestanden Fallback (Voor Single Page Applications)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // ==========================================
 // SERVER STARTEN
