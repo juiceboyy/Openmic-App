@@ -26,6 +26,8 @@ async function getSubFolders(folderId) {
     const response = await drive.files.list({
       q: `'${folderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`,
       fields: 'files(id, name, webViewLink)',
+      includeItemsFromAllDrives: true,
+      supportsAllDrives: true
     });
     return response.data.files;
   } catch (error) {

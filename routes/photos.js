@@ -17,13 +17,18 @@ const transporter = nodemailer.createTransport({
 // Scan-route: Foto map scannen en matchen met artiesten
 router.post('/scan', async (req, res) => {
   try {
-    const { folderUrl } = req.body;
-    const folderIdMatch = folderUrl.match(/[-\w]{25,}/);
+    // Vang ook 'url' op voor het geval de frontend het zo noemt
+    const urlToScan = req.body.folderUrl || req.body.url;
+    console.log('🤖 Scan verzoek ontvangen voor URL:', urlToScan);
     
+    if (!urlToScan) throw new Error('Geen geldige URL ontvangen van de voorkant.');
+
+    const folderIdMatch = String(urlToScan).match(/[-\w]{25,}/);
     if (!folderIdMatch) {
       return res.status(400).json({ status: 'error', message: 'Ongeldige Google Drive URL.' });
     }
     const folderId = folderIdMatch[0];
+    console.log('📂 Map ID gevonden:', folderId);
 
     // 1. Submappen ophalen uit Drive
     const subFolders = await getSubFolders(folderId);
