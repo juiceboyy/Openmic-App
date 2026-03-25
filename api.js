@@ -37,6 +37,13 @@ export async function apiRequest(payload) {
             options.headers = { 'Content-Type': 'application/json' };
         }
 
+        // Voeg de PIN code toe aan de requests naar jouw backend
+        // LET OP: Pas 'appPin' aan naar de exacte naam die je in localStorage gebruikt voor je login!
+        const appPin = localStorage.getItem('appPin') || sessionStorage.getItem('appPin') || localStorage.getItem('pin') || '';
+        if (appPin && url.startsWith('/api/')) {
+            options.headers['x-app-pin'] = appPin;
+        }
+
         const response = await fetch(url, options);
         return await response.json();
     } catch (error) {
@@ -48,7 +55,13 @@ export async function apiRequest(payload) {
 export async function fetchArtistsData() {
     try {
         // Taak 2: Data ophalen van lokale backend
-        const response = await fetch('/api/artists');
+        const appPin = localStorage.getItem('appPin') || sessionStorage.getItem('appPin') || localStorage.getItem('pin') || '';
+        const response = await fetch('/api/artists', {
+            headers: {
+                'Content-Type': 'application/json',
+                'x-app-pin': appPin
+            }
+        });
         return await response.json();
     } catch (error) {
         console.error('Fetch Artists failed:', error);
