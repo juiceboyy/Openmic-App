@@ -20,6 +20,12 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json()); // Zorgt dat we inkomende JSON-data (de 'payload') kunnen lezen
 
+// 🛠️ DEBUG LOGGING: Klikspaan die ELK inkomend verzoek print
+app.use((req, res, next) => {
+  console.log(`➡️ Inkomend verzoek: [${req.method}] ${req.url}`);
+  next();
+});
+
 // 4. Frontend koppelen
 // Dit vertelt de server: "Als iemand naar localhost:3000 gaat, laat dan de bestanden uit de 'public' map zien"
 app.use(express.static(path.join(__dirname, 'public')));
@@ -31,6 +37,7 @@ app.use('/api', (req, res, next) => {
   const clientPin = req.headers['x-app-pin'];
   if (clientPin && clientPin === process.env.APP_PIN) return next();
   
+  console.warn(`🔒 Toegang geweigerd! URL: ${req.path} | Gestuurde PIN: "${clientPin}"`);
   return res.status(401).json({ status: 'error', message: 'Niet geautoriseerd: ongeldige of ontbrekende PIN' });
 });
 
