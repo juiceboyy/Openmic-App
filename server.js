@@ -10,8 +10,8 @@ const nodemailer = require('nodemailer');
 // Nodemailer transporter instellen voor e-mailnotificaties
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // true voor 465, false voor andere poorten
+  port: 587,
+  secure: false, // false is verplicht voor poort 587 (STARTTLS)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
