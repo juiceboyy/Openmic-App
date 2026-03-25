@@ -1,3 +1,6 @@
+const dns = require('dns');
+dns.setDefaultResultOrder('ipv4first'); // Forceer IPv4 om Railway ETIMEDOUT bug met smtp.gmail.com te fixen
+
 // 1. Gereedschappen inladen
 require('dotenv').config(); // Laadt geheime variabelen uit je .env bestand
 const express = require('express'); // Het web-framework
