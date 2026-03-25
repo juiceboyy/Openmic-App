@@ -1,5 +1,5 @@
 const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first'); // Forceer IPv4 om Railway ETIMEDOUT bug met smtp.gmail.com te fixen
+dns.setDefaultResultOrder('ipv4first'); // Forceer IPv4
 
 // 1. Gereedschappen inladen
 require('dotenv').config(); // Laadt geheime variabelen uit je .env bestand
@@ -8,18 +8,6 @@ const cors = require('cors'); // Zorgt dat je frontend met je backend mag praten
 const path = require('path');
 const { addArtistData } = require('./googleSheets.js');
 const rateLimit = require('express-rate-limit');
-const nodemailer = require('nodemailer');
-
-// Nodemailer transporter instellen voor e-mailnotificaties
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // false is verplicht voor poort 587 (STARTTLS)
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
 
 // 2. De server (app) opstarten
 const app = express();
@@ -81,19 +69,30 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
     // Succes-response direct sturen zodat de bezoeker niet hoeft te wachten
     res.json({ success: true, message: "Aanmelding gelukt!" });
 
-    // Notificatie e-mail asynchroon sturen op de achtergrond (Fire and forget)
-    const mailOptions = {
-      from: `"Open Mic Aanmeldingen" <${process.env.EMAIL_USER}>`,
-      to: process.env.NOTIFICATION_EMAIL,
+    // Notificatie e-mail asynchroon sturen via Brevo (Fire and forget)
+    const brevoPayload = {
+      sender: { name: 'Haagse Open Mic', email: 'nieuwsbrief@haagseopenmic.nl' },
+      to: [{ email: process.env.NOTIFICATION_EMAIL, name: 'Beheerder' }],
       subject: `🎉 Nieuwe Publiek Aanmelding: ${firstName || ''} ${lastName || ''}`.trim(),
-      html: `<p>Er is een nieuwe aanmelding binnengekomen via de publieke pagina:</p>
+      htmlContent: `<p>Er is een nieuwe aanmelding binnengekomen via de publieke pagina:</p>
              <p><strong>Naam:</strong> ${firstName || ''} ${lastName || ''}</p>
              <p><strong>E-mailadres:</strong> ${email || ''}</p>`
     };
 
-    transporter.sendMail(mailOptions)
-      .then(info => console.log('Mail verstuurd:', info.messageId))
-      .catch(err => console.error('Fout bij sturen mail:', err));
+    fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(brevoPayload)
+    })
+    .then(async (response) => {
+      if (!response.ok) throw new Error(await response.text());
+      console.log('Brevo notificatie succesvol verstuurd!');
+    })
+    .catch(err => console.error('Fout bij sturen Brevo mail:', err));
   } catch (error) {
     console.error("Fout bij openbare aanmelding:", error);
     res.status(500).json({ success: false, message: "Aanmelding mislukt door een serverfout." });
@@ -101,6 +100,7 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
 });
 
 // 6. API Modules koppelen aan hun routes
+// BELANGRIJK: app.use('/api/photos', ...) koppelt de Google Drive functionaliteit aan je server!
 app.use('/api/artists', require('./routes/artists'));
 app.use('/api/photos', require('./routes/photos'));
 app.use('/api/mailing', require('./routes/mailing'));
