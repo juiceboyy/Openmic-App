@@ -78,7 +78,7 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
 
     // Notificatie e-mail asynchroon sturen via Brevo (Fire and forget)
      const brevoPayload = {
-      sender: { name: 'Haagse Open Mic', email: 'nieuwsbrief@haagseopenmic.nl' },
+      sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER },
       to: [{ email: process.env.NOTIFICATION_EMAIL, name: 'Beheerder' }],
       subject: `🎉 Nieuwe Publiek Aanmelding: ${firstName || ''} ${lastName || ''}`.trim(),
       htmlContent: `<p>Er is een nieuwe aanmelding binnengekomen via de publieke pagina:</p>
