@@ -70,7 +70,7 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
     res.json({ success: true, message: "Aanmelding gelukt!" });
 
     // Notificatie e-mail asynchroon sturen via Brevo (Fire and forget)
-    const brevoPayload = {
+     const brevoPayload = {
       sender: { name: 'Haagse Open Mic', email: 'nieuwsbrief@haagseopenmic.nl' },
       to: [{ email: process.env.NOTIFICATION_EMAIL, name: 'Beheerder' }],
       subject: `🎉 Nieuwe Publiek Aanmelding: ${firstName || ''} ${lastName || ''}`.trim(),
@@ -101,7 +101,7 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
 
 // 6. API Modules koppelen aan hun routes
 // BELANGRIJK: app.use('/api/photos', ...) koppelt de Google Drive functionaliteit aan je server!
-app.use('/api/artists', require('./routes/artists'));
+app.use('/api/artists', require('./routes/artists')); 
 app.use('/api/photos', require('./routes/photos'));
 app.use('/api/mailing', require('./routes/mailing'));
 app.use('/api/speelschema', require('./routes/speelschema'));
