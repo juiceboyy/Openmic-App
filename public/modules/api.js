@@ -20,6 +20,12 @@ export async function apiRequest(payload) {
         } else if (payload._action === 'add') {
             url = '/api/artists/add';
             options.headers = { 'Content-Type': 'application/json' };
+        } else if (payload._action === 'scan_folder') {
+            url = '/api/photos/scan';
+            options.headers = { 'Content-Type': 'application/json' };
+        } else if (payload._action === 'send_emails') {
+            url = '/api/photos/send';
+            options.headers = { 'Content-Type': 'application/json' };
         } else if (payload._action === 'send_mailing') {
             url = '/api/mailing';
             options.headers = { 'Content-Type': 'application/json' };
