@@ -5,6 +5,16 @@ const cors = require('cors'); // Zorgt dat je frontend met je backend mag praten
 const path = require('path');
 const { addArtistData } = require('./googleSheets.js');
 const rateLimit = require('express-rate-limit');
+const nodemailer = require('nodemailer');
+
+// Nodemailer transporter instellen voor e-mailnotificaties
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 // 2. De server (app) opstarten
 const app = express();
@@ -62,6 +72,20 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
     };
 
     await addArtistData(newContact);
+
+    // Notificatie e-mail sturen
+    try {
+      await transporter.sendMail({
+        from: `"Open Mic Aanmeldingen" <${process.env.EMAIL_USER}>`,
+        to: process.env.NOTIFICATION_EMAIL,
+        subject: `🎉 Nieuwe Publiek Aanmelding: ${firstName || ''} ${lastName || ''}`.trim(),
+        html: `<p>Er is een nieuwe aanmelding binnengekomen via de publieke pagina:</p>
+               <p><strong>Naam:</strong> ${firstName || ''} ${lastName || ''}</p>
+               <p><strong>E-mailadres:</strong> ${email || ''}</p>`
+      });
+    } catch (mailError) {
+      console.error("Fout bij het versturen van de e-mailnotificatie:", mailError);
+    }
 
     res.json({ success: true, message: "Aanmelding gelukt!" });
   } catch (error) {
