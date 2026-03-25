@@ -3,6 +3,7 @@ require('dotenv').config(); // Laadt geheime variabelen uit je .env bestand
 const express = require('express'); // Het web-framework
 const cors = require('cors'); // Zorgt dat je frontend met je backend mag praten
 const path = require('path');
+const { addArtistData } = require('./googleSheets.js');
 
 // 2. De server (app) opstarten
 const app = express();
@@ -18,7 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 5. Stateless API Authenticatie Middleware
 app.use('/api', (req, res, next) => {
-  if (req.path === '/verify-pin') return next(); // De check zélf mag altijd door
+  if (req.path === '/verify-pin' || req.path === '/public-subscribe') return next(); // De check zélf mag altijd door
   
   const clientPin = req.headers['x-app-pin'];
   if (clientPin && clientPin === process.env.APP_PIN) return next();
@@ -32,6 +33,28 @@ app.post('/api/verify-pin', (req, res) => {
     res.json({ success: true, status: 'success', message: 'Toegang verleend' });
   } else {
     res.status(401).json({ success: false, status: 'error', message: 'Onjuiste pincode' });
+  }
+});
+
+app.post('/api/public-subscribe', async (req, res) => {
+  try {
+    const { firstName, lastName, email } = req.body;
+    
+    const newContact = {
+      "Voornaam": firstName || "",
+      "Achternaam": lastName || "",
+      "E-mailadres": email || "",
+      "Soort contact": "Publiek",
+      "Mailinglijst": "TRUE",
+      "Datum toegevoegd": new Date().toLocaleDateString('nl-NL')
+    };
+
+    await addArtistData(newContact);
+
+    res.json({ success: true, message: "Aanmelding gelukt!" });
+  } catch (error) {
+    console.error("Fout bij openbare aanmelding:", error);
+    res.status(500).json({ success: false, message: "Aanmelding mislukt door een serverfout." });
   }
 });
 
