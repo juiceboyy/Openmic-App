@@ -9,7 +9,9 @@ const nodemailer = require('nodemailer');
 
 // Nodemailer transporter instellen voor e-mailnotificaties
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // true voor 465, false voor andere poorten
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -73,21 +75,22 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
 
     await addArtistData(newContact);
 
-    // Notificatie e-mail sturen
-    try {
-      await transporter.sendMail({
-        from: `"Open Mic Aanmeldingen" <${process.env.EMAIL_USER}>`,
-        to: process.env.NOTIFICATION_EMAIL,
-        subject: `🎉 Nieuwe Publiek Aanmelding: ${firstName || ''} ${lastName || ''}`.trim(),
-        html: `<p>Er is een nieuwe aanmelding binnengekomen via de publieke pagina:</p>
-               <p><strong>Naam:</strong> ${firstName || ''} ${lastName || ''}</p>
-               <p><strong>E-mailadres:</strong> ${email || ''}</p>`
-      });
-    } catch (mailError) {
-      console.error("Fout bij het versturen van de e-mailnotificatie:", mailError);
-    }
-
+    // Succes-response direct sturen zodat de bezoeker niet hoeft te wachten
     res.json({ success: true, message: "Aanmelding gelukt!" });
+
+    // Notificatie e-mail asynchroon sturen op de achtergrond (Fire and forget)
+    const mailOptions = {
+      from: `"Open Mic Aanmeldingen" <${process.env.EMAIL_USER}>`,
+      to: process.env.NOTIFICATION_EMAIL,
+      subject: `🎉 Nieuwe Publiek Aanmelding: ${firstName || ''} ${lastName || ''}`.trim(),
+      html: `<p>Er is een nieuwe aanmelding binnengekomen via de publieke pagina:</p>
+             <p><strong>Naam:</strong> ${firstName || ''} ${lastName || ''}</p>
+             <p><strong>E-mailadres:</strong> ${email || ''}</p>`
+    };
+
+    transporter.sendMail(mailOptions)
+      .then(info => console.log('Mail verstuurd:', info.messageId))
+      .catch(err => console.error('Fout bij sturen mail:', err));
   } catch (error) {
     console.error("Fout bij openbare aanmelding:", error);
     res.status(500).json({ success: false, message: "Aanmelding mislukt door een serverfout." });
