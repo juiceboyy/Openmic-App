@@ -77,3 +77,10 @@ select,
     display: block;
     margin: 20px auto 30px auto; /* Zorgt dat hij mooi in het midden staat met ruimte eronder */
 }
+
+.app-header-logo {
+    display: block;
+    max-height: 55px;
+    width: auto;
+    margin: 0 auto 15px auto;
+}
