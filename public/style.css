@@ -80,7 +80,8 @@ select,
 
 .app-header-logo {
     display: block;
-    max-height: 32px; /* Aangepast naar het formaat van het originele icoon */
-    width: auto;
+    height: 32px !important; /* Forceert de exacte hoogte, overschrijft Tailwind */
+    width: auto !important; /* Zorgt dat de breedte niet uitrekt */
+    object-fit: contain; /* Voorkomt vervorming van het logo */
     margin: 0 auto 15px auto;
 }
