@@ -44,6 +44,17 @@ export async function apiRequest(payload) {
         } else if (payload._action === 'verify_pin') {
             url = '/api/verify-pin';
             options.headers = { 'Content-Type': 'application/json' };
+        } else if (payload._action === 'get_sync_auth_url') {
+            url = '/api/sync/auth-url';
+            options.method = 'GET';
+            options.body = undefined;
+            options.headers = { 'Content-Type': 'application/json' };
+        } else if (payload._action === 'fetch_google_contacts') {
+            url = '/api/sync/contacts';
+            options.headers = { 'Content-Type': 'application/json' };
+        } else if (payload._action === 'import_contacts') {
+            url = '/api/sync/import';
+            options.headers = { 'Content-Type': 'application/json' };
         }
 
         // Voeg de PIN altijd stateless toe aan de headers
