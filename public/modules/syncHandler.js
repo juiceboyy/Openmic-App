@@ -126,6 +126,7 @@ export async function importSelectedContacts() {
             showToast(`Succes! ${result.importedCount} toegevoegd.`, "success");
             getEl('sync-modal').classList.add('hidden');
             state.recentlyImportedEmails = new Set(toImport.map(c => c.email.toLowerCase().trim()));
+            state.importFilterActive = true;
             toggleGlobalLoading(getEl('loading-state'), true);
             await loadArtists();
             activateImportFilter(result.importedCount);

@@ -175,8 +175,6 @@ export function applyFilters() {
 }
 
 export function activateImportFilter(count) {
-    state.importFilterActive = true;
-
     const existing = getEl('import-filter-banner');
     if (existing) existing.remove();
 
