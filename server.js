@@ -32,7 +32,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 5. Stateless API Authenticatie Middleware
 app.use('/api', (req, res, next) => {
-  if (req.path === '/verify-pin' || req.path === '/public-subscribe') return next(); // De check zélf mag altijd door
+  if (req.path === '/verify-pin' || req.path === '/public-subscribe' || req.path === '/sync/callback') return next(); // De check zélf mag altijd door
   
   const clientPin = req.headers['x-app-pin'];
   if (clientPin && clientPin === process.env.APP_PIN) return next();
@@ -108,10 +108,11 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
 
 // 6. API Modules koppelen aan hun routes
 // BELANGRIJK: app.use('/api/photos', ...) koppelt de Google Drive functionaliteit aan je server!
-app.use('/api/artists', require('./routes/artists')); 
+app.use('/api/artists', require('./routes/artists'));
 app.use('/api/photos', require('./routes/photos'));
 app.use('/api/mailing', require('./routes/mailing'));
 app.use('/api/speelschema', require('./routes/speelschema'));
+app.use('/api/sync', require('./routes/sync'));
 
 // 7. Statische bestanden Fallback (Voor Single Page Applications)
 app.get(/.*/, (req, res) => {
