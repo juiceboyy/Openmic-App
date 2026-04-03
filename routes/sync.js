@@ -64,21 +64,14 @@ router.post('/contacts', async (req, res) => {
     oauth2Client.setCredentials(tokens);
     storedTokens = tokens;
 
-    // Haal alle Google Contacts op (gesplitst over meerdere pagina's)
+    // Haal Google Contacts op (max 1000 — genoeg voor een persoonlijk adresboek)
     const people = google.people({ version: 'v1', auth: oauth2Client });
-    let allConnections = [];
-    let pageToken = null;
-
-    do {
-      const response = await people.people.connections.list({
-        resourceName: 'people/me',
-        pageSize: 1000,
-        personFields: 'names,emailAddresses,phoneNumbers,biographies',
-        ...(pageToken ? { pageToken } : {})
-      });
-      allConnections = allConnections.concat(response.data.connections || []);
-      pageToken = response.data.nextPageToken || null;
-    } while (pageToken);
+    const response = await people.people.connections.list({
+      resourceName: 'people/me',
+      pageSize: 1000,
+      personFields: 'names,emailAddresses,phoneNumbers,biographies'
+    });
+    const allConnections = response.data.connections || [];
 
     // Haal bestaande e-mails uit de sheet op
     const sheetData = await getSheetData();

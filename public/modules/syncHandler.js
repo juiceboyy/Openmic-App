@@ -92,7 +92,8 @@ export async function fetchGoogleContacts() {
                 showToast('Autorisatie geannuleerd.', 'error'); return;
             }
             // Opnieuw proberen na autorisatie
-            toggleButtonLoading(btn, true);
+            btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Adresboek ophalen...';
+            btn.disabled = true;
             const retryResult = await apiRequest({ _action: 'fetch_google_contacts' });
             if (retryResult.status === 'success') {
                 showContactsResult(retryResult.contacts);
