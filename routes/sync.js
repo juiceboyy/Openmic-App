@@ -23,7 +23,8 @@ router.get('/auth-url', (req, res) => {
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
     scope: ['https://www.googleapis.com/auth/contacts.readonly'],
-    prompt: 'consent'
+    prompt: 'consent',
+    ...(process.env.GOOGLE_CONTACTS_ACCOUNT ? { login_hint: process.env.GOOGLE_CONTACTS_ACCOUNT } : {})
   });
   res.json({ status: 'success', url });
 });
