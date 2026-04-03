@@ -93,7 +93,11 @@ router.post('/contacts', async (req, res) => {
         phone: person.phoneNumbers?.[0]?.value || '',
         notes: person.biographies?.[0]?.value || ''
       }))
-      .filter(c => c.email && !existingEmails.has(c.email.toLowerCase().trim()));
+      .filter(c => {
+        const email = c.email.toLowerCase().trim();
+        const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        return valid && !existingEmails.has(email);
+      });
 
     res.json({ status: 'success', contacts: newContacts });
   } catch (err) {
