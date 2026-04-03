@@ -19,6 +19,11 @@ const App = {
         window.addEventListener('touchmove', function() {}, {passive: false});
 
         document.addEventListener('DOMContentLoaded', async () => {
+            const host = window.location.hostname;
+            if (host === 'localhost' || host.includes('development')) {
+                getEl('dev-banner').classList.remove('hidden');
+            }
+
             Theme.initTheme();
             
             // Inject Templates

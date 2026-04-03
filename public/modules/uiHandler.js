@@ -104,7 +104,8 @@ export function renderTable(dataToRender, elements) {
             Unsubscribed
         </label>`;
 
-        const tr = document.createElement('tr'); tr.className = "hover:bg-gray-50/80 dark:hover:bg-gray-800/80 transition-colors group align-top border-b border-gray-100 dark:border-gray-800 last:border-0";
+        const isNew = state.recentlyImportedEmails.has((artist.email || '').toLowerCase().trim());
+        const tr = document.createElement('tr'); tr.className = `transition-colors group align-top border-b border-gray-100 dark:border-gray-800 last:border-0 ${isNew ? 'bg-green-50 dark:bg-green-900/20 hover:bg-green-100/80 dark:hover:bg-green-900/30 recently-imported' : 'hover:bg-gray-50/80 dark:hover:bg-gray-800/80'}`;
         tr.innerHTML = `
             <td class="px-2 py-1.5 text-center w-8 align-middle"><div class="flex flex-col items-center gap-2"><input type="checkbox" class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer" ${artist.mailingSelection ? 'checked' : ''} onchange="window.toggleMailingSelection(${artist.rowIndex}, this.checked)"><button data-index="${artist.rowIndex}" class="btn-delete text-red-300 hover:text-red-600 p-1 rounded transition-colors focus:outline-none opacity-0 group-hover:opacity-100" title="Verwijder Artiest"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
             <td class="px-2 py-1.5 min-w-[140px]"><div class="flex items-center gap-2.5">${photoHTML}<div class="flex flex-col items-start"><div class="font-medium text-gray-900 dark:text-gray-100 text-sm flex flex-wrap gap-1 mb-0">${editableSpan('Voornaam', artist.firstName, 'Voor')} ${editableSpan('Achternaam', artist.lastName, 'Achter')}</div>${artistNameHTML}</div></div></td>
@@ -118,6 +119,7 @@ export function renderTable(dataToRender, elements) {
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
+
 }
 
 export async function loadArtists() {
@@ -160,7 +162,8 @@ export function applyFilters() {
         else if (favFilter === 'ro') matchesFavs = artist.favRo;
         else if (favFilter === 'both') matchesFavs = artist.favGijs && artist.favRo;
 
-        return matchesSearch && matchesRegion && matchesType && matchesBookable && matchesFavs;
+        const matchesImport = !state.importFilterActive || state.recentlyImportedEmails.has((artist.email || '').toLowerCase().trim());
+        return matchesSearch && matchesRegion && matchesType && matchesBookable && matchesFavs && matchesImport;
     });
 
     const domElements = {
@@ -169,4 +172,29 @@ export function applyFilters() {
         contactCount: getEl('contact-count')
     };
     renderTable(state.currentFilteredData, domElements);
+}
+
+export function activateImportFilter(count) {
+    const existing = getEl('import-filter-banner');
+    if (existing) existing.remove();
+
+    const banner = document.createElement('div');
+    banner.id = 'import-filter-banner';
+    banner.className = 'flex items-center justify-between bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-xl px-4 py-2.5 mb-4 text-sm text-green-800 dark:text-green-200';
+    banner.innerHTML = `
+        <span><strong>${count}</strong> nieuwe contact${count !== 1 ? 'en' : ''} geïmporteerd — je ziet alleen de nieuw toegevoegde rijen.</span>
+        <button id="btn-clear-import-filter" class="ml-4 text-xs font-medium underline hover:no-underline shrink-0">Toon alle contacten</button>
+    `;
+    const main = document.querySelector('.max-w-\\[1500px\\]');
+    main.insertBefore(banner, main.firstChild);
+
+    document.getElementById('btn-clear-import-filter').addEventListener('click', clearImportFilter);
+}
+
+export function clearImportFilter() {
+    state.importFilterActive = false;
+    state.recentlyImportedEmails.clear();
+    const banner = getEl('import-filter-banner');
+    if (banner) banner.remove();
+    applyFilters();
 }

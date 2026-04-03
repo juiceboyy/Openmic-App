@@ -5,6 +5,8 @@ export const state = {
     scannedMatches: [],
     fetchedSyncContacts: [],
     mailingRecipients: [],
+    recentlyImportedEmails: new Set(),
+    importFilterActive: false,
 };
 
 export const isTrue = (val) => {

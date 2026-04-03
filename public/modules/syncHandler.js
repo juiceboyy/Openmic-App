@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { getEl, toggleButtonLoading } from './utils.js';
-import { loadArtists, toggleGlobalLoading } from './uiHandler.js';
+import { loadArtists, toggleGlobalLoading, activateImportFilter } from './uiHandler.js';
 import { showToast } from './notifications.js';
 
 export function renderSyncContacts(contacts, elements) {
@@ -122,6 +122,14 @@ export async function importSelectedContacts() {
     const btn = getEl('btn-import-contacts'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
         const result = await apiRequest({ _action: 'import_contacts', contacts: toImport });
-        if (result.status === "success") { showToast(`Succes! ${result.importedCount} toegevoegd.`, "success"); getEl('sync-modal').classList.add('hidden'); toggleGlobalLoading(getEl('loading-state'), true); loadArtists(); } else { showToast("Fout: " + result.message, "error"); }
+        if (result.status === "success") {
+            showToast(`Succes! ${result.importedCount} toegevoegd.`, "success");
+            getEl('sync-modal').classList.add('hidden');
+            state.recentlyImportedEmails = new Set(toImport.map(c => c.email.toLowerCase().trim()));
+            state.importFilterActive = true;
+            toggleGlobalLoading(getEl('loading-state'), true);
+            await loadArtists();
+            activateImportFilter(result.importedCount);
+        } else { showToast("Fout: " + result.message, "error"); }
     } catch (e) { showToast("Importeren mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
