@@ -18,6 +18,11 @@ export const mailingModalTemplate = /*html*/`
                 </div>
             </div>
             <div class="space-y-4">
+                <div class="flex justify-end">
+                    <button id="btn-generate-ai" class="bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-800/40 text-purple-700 dark:text-purple-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> Genereer met AI
+                    </button>
+                </div>
                 <div>
                     <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Onderwerp</label>
                     <input type="text" id="mailing-subject" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white" placeholder="Bijv: Haagse Open Mic op dinsdag a.s. in Amare!">

@@ -87,6 +87,7 @@ const App = {
         
         getEl('btn-mailing-test').addEventListener('click', () => Mailing.sendMailing(true));
         getEl('btn-mailing-send').addEventListener('click', () => Mailing.sendMailing(false));
+        getEl('btn-generate-ai').addEventListener('click', () => Mailing.generateMailingWithAI());
         
         getEl('btn-scan-folder').addEventListener('click', Photo.scanFolder);
         getEl('btn-send-photos').addEventListener('click', Photo.sendPhotos);
