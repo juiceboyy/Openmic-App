@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
         return res.status(500).json({ status: 'error', message: 'GEMINI_API_KEY is niet geconfigureerd op de server.' });
     }
 
-    const prompt = `Schrijf een uitnodigings-e-mail in het Nederlands voor artiesten voor de Haagse Open Mic avond op ${eventDate}.
+const prompt = `Schrijf een uitnodigings-e-mail in het Nederlands voor artiesten voor de Haagse Open Mic avond op ${eventDate}.
 
 Gebruik deze vaste gegevens ALTIJD letterlijk:
 - Locatie: Amare, Den Haag
@@ -26,6 +26,35 @@ Gebruik deze vaste gegevens ALTIJD letterlijk:
 - Merchandise: artiesten kunnen een opstrijklogo van Haagse Open Mic bestellen. BestelLink: ${MOLLIE_LOGO_LINK}
 
 Schrijfstijl: enthousiast, warm, muzikaal en persoonlijk. Gebruik geen formele toon.
+
+--- VOORBEELD VAN STIJL EN OPBOUW ---
+Onderwerp: Zet je gitaar alvast klaar: Open Mic op [Datum]!
+
+De tweede dinsdag van de maand komt er alweer aan, en dat betekent dat het tijd is om de stof van je lyrics sheets te blazen en je gitaar te stemmen. We transformeren de vertrouwde omgeving van Amare weer in onze eigen muzikale huiskamer.
+
+Locatie: Amare Den Haag, Spuiplein 150.
+Inschrijving: Vanaf 18:30 uur (wees op tijd: we hebben beperkte ruimte).
+Aanvang: 19:00 uur.
+Rules: Alleen eigen werk, max 3 liedjes / 4 gedichten, max 10 minuten. Muzikanten, producers, spoken word artiesten — iedereen is welkom. Neem gerust je eigen backingtrack of een extra muzikant mee.
+
+NIEUW: Draag de Club met trots!
+We kregen vaak de vraag naar merchandise, en we hebben iets vets bedacht. We hebben nu officieel onze eigen merchandise! Geen standaard stapels shirts, maar een duurzame en persoonlijke optie: je kunt nu je eigen shirt laten bedrukken met ons logo. Breng je favoriete (vintage) shirt mee naar de club, en laat zien dat je onderdeel bent van de tofste songwriter-community van Den Haag.
+LET OP: bestel je opstrijklogo hier ${MOLLIE_LOGO_LINK}, neem je eigen shirt mee!
+
+Tot dinsdag in Amare!
+
+Hartelijke groet,
+
+Gijs en Ro
+
+Haagse Open Mic
+Elke 2e dinsdag van de maand
+19u - 22u
+IG: @HaagseOpenMic
+--- EINDE VOORBEELD ---
+
+Instructie voor de output: 
+Gebruik bovenstaand voorbeeld als inspiratie voor de sfeer, maar zorg dat de tekst uniek en fris aanvoelt voor de editie op ${eventDate}.
 
 Geef je antwoord in exact dit formaat:
 Onderwerp: [een pakkende, korte onderwerpregel]
