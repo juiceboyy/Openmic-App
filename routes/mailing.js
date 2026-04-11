@@ -29,6 +29,7 @@ router.post('/', async (req, res) => {
     const brevoPayload = {
       sender: { name: 'Haagse Open Mic', email: 'nieuwsbrief@haagseopenmic.nl' },
       subject: testMode ? `[TEST] ${subject}` : subject,
+      htmlContent: `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">${bodyHtml}</div>`,
       messageVersions: messageVersions
     };
 
