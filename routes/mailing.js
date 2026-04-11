@@ -19,14 +19,16 @@ router.post('/', async (req, res) => {
       actualRecipients = [{ email: testEmail || 'haagseopenmic@gmail.com', name: 'Test Ontvanger' }];
     }
 
+    const bodyHtml = message.replace(/\n/g, '<br>');
+
     const messageVersions = actualRecipients.map(r => ({
-      to: [{ email: r.email, name: r.name }]
+      to: [{ email: r.email, name: r.name }],
+      htmlContent: `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">Hoi ${r.name},<br><br><br>${bodyHtml}</div>`
     }));
 
     const brevoPayload = {
       sender: { name: 'Haagse Open Mic', email: 'nieuwsbrief@haagseopenmic.nl' },
       subject: testMode ? `[TEST] ${subject}` : subject,
-      htmlContent: `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">${message.replace(/\n/g, '<br>')}</div>`,
       messageVersions: messageVersions
     };
 
