@@ -5,7 +5,7 @@ const router = express.Router();
 const MOLLIE_LOGO_LINK = process.env.MOLLIE_LOGO_LINK || 'https://pay.mollie.com/haagse-open-mic-logo';
 
 router.post('/', async (req, res) => {
-    const { eventDate } = req.body;
+    const { eventDate, extraInput } = req.body;
 
     if (!eventDate) {
         return res.status(400).json({ status: 'error', message: 'eventDate is verplicht.' });
@@ -25,7 +25,7 @@ Gebruik deze vaste gegevens ALTIJD letterlijk:
 - Regels: alleen eigen werk (geen covers), maximaal 10 minuten optreden
 - Merchandise: artiesten kunnen een opstrijklogo van Haagse Open Mic kopen. Neem een eigen shirt mee, betalen kan gewoon ter plekke.
 
-Schrijfstijl: enthousiast, warm, muzikaal en persoonlijk. Gebruik geen formele toon.
+${extraInput && extraInput.trim() !== '' ? `EXTRA MEDEDELING VAN DE ORGANISATIE:\nVerwerk de volgende specifieke mededeling op een logische en natuurlijke manier ergens in de e-mail:\n"${extraInput}"\n` : ''}Schrijfstijl: enthousiast, muzikaal en persoonlijk, maar hou het nuchter en to-the-point. Gebruik GEEN overdreven bloemrijk taalgebruik, clichés, of onnodige bijvoeglijke naamwoorden. Geen formele toon, gewoon heldere en vlotte spreektaal.
 
 --- VOORBEELD VAN STIJL EN OPBOUW ---
 Onderwerp: Zet je gitaar alvast klaar: Open Mic op [Datum]!

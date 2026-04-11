@@ -35,13 +35,15 @@ export async function generateMailingWithAI() {
         const eventDate = getNextSecondTuesday(new Date());
         const formattedDate = eventDate.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
+        const extraInput = getEl('mailing-body').value.trim();
+
         const result = await fetch('/api/generate-mailing', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'x-app-pin': localStorage.getItem('appPin') || ''
             },
-            body: JSON.stringify({ eventDate: formattedDate })
+            body: JSON.stringify({ eventDate: formattedDate, extraInput })
         });
 
         const data = await result.json();
