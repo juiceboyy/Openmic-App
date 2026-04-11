@@ -113,6 +113,7 @@ app.use('/api/photos', require('./routes/photos'));
 app.use('/api/mailing', require('./routes/mailing'));
 app.use('/api/speelschema', require('./routes/speelschema'));
 app.use('/api/sync', require('./routes/sync'));
+app.use('/api/generate-mailing', require('./routes/generateMailing'));
 
 // 7. Statische bestanden Fallback (Voor Single Page Applications)
 app.get(/.*/, (req, res) => {
