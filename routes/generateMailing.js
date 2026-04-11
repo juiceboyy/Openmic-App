@@ -22,7 +22,7 @@ Gebruik deze vaste gegevens ALTIJD letterlijk:
 - Locatie: Amare, Den Haag
 - Aanvang show: 19:00 uur
 - Inschrijven / soundcheck: vanaf 18:30 uur
-- Regels: alleen eigen werk (geen covers), maximaal 10 minuten optreden
+- Regels: alleen eigen werk (geen covers), max 3 liedjes of 4 gedichten, max 10 minuten optreden
 - Merchandise: artiesten kunnen een opstrijklogo van Haagse Open Mic kopen. Neem een eigen shirt mee, betalen kan gewoon ter plekke.
 
 ${extraInput && extraInput.trim() !== '' ? `EXTRA MEDEDELING VAN DE ORGANISATIE:\nVerwerk de volgende specifieke mededeling op een logische en natuurlijke manier ergens in de e-mail:\n"${extraInput}"\n` : ''}Schrijfstijl: enthousiast, muzikaal en persoonlijk, maar hou het nuchter en to-the-point. Gebruik GEEN overdreven bloemrijk taalgebruik, clichés, of onnodige bijvoeglijke naamwoorden. Geen formele toon, gewoon heldere en vlotte spreektaal.
