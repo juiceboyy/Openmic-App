@@ -23,7 +23,7 @@ router.post('/', async (req, res) => {
 
     const messageVersions = actualRecipients.map(r => ({
       to: [{ email: r.email, name: r.name }],
-      htmlContent: `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">Hoi ${r.name},<br><br><br>${bodyHtml}</div>`
+      htmlContent: `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">Hoi ${r.name},<br><br>${bodyHtml}</div>`
     }));
 
     const brevoPayload = {
