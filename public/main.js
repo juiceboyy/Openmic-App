@@ -48,6 +48,20 @@ const App = {
             if (el) el.addEventListener(id === 'search-input' ? 'input' : 'change', UI.applyFilters);
         });
 
+        // Select All mailing checkboxes (only visible/filtered rows)
+        const selectAllEl = getEl('selectAllArtists');
+        if (selectAllEl) {
+            selectAllEl.addEventListener('change', (e) => {
+                const checked = e.target.checked;
+                document.querySelectorAll('#artist-table-body tr td:first-child input[type="checkbox"]').forEach(cb => {
+                    if (cb.checked !== checked) {
+                        cb.checked = checked;
+                        cb.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+            });
+        }
+
         // Global Action Handler (Delegation for Navigation & Tools)
         document.body.addEventListener('click', (e) => {
             const actionElement = e.target.closest('[data-action]');

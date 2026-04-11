@@ -41,6 +41,8 @@ export function renderTable(dataToRender, elements) {
     const { artistTableBody, emptyState, contactCount } = elements;
     contactCount.innerText = dataToRender.length;
     artistTableBody.innerHTML = '';
+    const selectAllCb = document.getElementById('selectAllArtists');
+    if (selectAllCb) selectAllCb.checked = false;
     
 
     if (dataToRender.length === 0) { 
