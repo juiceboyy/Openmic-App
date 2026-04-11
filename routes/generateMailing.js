@@ -40,26 +40,17 @@ Rules: Alleen eigen werk, max 3 liedjes / 4 gedichten, max 10 minuten. Muzikante
 NIEUW: Draag de Club met trots!
 We kregen vaak de vraag naar merchandise, en we hebben iets vets bedacht. We hebben nu officieel onze eigen merchandise! Geen standaard stapels shirts, maar een duurzame en persoonlijke optie: je kunt nu je eigen shirt laten bedrukken met ons logo. Breng je favoriete (vintage) shirt mee naar de club, en laat zien dat je onderdeel bent van de tofste songwriter-community van Den Haag.
 LET OP: bestel je opstrijklogo hier ${MOLLIE_LOGO_LINK}, neem je eigen shirt mee!
-
-Tot dinsdag in Amare!
-
-Hartelijke groet,
-
-Gijs en Ro
-
-Haagse Open Mic
-Elke 2e dinsdag van de maand
-19u - 22u
-IG: @HaagseOpenMic
 --- EINDE VOORBEELD ---
 
-Instructie voor de output: 
+Instructie voor de output:
 Gebruik bovenstaand voorbeeld als inspiratie voor de sfeer, maar zorg dat de tekst uniek en fris aanvoelt voor de editie op ${eventDate}.
+
+Belangrijk: Sluit de tekst NIET af met een groet (zoals 'Groet', 'Tot dan', namen, of een handtekening). Stop direct na de laatste inhoudelijke zin of de Mollie-link. De groet wordt er later door het systeem automatisch achter geplakt.
 
 Geef je antwoord in exact dit formaat:
 Onderwerp: [een pakkende, korte onderwerpregel]
 
-[De volledige e-mailtekst. Begin NIET met een aanhef zoals "Hoi [naam]," of "Beste artist," want die wordt automatisch voor de tekst geplaatst. Sluit af met een enthousiaste groet namens Haagse Open Mic.]`;
+[De volledige e-mailtekst. Begin NIET met een aanhef zoals "Hoi [naam]," of "Beste artist," want die wordt automatisch voor de tekst geplaatst.]`;
 
     try {
         const response = await fetch(
@@ -103,7 +94,16 @@ Onderwerp: [een pakkende, korte onderwerpregel]
             bodyLines.shift();
         }
 
-        res.json({ status: 'success', subject, body: bodyLines.join('\n') });
+        // Verwijder ook eventuele AI-gegenereerde groet aan het einde (voor de zekerheid)
+        while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1].trim() === '') {
+            bodyLines.pop();
+        }
+
+        const VASTE_GROET = `\n\nHartelijke groet,\n\nGijs en Ro\n\nHaagse Open Mic\nElke 2e dinsdag van de maand\n19u - 22u\nIG: @HaagseOpenMic`;
+
+        const body = bodyLines.join('\n') + VASTE_GROET;
+
+        res.json({ status: 'success', subject, body });
     } catch (error) {
         console.error('Fout bij Gemini API aanroep:', error);
         res.status(500).json({ status: 'error', message: error.message });
