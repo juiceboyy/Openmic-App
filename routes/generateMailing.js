@@ -23,7 +23,7 @@ Gebruik deze vaste gegevens ALTIJD letterlijk:
 - Aanvang show: 19:00 uur
 - Inschrijven / soundcheck: vanaf 18:30 uur
 - Regels: alleen eigen werk (geen covers), maximaal 10 minuten optreden
-- Merchandise: artiesten kunnen een opstrijklogo van Haagse Open Mic bestellen. BestelLink: ${MOLLIE_LOGO_LINK}
+- Merchandise: artiesten kunnen een opstrijklogo van Haagse Open Mic kopen. Neem een eigen shirt mee, betalen kan gewoon ter plekke.
 
 Schrijfstijl: enthousiast, warm, muzikaal en persoonlijk. Gebruik geen formele toon.
 
@@ -39,7 +39,7 @@ Rules: Alleen eigen werk, max 3 liedjes / 4 gedichten, max 10 minuten. Muzikante
 
 NIEUW: Draag de Club met trots!
 We kregen vaak de vraag naar merchandise, en we hebben iets vets bedacht. We hebben nu officieel onze eigen merchandise! Geen standaard stapels shirts, maar een duurzame en persoonlijke optie: je kunt nu je eigen shirt laten bedrukken met ons logo. Breng je favoriete (vintage) shirt mee naar de club, en laat zien dat je onderdeel bent van de tofste songwriter-community van Den Haag.
-LET OP: bestel je opstrijklogo hier ${MOLLIE_LOGO_LINK}, neem je eigen shirt mee!
+LET OP: neem je eigen shirt mee, je scoort je opstrijklogo gewoon ter plekke bij ons!
 --- EINDE VOORBEELD ---
 
 Instructie voor de output:
