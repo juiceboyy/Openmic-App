@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
-import { showToast, showLineupConflictDialog } from './notifications.js';
+import { showToast, showLineupConflictDialog, showConfirm } from './notifications.js';
 import { getEl, toggleButtonLoading } from './utils.js';
 import { isFuzzyMatch, saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, copyLineupToClipboard, getDisplayName, createLineupItemHTML, createEmptySlotHTML, createReserveItemHTML } from './lineupHelpers.js';
 import * as DD from './lineupDragDrop.js';
@@ -140,13 +140,37 @@ export function addArtistToLineup(rowIndexInput) {
     currentLineup[emptyIndex] = artist; save(); renderLineupUI();
 }
 
-export const removeArtistFromLineup = (index) => { currentLineup[index] = null; save(); renderLineupUI(); };
-export const removeArtistFromReserve = (index) => { reserveLineup.splice(index, 1); save(); renderLineupUI(); };
+export function removeArtistFromLineup(index) {
+    try {
+        currentLineup[index] = null;
+        save();
+        renderLineupUI();
+    } catch (e) {
+        console.error('Fout bij verwijderen uit speelschema:', e);
+        showToast('Kon artiest niet verwijderen.', 'error');
+    }
+}
+
+export function removeArtistFromReserve(index) {
+    try {
+        reserveLineup.splice(index, 1);
+        save();
+        renderLineupUI();
+    } catch (e) {
+        console.error('Fout bij verwijderen uit reservelijst:', e);
+        showToast('Kon artiest niet verwijderen uit reserve.', 'error');
+    }
+}
 
 export async function clearLineup() {
-    if (currentLineup.every(slot => slot === null)) return;
-    if (await showConfirm("Weet je zeker dat je het hele speelschema wilt wissen?")) {
-        currentLineup.fill(null); reserveLineup = []; save(); renderLineupUI(); showToast("Speelschema leeggemaakt.", "success");
+    try {
+        if (currentLineup.every(slot => slot === null)) return;
+        if (await showConfirm("Weet je zeker dat je het hele speelschema wilt wissen?")) {
+            currentLineup.fill(null); reserveLineup = []; save(); renderLineupUI(); showToast("Speelschema leeggemaakt.", "success");
+        }
+    } catch (e) {
+        console.error('Fout bij wissen speelschema:', e);
+        showToast('Kon speelschema niet wissen.', 'error');
     }
 }
 
