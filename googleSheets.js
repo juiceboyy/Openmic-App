@@ -187,24 +187,30 @@ async function getPreviousLineup(sheetName) {
     });
 
     const rows = response.data.values || [];
-    const names = [];
+    const mainNames = [];
+    const reserveNames = [];
+    let inReserveSection = false;
 
     for (const row of rows) {
       const colA = String(row[0] || '').toLowerCase();
       const colB = String(row[1] || '').trim();
 
-      // De Dynamische Handrem: stop als we bij de reservelijst zijn.
       if (colA.includes('reserve')) {
-        break;
+        inReserveSection = true;
+        continue;
       }
 
       // Voeg de naam toe als deze niet leeg is en geen pauze bevat.
       if (colB && !colB.includes("PAUZE")) {
-        names.push(colB);
+        if (inReserveSection) {
+          reserveNames.push(colB);
+        } else {
+          mainNames.push(colB);
+        }
       }
     }
 
-    return names;
+    return { mainNames, reserveNames };
   } catch (error) {
     console.error(`Fout bij ophalen vorige lineup (${sheetName}):`, error);
     throw error;

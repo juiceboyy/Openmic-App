@@ -13,8 +13,8 @@ router.post('/sheets', async (req, res) => {
 
 router.post('/previous', async (req, res) => {
   try {
-    const names = await getPreviousLineup(req.body.prevSheetName);
-    res.json({ status: 'success', names });
+    const { mainNames, reserveNames } = await getPreviousLineup(req.body.prevSheetName);
+    res.json({ status: 'success', names: mainNames, reserveNames });
   } catch (error) {
     res.status(500).json({ status: 'error', message: error.message });
   }
