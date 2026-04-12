@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
-import { showToast, showConfirm } from './notifications.js';
+import { showToast, showLineupConflictDialog } from './notifications.js';
 import { getEl, toggleButtonLoading } from './utils.js';
 import { isFuzzyMatch, saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, copyLineupToClipboard, getDisplayName, createLineupItemHTML, createEmptySlotHTML, createReserveItemHTML } from './lineupHelpers.js';
 import * as DD from './lineupDragDrop.js';
@@ -115,9 +115,17 @@ export async function selectLineupArtist(rowIndex) {
     const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
     if (artist && activeSlotIndex !== null) {
         const matchedName = playedLastMonth.find(name => isFuzzyMatch(artist, name));
-        if (matchedName && !(await showConfirm(`Let op: <strong>${getDisplayName(artist)}</strong> lijkt erg op <strong>${matchedName}</strong> die vorige keer al heeft gespeeld.<br><br>Wil je deze artiest toch toevoegen aan het hoofdschema?`))) {
-            reserveLineup.push(artist); showToast('Artiest verplaatst naar reservelijst.', 'info');
-        } else { currentLineup[activeSlotIndex] = artist; }
+        if (matchedName) {
+            const choice = await showLineupConflictDialog(`<strong>${getDisplayName(artist)}</strong> lijkt erg op <strong>${matchedName}</strong> die vorige keer al heeft gespeeld.`);
+            if (choice === 'cancel') return;
+            if (choice === 'reserve') {
+                reserveLineup.push(artist); showToast('Artiest toegevoegd aan reservelijst.', 'info');
+            } else {
+                currentLineup[activeSlotIndex] = artist;
+            }
+        } else {
+            currentLineup[activeSlotIndex] = artist;
+        }
         save(); closeSlotSearch(); renderLineupUI();
     }
 }

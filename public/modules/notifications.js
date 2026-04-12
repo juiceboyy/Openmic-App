@@ -81,3 +81,51 @@ export function showConfirm(message) {
         modal.querySelector('#confirm-ok').onclick = () => cleanup(true);
     });
 }
+
+export function showLineupConflictDialog(message) {
+    return new Promise((resolve) => {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4 opacity-0 transition-opacity duration-200';
+
+        modal.innerHTML = `
+            <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm p-6 transform scale-95 transition-transform duration-200 border border-gray-100 dark:border-gray-700">
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-12 h-12 bg-orange-50 dark:bg-orange-900/20 rounded-full flex items-center justify-center mb-4">
+                        <i data-lucide="alert-triangle" class="w-6 h-6 text-orange-500"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Al gespeeld vorige maand</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">${message}</p>
+                    <div class="flex flex-col gap-2 w-full">
+                        <button id="conflict-main" class="w-full px-4 py-2 text-sm font-medium text-white bg-apple-blue rounded-lg hover:bg-blue-600 transition-colors shadow-sm">
+                            Toch toevoegen aan hoofdschema
+                        </button>
+                        <button id="conflict-reserve" class="w-full px-4 py-2 text-sm font-medium text-white bg-amber-500 rounded-lg hover:bg-amber-600 transition-colors shadow-sm">
+                            Naar Reservelijst
+                        </button>
+                        <button id="conflict-cancel" class="w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                            Annuleren
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        lucide.createIcons();
+
+        requestAnimationFrame(() => {
+            modal.classList.remove('opacity-0');
+            modal.querySelector('div').classList.remove('scale-95');
+        });
+
+        const cleanup = (result) => {
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.remove(), 200);
+            resolve(result);
+        };
+
+        modal.querySelector('#conflict-main').onclick = () => cleanup('main');
+        modal.querySelector('#conflict-reserve').onclick = () => cleanup('reserve');
+        modal.querySelector('#conflict-cancel').onclick = () => cleanup('cancel');
+    });
+}
