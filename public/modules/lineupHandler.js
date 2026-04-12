@@ -42,12 +42,21 @@ export async function loadCurrentSession(event) {
         const res = await apiRequest({ _action: 'get_current_lineup', sheetName: sessionName });
         if (res.status !== "success") return showToast("Fout: " + res.message, "error");
         currentLineup = new Array(LINEUP_CONFIG.MAX_SLOTS).fill(null);
+        reserveLineup = [];
         if (!res.isNew && Array.isArray(res.data)) {
             res.data.forEach((item, i) => {
                 if (i >= LINEUP_CONFIG.MAX_SLOTS || !item?.name || item.name.toLowerCase().includes('pauze') || item.name.includes('☕')) return;
                 const searchName = item.name.toLowerCase();
                 const artist = state.allArtists.find(a => (a.artistName?.toLowerCase() === searchName) || (`${a.firstName} ${a.lastName}`.toLowerCase() === searchName));
                 currentLineup[i] = artist || { artistName: item.name, notes: item.notes || '', fallback: true };
+            });
+        }
+        if (Array.isArray(res.reserveData)) {
+            res.reserveData.forEach(item => {
+                if (!item?.name) return;
+                const searchName = item.name.toLowerCase();
+                const artist = state.allArtists.find(a => (a.artistName?.toLowerCase() === searchName) || (`${a.firstName} ${a.lastName}`.toLowerCase() === searchName));
+                reserveLineup.push(artist || { artistName: item.name, notes: item.notes || '', fallback: true });
             });
         }
         showToast(res.isNew ? 'Nieuwe sessie gestart.' : 'Bestaande sessie ingeladen!', 'success');
@@ -72,8 +81,12 @@ export async function loadPreviousLineup(event) {
     const btn = event.currentTarget; const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
         const res = await apiRequest({ _action: 'get_previous_lineup', prevSheetName });
-        if (res.status === "success") { playedLastMonth = res.names || []; showToast(`Historie geladen: ${playedLastMonth.length} artiesten gevonden.`, "success"); } 
-        else showToast("Kon historie niet laden: " + res.message, "error");
+        if (res.status === "success") {
+            playedLastMonth = res.names || [];
+            state.previousReserveList = res.reserveNames || [];
+            showToast(`Historie geladen: ${playedLastMonth.length} artiesten gevonden.`, "success");
+            renderLineupUI();
+        } else showToast("Kon historie niet laden: " + res.message, "error");
     } catch (e) { showToast("Fout bij ophalen historie.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
 
@@ -154,9 +167,7 @@ export async function saveLineupToDatabase() {
         const res = await apiRequest({ _action: 'save_lineup', sheetName: activeSessionName, lineup: currentLineup, reserve: reserveLineup });
         if (res.status === "success") {
             showToast("Lineup succesvol opgeslagen!", "success");
-            clearLocalStorage(); currentLineup.fill(null); reserveLineup = []; activeSessionName = '';
-            getEl('current-session-name').value = ''; getEl('lineup-editor-container').classList.add('hidden');
-            renderLineupUI(); closeLineupModal();
+            clearLocalStorage();
         } else showToast("Fout: " + res.message, "error");
     } catch (e) { showToast("Opslaan mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
@@ -167,12 +178,16 @@ export function renderLineupUI() {
     for (let i = 0; i < LINEUP_CONFIG.MAX_SLOTS; i++) {
         if (i === LINEUP_CONFIG.PAUSE_INDEX) html += `<div class="pauze-divider flex items-center justify-center py-3 my-2 border-y border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/30 rounded-lg"><span class="text-gray-500 dark:text-gray-400 font-medium text-sm">☕ Pauze</span></div>`;
         const artist = currentLineup[i];
-        html += artist ? createLineupItemHTML(i, artist, i + 1) : createEmptySlotHTML(i, i + 1);
+        const starred = artist ? state.previousReserveList.some(name => isFuzzyMatch(artist, name)) : false;
+        html += artist ? createLineupItemHTML(i, artist, i + 1, starred) : createEmptySlotHTML(i, i + 1);
     }
     container.innerHTML = html;
 
-    getEl('reserve-list-content').innerHTML = reserveLineup.length === 0 
+    getEl('reserve-list-content').innerHTML = reserveLineup.length === 0
         ? '<div class="text-sm text-orange-800/50 dark:text-orange-400/50 italic text-center py-2">Sleep artiesten hierheen voor de reservelijst</div>'
-        : reserveLineup.map((artist, i) => createReserveItemHTML(i, artist)).join('');
+        : reserveLineup.map((artist, i) => {
+            const starred = state.previousReserveList.some(name => isFuzzyMatch(artist, name));
+            return createReserveItemHTML(i, artist, starred);
+          }).join('');
     lucide.createIcons();
 }
