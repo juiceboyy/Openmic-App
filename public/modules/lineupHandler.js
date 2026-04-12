@@ -42,12 +42,21 @@ export async function loadCurrentSession(event) {
         const res = await apiRequest({ _action: 'get_current_lineup', sheetName: sessionName });
         if (res.status !== "success") return showToast("Fout: " + res.message, "error");
         currentLineup = new Array(LINEUP_CONFIG.MAX_SLOTS).fill(null);
+        reserveLineup = [];
         if (!res.isNew && Array.isArray(res.data)) {
             res.data.forEach((item, i) => {
                 if (i >= LINEUP_CONFIG.MAX_SLOTS || !item?.name || item.name.toLowerCase().includes('pauze') || item.name.includes('☕')) return;
                 const searchName = item.name.toLowerCase();
                 const artist = state.allArtists.find(a => (a.artistName?.toLowerCase() === searchName) || (`${a.firstName} ${a.lastName}`.toLowerCase() === searchName));
                 currentLineup[i] = artist || { artistName: item.name, notes: item.notes || '', fallback: true };
+            });
+        }
+        if (Array.isArray(res.reserveData)) {
+            res.reserveData.forEach(item => {
+                if (!item?.name) return;
+                const searchName = item.name.toLowerCase();
+                const artist = state.allArtists.find(a => (a.artistName?.toLowerCase() === searchName) || (`${a.firstName} ${a.lastName}`.toLowerCase() === searchName));
+                reserveLineup.push(artist || { artistName: item.name, notes: item.notes || '', fallback: true });
             });
         }
         showToast(res.isNew ? 'Nieuwe sessie gestart.' : 'Bestaande sessie ingeladen!', 'success');
@@ -158,9 +167,7 @@ export async function saveLineupToDatabase() {
         const res = await apiRequest({ _action: 'save_lineup', sheetName: activeSessionName, lineup: currentLineup, reserve: reserveLineup });
         if (res.status === "success") {
             showToast("Lineup succesvol opgeslagen!", "success");
-            clearLocalStorage(); currentLineup.fill(null); reserveLineup = []; activeSessionName = '';
-            getEl('current-session-name').value = ''; getEl('lineup-editor-container').classList.add('hidden');
-            renderLineupUI(); closeLineupModal();
+            clearLocalStorage();
         } else showToast("Fout: " + res.message, "error");
     } catch (e) { showToast("Opslaan mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }

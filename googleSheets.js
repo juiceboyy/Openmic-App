@@ -197,7 +197,7 @@ async function getPreviousLineup(sheetName) {
 
       if (colA.includes('reserve')) {
         inReserveSection = true;
-        continue;
+        // geen continue: de naam op deze zelfde rij (colB) ook meenemen
       }
 
       // Voeg de naam toe als deze niet leeg is en geen pauze bevat.
@@ -221,18 +221,31 @@ async function getCurrentLineup(sheetName) {
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SPEELSCHEMA_ID,
-      range: `${sheetName}!A3:F15`,
+      range: `${sheetName}!A3:F40`,
     });
-    
+
     const rawData = response.data.values || [];
     const parsedData = [];
+    const reserveData = [];
+    let inReserveSection = false;
 
     rawData.forEach(row => {
+      const colA = String(row[0] || '').toLowerCase();
       const name = row[1] ? row[1].toString().trim() : "";
       const notes = row[5] ? row[5].toString().trim() : "";
-      
-      if (name.includes("PAUZE")) return;
-      parsedData.push({ name, notes });
+
+      if (colA.includes('reserve')) {
+        inReserveSection = true;
+        // geen continue: naam op deze rij ook meenemen
+      }
+
+      if (name.includes("PAUZE") || name.includes("☕")) return;
+
+      if (inReserveSection) {
+        if (name) reserveData.push({ name, notes });
+      } else {
+        parsedData.push({ name, notes });
+      }
     });
 
     // Aanvullen tot 12 slots
@@ -241,10 +254,10 @@ async function getCurrentLineup(sheetName) {
       finalData.push({ name: "", notes: "" });
     }
 
-    return { isNew: false, data: finalData };
+    return { isNew: false, data: finalData, reserveData };
   } catch (error) {
     // Als het tabblad niet bestaat, is het een nieuwe sessie
-    return { isNew: true, data: [] };
+    return { isNew: true, data: [], reserveData: [] };
   }
 }
 
