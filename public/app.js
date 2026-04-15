@@ -97,14 +97,25 @@ const App = {
             btn.addEventListener('click', () => this.closeModal(btn.getAttribute('data-close')));
         });
 
-        // Body Scroll Lock: observeer alle modals en zet 'modal-open' op body als er één open is.
-        // Dit werkt voor ALLE open/sluit-acties (knoppen, succes-callbacks, etc.) zonder dat
-        // elke handler apart aangepast hoeft te worden.
+        // Body Scroll Lock (Fixed Body hack): werkt ook op iOS Safari, waar
+        // 'overflow: hidden' op de body genegeerd wordt.
+        // Slaat de scrollpositie op, fixeert de body, en herstelt alles bij sluiten.
+        let scrollPosition = 0;
         document.querySelectorAll('[id$="-modal"]').forEach(modal => {
             new MutationObserver(() => {
                 const anyOpen = [...document.querySelectorAll('[id$="-modal"]')]
                     .some(m => !m.classList.contains('hidden'));
-                document.body.classList.toggle('modal-open', anyOpen);
+                if (anyOpen) {
+                    scrollPosition = window.scrollY;
+                    document.body.style.position = 'fixed';
+                    document.body.style.top = `-${scrollPosition}px`;
+                    document.body.style.width = '100%';
+                } else {
+                    document.body.style.removeProperty('position');
+                    document.body.style.removeProperty('top');
+                    document.body.style.removeProperty('width');
+                    window.scrollTo(0, scrollPosition);
+                }
             }).observe(modal, { attributes: true, attributeFilter: ['class'] });
         });
 

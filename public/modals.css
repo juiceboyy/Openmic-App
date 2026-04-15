@@ -1,12 +1,6 @@
 /* =========================================================
-   BODY SCROLL LOCK & OVERSCROLL CONTAINMENT
+   OVERSCROLL CONTAINMENT
    ========================================================= */
-
-/* Vergrendelt de achtergrond-pagina als een modal open is.
-   Gebruikt !important om de 'overflow: visible !important' uit mobile.css te overwinnen. */
-body.modal-open {
-    overflow: hidden !important;
-}
 
 /* Voorkomt scroll-chaining: als je het einde van de modal-scroll bereikt,
    mag de achtergrond-pagina NIET meescrollen (werkt op iOS 16+ en Android). */
