@@ -97,6 +97,17 @@ const App = {
             btn.addEventListener('click', () => this.closeModal(btn.getAttribute('data-close')));
         });
 
+        // Body Scroll Lock: observeer alle modals en zet 'modal-open' op body als er één open is.
+        // Dit werkt voor ALLE open/sluit-acties (knoppen, succes-callbacks, etc.) zonder dat
+        // elke handler apart aangepast hoeft te worden.
+        document.querySelectorAll('[id$="-modal"]').forEach(modal => {
+            new MutationObserver(() => {
+                const anyOpen = [...document.querySelectorAll('[id$="-modal"]')]
+                    .some(m => !m.classList.contains('hidden'));
+                document.body.classList.toggle('modal-open', anyOpen);
+            }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+        });
+
         // Expose to Window for HTML inline calls (legacy support)
         this.exposeToWindow();
     },

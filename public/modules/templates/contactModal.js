@@ -9,7 +9,7 @@ export const contactModalTemplate = /*html*/`
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800">
+        <div class="p-6 flex-1 overflow-y-auto modal-scroll bg-white dark:bg-gray-800">
             <form id="new-contact-form" class="space-y-6">
                 <div>
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Persoonlijke Gegevens</h3>
