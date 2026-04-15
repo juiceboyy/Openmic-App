@@ -119,6 +119,17 @@ const App = {
             }).observe(modal, { attributes: true, attributeFilter: ['class'] });
         });
 
+        // iOS Safari Touch-interceptie: blokkeer rubber-banding op de donkere overlay
+        // en alle andere niet-scrollbare modal-onderdelen (header, footer).
+        // { passive: false } is verplicht, anders mag preventDefault() niet aangeroepen worden.
+        document.querySelectorAll('[id$="-modal"]').forEach(modal => {
+            modal.addEventListener('touchmove', (e) => {
+                if (!e.target.closest('.modal-scroll')) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        });
+
         // Expose to Window for HTML inline calls (legacy support)
         this.exposeToWindow();
     },
