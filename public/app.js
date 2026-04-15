@@ -119,12 +119,37 @@ const App = {
             }).observe(modal, { attributes: true, attributeFilter: ['class'] });
         });
 
-        // iOS Safari Touch-interceptie: blokkeer rubber-banding op de donkere overlay
-        // en alle andere niet-scrollbare modal-onderdelen (header, footer).
-        // { passive: false } is verplicht, anders mag preventDefault() niet aangeroepen worden.
+        // iOS Safari Touch-interceptie met tolerante boundary-detectie.
+        // Blokkeert rubber-banding op de overlay/header/footer én op de scroll-grenzen,
+        // maar laat normaal scrollen door het midden van de lijst gewoon werken.
         document.querySelectorAll('[id$="-modal"]').forEach(modal => {
+            const scrollable = modal.querySelector('.modal-scroll');
+            if (!scrollable) return;
+
+            let touchStartY = 0;
+
+            modal.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
             modal.addEventListener('touchmove', (e) => {
+                // 1. Blokkeer vegen als de vinger niet op het formulier begon
                 if (!e.target.closest('.modal-scroll')) {
+                    e.preventDefault();
+                    return;
+                }
+
+                const touchY = e.touches[0].clientY;
+                const deltaY = touchY - touchStartY;
+
+                // 2. Ruime marge (2px) voor sub-pixel afrondingsfouten van iOS
+                const isAtTop = scrollable.scrollTop <= 2;
+                const isAtBottom = (scrollable.scrollHeight - scrollable.scrollTop) <= (scrollable.clientHeight + 2);
+
+                // 3. Blokkeer ALLEEN de foute richting (elastiek-effect voorkomen)
+                if (isAtTop && deltaY > 0) {
+                    e.preventDefault();
+                } else if (isAtBottom && deltaY < 0) {
                     e.preventDefault();
                 }
             }, { passive: false });
