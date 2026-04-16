@@ -1,6 +1,6 @@
 export const mailingModalTemplate = /*html*/`
 <div id="mailing-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-full overflow-hidden transition-colors">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-[85dvh] overflow-hidden transition-colors">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-700/50 rounded-t-2xl">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                 <i data-lucide="mail" class="w-5 h-5 text-apple-blue"></i> Nieuwe E-mailing Sturen

@@ -55,15 +55,6 @@
         margin-right: auto !important;
     }
 
-    /* Fix: Begrenst de modal-card hoogte zodat hij nooit groter is dan het scherm.
-       'max-h-full' werkt niet betrouwbaar op iOS Safari binnen een flex-container;
-       een expliciete dvh/vh waarde wel. De 2rem (32px) compenseert de p-4 padding
-       van de overlay zodat de card het scherm niet raakt. */
-    [id$="-modal"] > div {
-        max-height: calc(100dvh - 2rem);
-        max-height: calc(100vh - 2rem); /* Fallback voor oudere browsers */
-    }
-
     /* iOS touch-scrolling voor scrollbare modal-inhoud */
     [id$="-modal"] .modal-scroll {
         -webkit-overflow-scrolling: touch;
