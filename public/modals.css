@@ -2,11 +2,13 @@
    OVERSCROLL CONTAINMENT
    ========================================================= */
 
-/* Voorkomt scroll-chaining: als je het einde van de modal-scroll bereikt,
-   mag de achtergrond-pagina NIET meescrollen (werkt op iOS 16+ en Android). */
-.modal-scroll,
-[id$="-modal"] .overflow-y-auto {
-    overscroll-behavior: contain;
+/* Geeft de scrollbare modal-container expliciet toestemming voor verticaal scrollen,
+   ook al is touch-action: none op de body gezet.
+   overscroll-behavior: contain voorkomt dat scroll-energie lekt naar de achtergrond. */
+.modal-scroll {
+    touch-action: pan-y !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* =========================================================

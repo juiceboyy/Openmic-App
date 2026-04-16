@@ -97,17 +97,19 @@ const App = {
             btn.addEventListener('click', () => this.closeModal(btn.getAttribute('data-close')));
         });
 
-        // Body Scroll Lock via library (werkt ook op iOS Safari).
-        // Observeert de 'hidden' class op elke modal en schakelt de body-scroll
-        // in/uit via de bodyScrollLock library (geladen via CDN in index.html).
+        // Body Scroll Lock via native CSS touch-action API.
+        // Zet OS-niveau touch-scrolling uit op de body als een modal open is;
+        // .modal-scroll krijgt via CSS expliciet pan-y terug zodat het formulier wél scrollt.
         document.querySelectorAll('[id$="-modal"]').forEach(modal => {
-            const scrollable = modal.querySelector('.modal-scroll');
             new MutationObserver(() => {
-                const isOpen = !modal.classList.contains('hidden');
-                if (isOpen && scrollable) {
-                    bodyScrollLock.disableBodyScroll(scrollable, { reserveScrollBarGap: true });
+                const anyOpen = [...document.querySelectorAll('[id$="-modal"]')]
+                    .some(m => !m.classList.contains('hidden'));
+                if (anyOpen) {
+                    document.body.style.overflow = 'hidden';
+                    document.body.style.touchAction = 'none';
                 } else {
-                    bodyScrollLock.clearAllBodyScrollLocks();
+                    document.body.style.overflow = '';
+                    document.body.style.touchAction = '';
                 }
             }).observe(modal, { attributes: true, attributeFilter: ['class'] });
         });
