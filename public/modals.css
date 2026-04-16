@@ -54,17 +54,22 @@
         margin-right: auto !important;
     }
 
-    /* Geef de modal-card een ECHTE hoogte (niet alleen max-height).
-       iOS Safari berekent flex-1 alleen correct als de parent een definitieve hoogte
-       heeft — max-height alleen is niet voldoende voor de flex-scroll te activeren. */
+    /* Vervang flex door CSS Grid op mobiel. iOS Safari berekent flex-1 niet altijd
+       naar een concrete pixelhoogte, waardoor overflow-y: scroll niets heeft om in
+       te scrollen. Met grid-template-rows: auto 1fr auto krijgt de middelste rij
+       (modal-scroll) wél een definitieve hoogte — dat werkt wél op iOS. */
     [id$="-modal"] > div {
-        height: 85dvh;
-        height: 85vh; /* fallback voor oudere iOS */
+        display: grid !important;
+        grid-template-rows: auto 1fr auto !important;
+        height: 85dvh !important;
+        height: 85vh !important; /* fallback voor oudere iOS */
+        max-height: none !important;
     }
 
     /* iOS touch-scrolling voor scrollbare modal-inhoud */
     [id$="-modal"] .modal-scroll {
         -webkit-overflow-scrolling: touch;
+        min-height: 0;
     }
 
     /* Inputs & Knoppen (Stapelen) voor Sessie Laden etc. */
