@@ -10,7 +10,7 @@ export const lineupModalTemplate = /*html*/`
             </button>
         </div>
         
-        <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800 flex-1">
+        <div class="p-6 flex-1 min-h-0 overflow-y-auto modal-scroll bg-white dark:bg-gray-800">
 
             <div class="flex gap-2 mb-6 bg-blue-50 p-4 rounded-xl border border-blue-100 dark:bg-blue-900/20 dark:border-blue-800">
                 <select id="current-session-name" class="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white">

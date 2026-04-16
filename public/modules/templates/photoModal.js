@@ -9,7 +9,7 @@ export const photoModalTemplate = /*html*/`
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800 flex-1">
+        <div class="p-6 flex-1 min-h-0 overflow-y-auto modal-scroll bg-white dark:bg-gray-800">
             <div id="photo-step-1">
                 <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Plak hier de algemene link naar de Google Drive map van de specifieke Open Mic.</p>
                 <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Google Drive Map URL</label>

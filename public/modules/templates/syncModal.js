@@ -9,7 +9,7 @@ export const syncModalTemplate = /*html*/`
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800 flex-1">
+        <div class="p-6 flex-1 min-h-0 overflow-y-auto modal-scroll bg-white dark:bg-gray-800">
             <div id="sync-step-1" class="text-center py-6">
                 <i data-lucide="contact" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
                 <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-2">Zoek naar nieuwe contacten</h3>

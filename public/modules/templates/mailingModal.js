@@ -9,7 +9,7 @@ export const mailingModalTemplate = /*html*/`
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800 flex-1">
+        <div class="p-6 flex-1 min-h-0 overflow-y-auto modal-scroll bg-white dark:bg-gray-800">
             <div class="mb-5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg p-4 flex gap-3">
                 <i data-lucide="info" class="w-5 h-5 text-apple-blue shrink-0 mt-0.5"></i>
                 <div>
