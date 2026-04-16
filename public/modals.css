@@ -1,4 +1,16 @@
 /* =========================================================
+   OVERSCROLL CONTAINMENT
+   ========================================================= */
+
+/* Scrollbare modal-container: scroll (niet auto) is betrouwbaarder op iOS Safari.
+   overscroll-behavior: contain voorkomt rubber-banding naar de achtergrond. */
+.modal-scroll {
+    overflow-y: scroll !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+/* =========================================================
    MODALS: DESKTOP & TABLET FIXES
    ========================================================= */
 @media (min-width: 769px) {
@@ -40,6 +52,24 @@
         max-width: 95vw !important;
         margin-left: auto !important;
         margin-right: auto !important;
+    }
+
+    /* Vervang flex door CSS Grid op mobiel. iOS Safari berekent flex-1 niet altijd
+       naar een concrete pixelhoogte, waardoor overflow-y: scroll niets heeft om in
+       te scrollen. Met grid-template-rows: auto 1fr auto krijgt de middelste rij
+       (modal-scroll) wél een definitieve hoogte — dat werkt wél op iOS. */
+    [id$="-modal"] > div {
+        display: grid !important;
+        grid-template-rows: auto 1fr auto !important;
+        height: 85dvh !important;
+        height: 85vh !important; /* fallback voor oudere iOS */
+        max-height: none !important;
+    }
+
+    /* iOS touch-scrolling voor scrollbare modal-inhoud */
+    [id$="-modal"] .modal-scroll {
+        -webkit-overflow-scrolling: touch;
+        min-height: 0;
     }
 
     /* Inputs & Knoppen (Stapelen) voor Sessie Laden etc. */

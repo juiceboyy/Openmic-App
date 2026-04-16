@@ -95,3 +95,18 @@ POST /api/speelschema/save
 - The public signup page is `public/aanmelden.html` — it's a separate HTML file, not part of the SPA
 - Lineup feature uses HTML5 drag-and-drop with a mobile polyfill (`mobile-drag-drop`)
 - Brevo handles newsletter campaigns; Gmail handles individual photo emails
+
+## iOS Safari Modal Scrolling — Lessons Learned
+
+**The entry point is `main.js`, not `app.js`.** `public/app.js` is a dead file that is never loaded. All frontend JS logic belongs in `public/main.js`. Always verify via `index.html` which script is actually loaded before editing JS.
+
+**iOS Safari flex + overflow scroll doesn't work reliably.** Using `flex-col` + `flex-1` + `overflow-y: scroll` on a modal body fails on iOS because `flex-1` doesn't always resolve to a concrete pixel height. iOS requires a *definite* height on the scroll container for `overflow-y: scroll` to activate.
+
+**The working solution for scrollable modals on iOS:**
+1. Give the modal card a real `height` (not just `max-height`) on mobile — use `height: 85dvh` via CSS.
+2. Switch the card from `display: flex` to `display: grid` with `grid-template-rows: auto 1fr auto` on mobile. The `1fr` row gets a definite pixel height, which iOS Safari does understand.
+3. Use `overflow-y: scroll` (not `auto`) on the `.modal-scroll` container.
+4. Use `-webkit-overflow-scrolling: touch` and `overscroll-behavior: contain` on `.modal-scroll`.
+5. For body scroll lock use the **fixed-body hack** in `main.js`: save `window.scrollY`, set `body { position: fixed; top: -scrollY; width: 100% }` on open, restore on close. Do NOT use `touch-action: none` on the body — iOS does not reliably honour the child `touch-action: pan-y` override, which breaks modal scroll entirely.
+
+These rules are applied in `public/modals.css` (mobile media query) and `public/main.js` (`bindEvents`).

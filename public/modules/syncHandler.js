@@ -15,7 +15,7 @@ export function renderSyncContacts(contacts, elements) {
     contacts.forEach((contact, index) => {
         let nameStr = `${contact.firstName} ${contact.lastName}`.trim() || '<span class="text-gray-400 italic">Geen naam</span>';
         let contactStr = '';
-        if(contact.email) contactStr += `<div><i data-lucide="mail" class="w-3.5 h-3.5 inline mr-1 text-gray-400"></i> ${contact.email}</div>`;
+        if(contact.email) contactStr += `<div><i data-lucide="mail" class="w-3.5 h-3.5 inline mr-1 text-gray-400"></i> <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${contact.email}" target="_blank" rel="noopener noreferrer" class="hover:underline text-apple-blue">${contact.email}</a></div>`;
         if(contact.phone) contactStr += `<div><i data-lucide="phone" class="w-3.5 h-3.5 inline mr-1 text-gray-400"></i> ${contact.phone}</div>`;
 
         syncContactsBody.innerHTML += `

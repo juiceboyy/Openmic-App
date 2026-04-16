@@ -1,6 +1,6 @@
 export const contactModalTemplate = /*html*/`
 <div id="contact-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl flex flex-col max-h-full overflow-hidden transition-colors">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl flex flex-col max-h-[85dvh] overflow-hidden transition-colors">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-700/50 rounded-t-2xl">
             <h2 id="modal-title" class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                 <i data-lucide="user-plus" class="w-5 h-5 text-apple-blue"></i> Nieuw Contact Toevoegen
@@ -9,7 +9,7 @@ export const contactModalTemplate = /*html*/`
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800">
+        <div class="p-6 flex-1 min-h-0 overflow-y-auto modal-scroll bg-white dark:bg-gray-800">
             <form id="new-contact-form" class="space-y-6">
                 <div>
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Persoonlijke Gegevens</h3>

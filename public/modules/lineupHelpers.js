@@ -65,7 +65,7 @@ export const createLineupItemHTML = (i, artist, num, starred = false) => `
             <i data-lucide="grip-vertical" class="w-4 h-4 text-gray-400"></i>
         </div>
         <div class="w-8 h-8 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-600 font-semibold text-gray-500 dark:text-gray-400 text-sm shadow-sm shrink-0">${num}</div>
-        <div class="flex-1 min-w-0"><div class="font-medium text-gray-900 dark:text-gray-100 truncate">${starred ? '⭐ ' : ''}${getDisplayName(artist)}</div><div class="text-xs text-gray-500 dark:text-gray-400 truncate">${artist.email || '-'}</div></div>
+        <div class="flex-1 min-w-0"><div class="font-medium text-gray-900 dark:text-gray-100 truncate">${starred ? '⭐ ' : ''}${getDisplayName(artist)}</div><div class="text-xs text-gray-500 dark:text-gray-400 truncate">${artist.email && artist.email !== '-' ? `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${artist.email}" target="_blank" rel="noopener noreferrer" class="hover:underline hover:text-apple-blue transition-colors" onclick="event.stopPropagation()">${artist.email}</a>` : '-'}</div></div>
         <div class="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"><button onclick="removeArtistFromLineup(${i})" class="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors ml-1" title="Verwijder"><i data-lucide="x" class="w-4 h-4"></i></button></div>
     </div>`;
 

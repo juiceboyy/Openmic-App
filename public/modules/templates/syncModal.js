@@ -1,6 +1,6 @@
 export const syncModalTemplate = /*html*/`
 <div id="sync-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-full overflow-hidden transition-colors">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-3xl flex flex-col max-h-[85dvh] overflow-hidden transition-colors">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-700/50 rounded-t-2xl">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                 <i data-lucide="refresh-cw" class="w-5 h-5 text-apple-blue"></i> Synchroniseer Google Contacts
@@ -9,7 +9,7 @@ export const syncModalTemplate = /*html*/`
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        <div class="p-6 overflow-y-auto modal-scroll bg-white dark:bg-gray-800 flex-1">
+        <div class="p-6 flex-1 min-h-0 overflow-y-auto modal-scroll bg-white dark:bg-gray-800">
             <div id="sync-step-1" class="text-center py-6">
                 <i data-lucide="contact" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
                 <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-2">Zoek naar nieuwe contacten</h3>
