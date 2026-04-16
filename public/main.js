@@ -124,6 +124,27 @@ const App = {
             btn.addEventListener('click', () => this.closeModal(btn.getAttribute('data-close')));
         });
 
+        // Body Scroll Lock: fixed-body hack voor iOS Safari.
+        // Slaat scrollpositie op, fixeert de body, en herstelt bij sluiten.
+        let scrollPosition = 0;
+        document.querySelectorAll('[id$="-modal"]').forEach(modal => {
+            new MutationObserver(() => {
+                const anyOpen = [...document.querySelectorAll('[id$="-modal"]')]
+                    .some(m => !m.classList.contains('hidden'));
+                if (anyOpen) {
+                    scrollPosition = window.scrollY;
+                    document.body.style.position = 'fixed';
+                    document.body.style.top = `-${scrollPosition}px`;
+                    document.body.style.width = '100%';
+                } else {
+                    document.body.style.removeProperty('position');
+                    document.body.style.removeProperty('top');
+                    document.body.style.removeProperty('width');
+                    window.scrollTo(0, scrollPosition);
+                }
+            }).observe(modal, { attributes: true, attributeFilter: ['class'] });
+        });
+
         // Handle Resize
         let resizeTimer;
         window.addEventListener('resize', () => {
