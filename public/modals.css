@@ -2,13 +2,12 @@
    OVERSCROLL CONTAINMENT
    ========================================================= */
 
-/* Geeft de scrollbare modal-container expliciet toestemming voor verticaal scrollen,
-   ook al is touch-action: none op de body gezet.
-   overscroll-behavior: contain voorkomt dat scroll-energie lekt naar de achtergrond. */
+/* Scrollbare modal-container: scroll (niet auto) is betrouwbaarder op iOS Safari.
+   overscroll-behavior: contain voorkomt rubber-banding naar de achtergrond. */
 .modal-scroll {
-    touch-action: pan-y !important;
-    overscroll-behavior: contain !important;
+    overflow-y: scroll !important;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
 }
 
 /* =========================================================
