@@ -97,62 +97,19 @@ const App = {
             btn.addEventListener('click', () => this.closeModal(btn.getAttribute('data-close')));
         });
 
-        // Body Scroll Lock (Fixed Body hack): werkt ook op iOS Safari, waar
-        // 'overflow: hidden' op de body genegeerd wordt.
-        // Slaat de scrollpositie op, fixeert de body, en herstelt alles bij sluiten.
-        let scrollPosition = 0;
-        document.querySelectorAll('[id$="-modal"]').forEach(modal => {
-            new MutationObserver(() => {
-                const anyOpen = [...document.querySelectorAll('[id$="-modal"]')]
-                    .some(m => !m.classList.contains('hidden'));
-                if (anyOpen) {
-                    scrollPosition = window.scrollY;
-                    document.body.style.position = 'fixed';
-                    document.body.style.top = `-${scrollPosition}px`;
-                    document.body.style.width = '100%';
-                } else {
-                    document.body.style.removeProperty('position');
-                    document.body.style.removeProperty('top');
-                    document.body.style.removeProperty('width');
-                    window.scrollTo(0, scrollPosition);
-                }
-            }).observe(modal, { attributes: true, attributeFilter: ['class'] });
-        });
-
-        // iOS Safari Touch-interceptie met tolerante boundary-detectie.
-        // Blokkeert rubber-banding op de overlay/header/footer én op de scroll-grenzen,
-        // maar laat normaal scrollen door het midden van de lijst gewoon werken.
+        // Body Scroll Lock via library (werkt ook op iOS Safari).
+        // Observeert de 'hidden' class op elke modal en schakelt de body-scroll
+        // in/uit via de bodyScrollLock library (geladen via CDN in index.html).
         document.querySelectorAll('[id$="-modal"]').forEach(modal => {
             const scrollable = modal.querySelector('.modal-scroll');
-            if (!scrollable) return;
-
-            let touchStartY = 0;
-
-            modal.addEventListener('touchstart', (e) => {
-                touchStartY = e.touches[0].clientY;
-            }, { passive: true });
-
-            modal.addEventListener('touchmove', (e) => {
-                // 1. Blokkeer vegen als de vinger niet op het formulier begon
-                if (!e.target.closest('.modal-scroll')) {
-                    e.preventDefault();
-                    return;
+            new MutationObserver(() => {
+                const isOpen = !modal.classList.contains('hidden');
+                if (isOpen && scrollable) {
+                    bodyScrollLock.disableBodyScroll(scrollable, { reserveScrollBarGap: true });
+                } else {
+                    bodyScrollLock.clearAllBodyScrollLocks();
                 }
-
-                const touchY = e.touches[0].clientY;
-                const deltaY = touchY - touchStartY;
-
-                // 2. Ruime marge (2px) voor sub-pixel afrondingsfouten van iOS
-                const isAtTop = scrollable.scrollTop <= 2;
-                const isAtBottom = (scrollable.scrollHeight - scrollable.scrollTop) <= (scrollable.clientHeight + 2);
-
-                // 3. Blokkeer ALLEEN de foute richting (elastiek-effect voorkomen)
-                if (isAtTop && deltaY > 0) {
-                    e.preventDefault();
-                } else if (isAtBottom && deltaY < 0) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
+            }).observe(modal, { attributes: true, attributeFilter: ['class'] });
         });
 
         // Expose to Window for HTML inline calls (legacy support)
