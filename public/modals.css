@@ -1,4 +1,18 @@
 /* =========================================================
+   DRAG & DROP: TOUCH PROTECTION
+   Prevents iOS text-selection magnifier and callout from
+   interfering with drag gestures on lineup items.
+   ========================================================= */
+
+.draggable-item,
+.lineup-item,
+.drag-handle {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* =========================================================
    OVERSCROLL CONTAINMENT
    ========================================================= */
 
