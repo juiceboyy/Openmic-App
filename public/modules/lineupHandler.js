@@ -191,7 +191,7 @@ export function removeArtistFromReserve(index) {
 
 export async function clearLineup() {
     try {
-        if (currentLineup.every(slot => slot === null)) return;
+        if (currentLineup.every(slot => slot === null) && reserveLineup.length === 0) return;
         if (await showConfirm("Weet je zeker dat je het hele speelschema wilt wissen?")) {
             currentLineup.fill(null); reserveLineup = []; save(); renderLineupUI(); showToast("Speelschema leeggemaakt.", "success");
         }
