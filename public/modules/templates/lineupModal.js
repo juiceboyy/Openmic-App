@@ -36,8 +36,11 @@ export const lineupModalTemplate = /*html*/`
                 </div>
 
                 <div id="reserve-list-container" class="mt-8 p-4 border-2 border-dashed border-orange-200 bg-orange-50/30 rounded-lg dark:border-orange-900/50 dark:bg-orange-900/10 min-h-[100px] transition-colors">
-                    <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center">
-                        <i data-lucide="clipboard-list" class="w-4 h-4 inline mr-2"></i> Reservelijst
+                    <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center justify-between">
+                        <span class="flex items-center"><i data-lucide="clipboard-list" class="w-4 h-4 inline mr-2"></i> Reservelijst</span>
+                        <button id="btn-add-to-reserve" class="text-orange-600 hover:text-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 rounded-md px-2 py-1 text-xs font-medium flex items-center gap-1 transition-colors" title="Artiest direct toevoegen aan reservelijst">
+                            <i data-lucide="plus" class="w-3 h-3"></i> Toevoegen
+                        </button>
                     </h3>
                     <div id="reserve-list-content" class="space-y-2">
                         <!-- Reserve items injected here -->

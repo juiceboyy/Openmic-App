@@ -106,6 +106,7 @@ const App = {
         // Lineup Search Actions
         getEl('slot-search-input').addEventListener('input', Lineup.handleLineupSearch);
         getEl('btn-close-slot-search').addEventListener('click', Lineup.closeSlotSearch);
+        getEl('btn-add-to-reserve').addEventListener('click', Lineup.openReserveSearch);
 
         const reserveContainer = getEl('reserve-list-container');
         if (reserveContainer) {

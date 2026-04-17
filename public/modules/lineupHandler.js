@@ -11,6 +11,7 @@ let reserveLineup = [];
 let playedLastMonth = [];
 let activeSlotIndex = null;
 let activeSessionName = '';
+let addingToReserve = false;
 
 const save = () => saveToLocalStorage(currentLineup, reserveLineup);
 
@@ -91,12 +92,25 @@ export async function loadPreviousLineup(event) {
 }
 
 export function openSlotSearch(index) {
-    activeSlotIndex = index; const input = getEl('slot-search-input'); 
+    addingToReserve = false;
+    activeSlotIndex = index;
+    const input = getEl('slot-search-input');
+    input.placeholder = 'Zoek artiest of naam...';
+    getEl('lineup-search-modal').classList.remove('hidden'); input.value = ''; getEl('slot-search-results').innerHTML = ''; input.focus();
+}
+
+export function openReserveSearch() {
+    addingToReserve = true;
+    activeSlotIndex = null;
+    const input = getEl('slot-search-input');
+    input.placeholder = 'Zoek artiest voor reservelijst...';
     getEl('lineup-search-modal').classList.remove('hidden'); input.value = ''; getEl('slot-search-results').innerHTML = ''; input.focus();
 }
 
 export function closeSlotSearch() {
-    getEl('lineup-search-modal').classList.add('hidden'); activeSlotIndex = null;
+    getEl('lineup-search-modal').classList.add('hidden');
+    activeSlotIndex = null;
+    addingToReserve = false;
 }
 
 export function handleLineupSearch(event) {
@@ -113,7 +127,20 @@ export function handleLineupSearch(event) {
 
 export async function selectLineupArtist(rowIndex) {
     const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
-    if (artist && activeSlotIndex !== null) {
+    if (!artist) return;
+
+    if (addingToReserve) {
+        if (!reserveLineup.some(a => a.rowIndex === artist.rowIndex)) {
+            reserveLineup.push(artist);
+            showToast(`${getDisplayName(artist)} toegevoegd aan reservelijst.`, 'success');
+        } else {
+            showToast('Artiest staat al in de reservelijst.', 'error');
+        }
+        save(); closeSlotSearch(); renderLineupUI();
+        return;
+    }
+
+    if (activeSlotIndex !== null) {
         const matchedName = playedLastMonth.find(name => isFuzzyMatch(artist, name));
         if (matchedName) {
             const choice = await showLineupConflictDialog(`<strong>${getDisplayName(artist)}</strong> lijkt erg op <strong>${matchedName}</strong> die vorige keer al heeft gespeeld.`);
