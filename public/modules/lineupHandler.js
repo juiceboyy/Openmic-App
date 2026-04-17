@@ -11,6 +11,7 @@ let reserveLineup = [];
 let playedLastMonth = [];
 let activeSlotIndex = null;
 let activeSessionName = '';
+let addingToReserve = false;
 
 const save = () => saveToLocalStorage(currentLineup, reserveLineup);
 
@@ -91,29 +92,93 @@ export async function loadPreviousLineup(event) {
 }
 
 export function openSlotSearch(index) {
-    activeSlotIndex = index; const input = getEl('slot-search-input'); 
+    addingToReserve = false;
+    activeSlotIndex = index;
+    const input = getEl('slot-search-input');
+    input.placeholder = 'Zoek artiest of naam...';
+    getEl('lineup-search-modal').classList.remove('hidden'); input.value = ''; getEl('slot-search-results').innerHTML = ''; input.focus();
+}
+
+export function openReserveSearch() {
+    addingToReserve = true;
+    activeSlotIndex = null;
+    const input = getEl('slot-search-input');
+    input.placeholder = 'Zoek artiest voor reservelijst...';
     getEl('lineup-search-modal').classList.remove('hidden'); input.value = ''; getEl('slot-search-results').innerHTML = ''; input.focus();
 }
 
 export function closeSlotSearch() {
-    getEl('lineup-search-modal').classList.add('hidden'); activeSlotIndex = null;
+    getEl('lineup-search-modal').classList.add('hidden');
+    const quickAdd = getEl('quick-add-new-artist');
+    if (quickAdd) quickAdd.classList.add('hidden');
+    const emailInput = getEl('new-artist-email');
+    if (emailInput) emailInput.value = '';
+    activeSlotIndex = null;
+    addingToReserve = false;
 }
 
 export function handleLineupSearch(event) {
     const q = event.target.value.toLowerCase().trim();
-    if (!q) { getEl('slot-search-results').innerHTML = ''; return; }
-    const matches = state.allArtists.filter(a => ((a.artistName || '').toLowerCase().includes(q) || (a.firstName || '').toLowerCase().includes(q) || (a.lastName || '').toLowerCase().includes(q)));
-    getEl('slot-search-results').innerHTML = matches.length === 0 ? '<div class="px-4 py-3 text-sm text-gray-500">Geen artiesten gevonden...</div>' : matches.map(a => {
-        const dn = getDisplayName(a);
-        return currentLineup.some(s => s?.rowIndex === a.rowIndex) 
-            ? `<div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 opacity-60 cursor-not-allowed flex justify-between items-center"><div><div class="font-medium text-gray-500 dark:text-gray-400">${dn}</div><div class="text-xs text-gray-400 dark:text-gray-500">${a.firstName} ${a.lastName}</div></div><span class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Al in lijst</span></div>`
-            : `<div onclick="selectLineupArtist(${a.rowIndex})" class="px-4 py-3 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"><div class="font-medium text-gray-900 dark:text-gray-100">${dn}</div><div class="text-xs text-gray-500 dark:text-gray-400">${a.firstName} ${a.lastName}</div></div>`;
-    }).join('');
+    const quickAdd = getEl('quick-add-new-artist');
+    if (!q) { getEl('slot-search-results').innerHTML = ''; if (quickAdd) quickAdd.classList.add('hidden'); return; }
+    const matches = state.allArtists.filter(a =>
+        (a.artistName || '').toLowerCase().includes(q) || (a.firstName || '').toLowerCase().includes(q) || (a.lastName || '').toLowerCase().includes(q) || (a.notes || '').toLowerCase().includes(q)
+    );
+    if (matches.length === 0) {
+        getEl('slot-search-results').innerHTML = '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Geen artiesten gevonden...</div>';
+        if (quickAdd) { quickAdd.classList.remove('hidden'); lucide.createIcons(); }
+    } else {
+        if (quickAdd) quickAdd.classList.add('hidden');
+        getEl('slot-search-results').innerHTML = matches.map(a => {
+            const dn = getDisplayName(a);
+            return currentLineup.some(s => s?.rowIndex === a.rowIndex)
+                ? `<div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 opacity-60 cursor-not-allowed flex justify-between items-center"><div><div class="font-medium text-gray-500 dark:text-gray-400">${dn}</div><div class="text-xs text-gray-400 dark:text-gray-500">${a.firstName} ${a.lastName}</div></div><span class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Al in lijst</span></div>`
+                : `<div onclick="selectLineupArtist(${a.rowIndex})" class="px-4 py-3 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"><div class="font-medium text-gray-900 dark:text-gray-100">${dn}</div><div class="text-xs text-gray-500 dark:text-gray-400">${a.firstName} ${a.lastName}</div></div>`;
+        }).join('');
+    }
+}
+
+export function addNewArtistFromSearch() {
+    const rawName = getEl('slot-search-input').value.trim();
+    const email = getEl('new-artist-email')?.value.trim() || '';
+    if (!rawName) return showToast('Voer eerst een naam in het zoekveld in.', 'error');
+    const parts = rawName.split(/\s+/);
+    const newArtist = {
+        rowIndex: null,
+        artistName: rawName,
+        firstName: parts[0],
+        lastName: parts.slice(1).join(' '),
+        email: email || '-',
+        gender: '',
+        notes: 'NIEUW',
+        isNew: true,
+    };
+    if (addingToReserve) {
+        reserveLineup.push(newArtist);
+        showToast(`${rawName} toegevoegd aan reservelijst als nieuwe artiest.`, 'success');
+    } else if (activeSlotIndex !== null) {
+        currentLineup[activeSlotIndex] = newArtist;
+        showToast(`${rawName} toegevoegd aan speelschema als nieuwe artiest.`, 'success');
+    } else { return; }
+    save(); closeSlotSearch(); renderLineupUI();
 }
 
 export async function selectLineupArtist(rowIndex) {
     const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
-    if (artist && activeSlotIndex !== null) {
+    if (!artist) return;
+
+    if (addingToReserve) {
+        if (!reserveLineup.some(a => a.rowIndex === artist.rowIndex)) {
+            reserveLineup.push(artist);
+            showToast(`${getDisplayName(artist)} toegevoegd aan reservelijst.`, 'success');
+        } else {
+            showToast('Artiest staat al in de reservelijst.', 'error');
+        }
+        save(); closeSlotSearch(); renderLineupUI();
+        return;
+    }
+
+    if (activeSlotIndex !== null) {
         const matchedName = playedLastMonth.find(name => isFuzzyMatch(artist, name));
         if (matchedName) {
             const choice = await showLineupConflictDialog(`<strong>${getDisplayName(artist)}</strong> lijkt erg op <strong>${matchedName}</strong> die vorige keer al heeft gespeeld.`);
@@ -164,7 +229,7 @@ export function removeArtistFromReserve(index) {
 
 export async function clearLineup() {
     try {
-        if (currentLineup.every(slot => slot === null)) return;
+        if (currentLineup.every(slot => slot === null) && reserveLineup.length === 0) return;
         if (await showConfirm("Weet je zeker dat je het hele speelschema wilt wissen?")) {
             currentLineup.fill(null); reserveLineup = []; save(); renderLineupUI(); showToast("Speelschema leeggemaakt.", "success");
         }
@@ -179,26 +244,75 @@ export async function exportLineupToClipboard() {
     else showToast("Kon niet kopiëren of lijst is leeg.", "error");
 }
 
+let pendingDOMRebuild = false;
+
+export function handleDragStart(event, index, list) {
+    DD.setSnapshots(currentLineup, reserveLineup);
+    pendingDOMRebuild = true;
+    DD.handleDragStart(event, index, list);
+}
+
 export function handleDropOnMain(event, targetIndex) {
     event.preventDefault();
     event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/50');
-    if (DD.processDropOnMain(targetIndex, currentLineup, reserveLineup)) { save(); DD.resetDraggedItem(); renderLineupUI(); }
+    if (DD.processDropOnMain(targetIndex, currentLineup, reserveLineup)) {
+        pendingDOMRebuild = false;
+        save(); DD.resetDraggedItem(); renderLineupUI();
+    }
 }
 
 export function handleDropOnReserve(event) {
     event.preventDefault();
-    if (DD.processDropOnReserve(currentLineup, reserveLineup)) { save(); DD.resetDraggedItem(); renderLineupUI(); }
+    if (DD.processDropOnReserve(currentLineup, reserveLineup)) {
+        pendingDOMRebuild = false;
+        save(); DD.resetDraggedItem(); renderLineupUI();
+    }
 }
 
-export const { handleDragStart, handleDragOver, handleDragEnter, handleDragLeave, handleDragEnd } = DD;
+export function handleDragEnd(event) {
+    DD.handleDragEnd(event);
+    if (pendingDOMRebuild) {
+        const { newMain, newReserve } = DD.rebuildFromDOM(
+            getEl('lineup-list-container'),
+            getEl('reserve-list-content')
+        );
+        for (let i = 0; i < newMain.length; i++) currentLineup[i] = newMain[i];
+        reserveLineup.length = 0;
+        newReserve.forEach(x => reserveLineup.push(x));
+        save();
+        renderLineupUI();
+    }
+    pendingDOMRebuild = false;
+}
+
+export const { handleDragOver, handleDragEnter, handleDragLeave } = DD;
 
 export async function saveLineupToDatabase() {
     if (!activeSessionName) return showToast('Laad eerst een sessie voordat je opslaat.', 'error');
     const btn = getEl('btn-save-lineup'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
+        const newArtists = [...currentLineup.filter(a => a?.isNew), ...reserveLineup.filter(a => a?.isNew)];
+        const today = new Date().toLocaleDateString('nl-NL');
+        for (const artist of newArtists) {
+            await apiRequest({
+                _action: 'add',
+                'Voornaam': artist.firstName || '',
+                'Achternaam': artist.lastName || '',
+                'Artiestennaam': artist.artistName && artist.artistName !== '-' ? artist.artistName : '',
+                'E-mailadres': artist.email && artist.email !== '-' ? artist.email : '',
+                'Gender': artist.gender || '',
+                'Notities': 'NIEUW',
+                'Opmerkingen': 'NIEUW',
+                'Soort contact': 'Artiest',
+                'Datum toegevoegd': today,
+            });
+        }
         const res = await apiRequest({ _action: 'save_lineup', sheetName: activeSessionName, lineup: currentLineup, reserve: reserveLineup });
         if (res.status === "success") {
-            showToast("Lineup succesvol opgeslagen!", "success");
+            const msg = newArtists.length > 0
+                ? `Lineup opgeslagen! ${newArtists.length} nieuwe artiest(en) ook toegevoegd aan contacten.`
+                : "Lineup succesvol opgeslagen!";
+            showToast(msg, "success");
             clearLocalStorage();
         } else showToast("Fout: " + res.message, "error");
     } catch (e) { showToast("Opslaan mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }

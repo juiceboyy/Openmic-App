@@ -36,8 +36,11 @@ export const lineupModalTemplate = /*html*/`
                 </div>
 
                 <div id="reserve-list-container" class="mt-8 p-4 border-2 border-dashed border-orange-200 bg-orange-50/30 rounded-lg dark:border-orange-900/50 dark:bg-orange-900/10 min-h-[100px] transition-colors">
-                    <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center">
-                        <i data-lucide="clipboard-list" class="w-4 h-4 inline mr-2"></i> Reservelijst
+                    <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center justify-between">
+                        <span class="flex items-center"><i data-lucide="clipboard-list" class="w-4 h-4 inline mr-2"></i> Reservelijst</span>
+                        <button id="btn-add-to-reserve" class="text-orange-600 hover:text-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 rounded-md px-2 py-1 text-xs font-medium flex items-center gap-1 transition-colors" title="Artiest direct toevoegen aan reservelijst">
+                            <i data-lucide="plus" class="w-3 h-3"></i> Toevoegen
+                        </button>
                     </h3>
                     <div id="reserve-list-content" class="space-y-2">
                         <!-- Reserve items injected here -->
@@ -76,5 +79,21 @@ export const lineupSearchModalTemplate = /*html*/`
             </button>
         </div>
         <div id="slot-search-results" class="max-h-64 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700"></div>
+        <div id="quick-add-new-artist" class="hidden border-t border-gray-100 dark:border-gray-700">
+            <div class="px-4 py-4 bg-green-50/50 dark:bg-green-900/10">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 flex items-center gap-1.5">
+                    <i data-lucide="user-plus" class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0"></i>
+                    Artiest niet gevonden. Vul e-mail in om direct toe te voegen.
+                </p>
+                <div class="flex gap-2">
+                    <input type="email" id="new-artist-email" placeholder="E-mailadres (optioneel)..."
+                        class="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-500">
+                    <button onclick="addNewArtistFromSearch()"
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 shrink-0">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Toevoegen
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>`;

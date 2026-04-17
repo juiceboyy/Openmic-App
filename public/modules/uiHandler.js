@@ -71,7 +71,19 @@ export function renderTable(dataToRender, elements) {
         const photoUrl = artist.profilePic && artist.profilePic !== '-' ? artist.profilePic : basePhotoUrl;
         const photoHTML = `<img src="${photoUrl}" onerror="this.onerror=null; this.src='${fallbackUrl}';" onclick="window.openPhotoEditModal(${artist.rowIndex}, '${artist.profilePic !== '-' ? artist.profilePic : ''}', '${basePhotoUrl}')" class="w-9 h-9 rounded-full object-cover border border-gray-200 dark:border-gray-700 cursor-pointer shadow-sm shrink-0 hover:opacity-80 transition-opacity" title="Klik om profielfoto aan te passen" alt="Foto">`;
 
-        let artistNameHTML = `<div class="inline-flex items-center mt-0.5 px-1.5 py-0 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-[11px] font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2 h-2 mr-1"></i>${editableSpan('Artiestennaam', artist.artistName, 'Artiestennaam')}</div>`;
+        const artistNameBadge = `<div class="inline-flex items-center px-1.5 py-0 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-[11px] font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2 h-2 mr-1"></i>${editableSpan('Artiestennaam', artist.artistName, 'Artiestennaam')}</div>`;
+
+        const genderSymbol = artist.gender === 'Vrouw' ? '♀' : artist.gender === 'Man' ? '♂' : artist.gender === 'Non-binair' ? '⚧' : '·';
+        const genderColor = artist.gender === 'Vrouw' ? 'text-rose-400 dark:text-rose-400' : artist.gender === 'Man' ? 'text-blue-400 dark:text-blue-400' : artist.gender === 'Non-binair' ? 'text-purple-400 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500';
+        const genderIconSelect = `<select data-field="Gender" data-row="${artist.rowIndex}" onchange="window.updateArtistField(event)" title="${artist.gender || 'Gender instellen'}" class="appearance-none bg-transparent ${genderColor} hover:text-gray-600 dark:hover:text-gray-300 text-sm font-medium cursor-pointer outline-none border-none p-0 m-0 leading-none transition-colors shrink-0 w-[1.1em]">
+            <option value="" ${!artist.gender ? 'selected' : ''}>?</option>
+            <option value="Man" ${artist.gender === 'Man' ? 'selected' : ''}>♂</option>
+            <option value="Vrouw" ${artist.gender === 'Vrouw' ? 'selected' : ''}>♀</option>
+            <option value="Non-binair" ${artist.gender === 'Non-binair' ? 'selected' : ''}>⚧</option>
+            <option value="Zeg ik liever niet" ${artist.gender === 'Zeg ik liever niet' ? 'selected' : ''}>–</option>
+        </select>`;
+
+        let artistNameHTML = `<div class="flex items-center gap-1.5 mt-0.5 flex-wrap">${artistNameBadge}${genderIconSelect}</div>`;
         
         let instaIconHTML = '';
         const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>`;
@@ -100,6 +112,7 @@ export function renderTable(dataToRender, elements) {
             <option value="Publiek" ${artist.type === 'Publiek' ? 'selected' : ''} class="dark:bg-gray-800">Publiek</option>
             <option value="-" ${artist.type === '-' ? 'selected' : ''} class="dark:bg-gray-800">-</option>
         </select>`;
+
 
         let unsubHTML = `<label class="inline-flex items-center px-1.5 py-0 rounded text-xs font-medium border cursor-pointer transition-colors text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 h-5 leading-none">
             <input type="checkbox" class="form-checkbox h-3 w-3 mr-1 rounded text-gray-500 focus:ring-gray-500" data-row="${artist.rowIndex}" data-field="Unsubscribed (Ja/Nee)" ${artist.unsubscribed ? 'checked' : ''} onchange="window.updateArtistField(event)">
@@ -136,7 +149,7 @@ export async function loadArtists() {
             workshops: isTrue(row['Interesse in workshops (Ja/Nee)']), workshop7Nov: isTrue(row['Workshop 7 nov (Ja/Nee)']),
             unsubscribed: isTrue(row['Unsubscribed (Ja/Nee)']), type: String(row['Soort contact'] || '-').trim(),
             blacklist: isTrue(row['Blacklist (Ja/Nee)']), notes: String(row['Notities'] || '-'), profilePic: String(row['Profielfoto'] || '-').trim(),
-            mailingSelection: isTrue(row['Mailing Selectie'])
+            mailingSelection: isTrue(row['Mailing Selectie']), gender: String(row['Gender'] || '').trim()
         }));
         toggleGlobalLoading(loadingState, false);
         applyFilters();
@@ -146,26 +159,36 @@ export async function loadArtists() {
     }
 }
 
+function isUnknownGender(artist) {
+    const g = (artist.gender || '').toLowerCase().trim();
+    return !g || g === 'onbekend' || g.includes('zeg ik liever niet');
+}
+
 export function applyFilters() {
     const searchTerm = getEl('search-input').value.toLowerCase();
     const regionFilter = getEl('filter-region').value;
     const typeFilter = getEl('filter-type').value;
     const bookableFilter = getEl('filter-bookable').value;
     const favFilter = getEl('filter-favs') ? getEl('filter-favs').value : 'all';
+    const genderFilter = getEl('filter-gender') ? getEl('filter-gender').value : 'all';
 
     state.currentFilteredData = state.allArtists.filter(artist => {
-        const matchesSearch = (artist.firstName + ' ' + artist.lastName + artist.artistName + artist.email).toLowerCase().includes(searchTerm);
+        const matchesSearch = (artist.firstName + ' ' + artist.lastName + artist.artistName + artist.email).toLowerCase().includes(searchTerm)
+            || (artist.notes || '').toLowerCase().includes(searchTerm);
         let matchesRegion = regionFilter === 'all' || (regionFilter === 'Den Haag' && artist.regionDH) || (regionFilter === 'Rotterdam' && artist.regionRdam);
         const matchesType = typeFilter === 'all' || artist.type === typeFilter;
         let matchesBookable = bookableFilter === 'all' || (bookableFilter === 'ja' && artist.bookable) || (bookableFilter === 'nee' && !artist.bookable);
-        
+
         let matchesFavs = true;
         if (favFilter === 'gijs') matchesFavs = artist.favGijs;
         else if (favFilter === 'ro') matchesFavs = artist.favRo;
         else if (favFilter === 'both') matchesFavs = artist.favGijs && artist.favRo;
 
+        const matchesGender = genderFilter === 'all' ||
+            (genderFilter === 'Onbekend' ? isUnknownGender(artist) : (artist.gender || '').toLowerCase() === genderFilter.toLowerCase());
+
         const matchesImport = !state.importFilterActive || state.recentlyImportedEmails.has((artist.email || '').toLowerCase().trim());
-        return matchesSearch && matchesRegion && matchesType && matchesBookable && matchesFavs && matchesImport;
+        return matchesSearch && matchesRegion && matchesType && matchesBookable && matchesFavs && matchesGender && matchesImport;
     });
 
     const domElements = {

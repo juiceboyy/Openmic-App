@@ -43,7 +43,7 @@ const App = {
 
     bindEvents() {
         // Filter Events
-        ['search-input', 'filter-region', 'filter-type', 'filter-bookable', 'filter-favs'].forEach(id => {
+        ['search-input', 'filter-region', 'filter-type', 'filter-bookable', 'filter-favs', 'filter-gender'].forEach(id => {
             const el = getEl(id);
             if (el) el.addEventListener(id === 'search-input' ? 'input' : 'change', UI.applyFilters);
         });
@@ -106,6 +106,7 @@ const App = {
         // Lineup Search Actions
         getEl('slot-search-input').addEventListener('input', Lineup.handleLineupSearch);
         getEl('btn-close-slot-search').addEventListener('click', Lineup.closeSlotSearch);
+        getEl('btn-add-to-reserve').addEventListener('click', Lineup.openReserveSearch);
 
         const reserveContainer = getEl('reserve-list-container');
         if (reserveContainer) {
@@ -206,6 +207,7 @@ const App = {
         window.handleDropOnMain = Lineup.handleDropOnMain;
         window.handleDropOnReserve = Lineup.handleDropOnReserve;
         window.handleDragEnd = Lineup.handleDragEnd;
+        window.addNewArtistFromSearch = Lineup.addNewArtistFromSearch;
         window.toggleTheme = Theme.toggleTheme;
         window.loadArtists = UI.loadArtists;
     }

@@ -294,20 +294,21 @@ async function saveLineup(sheetName, lineup, reserves = []) {
     rowsToInsert.push(["", "", "", "", "", ""]);
     rowsToInsert.push(["", "", "", "", "", ""]);
 
-    // Reserves toevoegen vanaf Rij 18
+    // Reserve-sectie altijd schrijven (ook als leeg), zodat handmatig toevoegen in Sheets mogelijk is
     if (reserves && reserves.length > 0) {
       reserves.forEach((artist, index) => {
         let displayName = "";
         if (artist) {
-          displayName = (artist.artistName && artist.artistName !== '-') 
-            ? artist.artistName 
+          displayName = (artist.artistName && artist.artistName !== '-')
+            ? artist.artistName
             : `${artist.firstName || ''} ${artist.lastName || ''}`.trim();
         }
-
-        // Zet 'Reserve' label alleen bij de eerste reserve (Rij 18, Kolom A)
         const label = index === 0 ? "Reserve" : "";
         rowsToInsert.push([label, displayName, "", "", "", ""]);
       });
+    } else {
+      // Lege reserve-sectie: alleen de header-rij, zodat de gebruiker in Sheets kan zien waar reserves horen
+      rowsToInsert.push(["Reserve", "", "", "", "", ""]);
     }
 
     // 3. Schrijf de data
@@ -325,12 +326,12 @@ async function saveLineup(sheetName, lineup, reserves = []) {
   }
 }
 
-module.exports = { 
-  sheets, 
-  getSheetData, 
-  updateArtistData, 
-  addArtistData, 
-  deleteArtistData, 
+module.exports = {
+  sheets,
+  getSheetData,
+  updateArtistData,
+  addArtistData,
+  deleteArtistData,
   SPREADSHEET_ID,
   getSheetNames,
   getPreviousLineup,

@@ -7,7 +7,8 @@ import { showToast, showConfirm } from './notifications.js';
 const FIELD_MAP = {
     'Voornaam': 'firstName', 'Achternaam': 'lastName', 'Artiestennaam': 'artistName',
     'E-mailadres': 'email', 'Telefoonnummer': 'phone', 'Instagram account': 'instagram',
-    'Soort contact': 'type', 'Speelduur': 'setLength', 'Notities': 'notes', 'Profielfoto': 'profilePic'
+    'Soort contact': 'type', 'Speelduur': 'setLength', 'Notities': 'notes', 'Profielfoto': 'profilePic',
+    'Gender': 'gender'
 };
 
 const BOOL_MAP = {
@@ -116,9 +117,12 @@ export async function updateArtistField(event) {
         artist[BOOL_MAP[field]] = el.checked;
     } else if (el.tagName === 'SELECT' && field === 'Soort contact') {
         artist.type = el.value;
+    } else if (el.tagName === 'SELECT' && field === 'Gender') {
+        artist.gender = el.value;
     }
-    
+
     await saveArtistUpdate(rowIndex, artist, el.closest('td') || el.closest('label'));
+    if (field === 'Gender') applyFilters();
 }
 window.updateArtistField = updateArtistField;
 
