@@ -145,8 +145,6 @@ export function closeSlotSearch() {
     if (quickAdd) quickAdd.classList.add('hidden');
     const emailInput = getEl('new-artist-email');
     if (emailInput) emailInput.value = '';
-    const genderSelect = getEl('new-artist-gender');
-    if (genderSelect) genderSelect.value = '';
     activeSlotIndex = null;
     addingToReserve = false;
     activeGenderFilter = 'all';
@@ -178,7 +176,6 @@ export function handleLineupSearch(event) {
 export function addNewArtistFromSearch() {
     const rawName = getEl('slot-search-input').value.trim();
     const email = getEl('new-artist-email')?.value.trim() || '';
-    const gender = getEl('new-artist-gender')?.value || '';
     if (!rawName) return showToast('Voer eerst een naam in het zoekveld in.', 'error');
     const parts = rawName.split(/\s+/);
     const newArtist = {
@@ -187,7 +184,7 @@ export function addNewArtistFromSearch() {
         firstName: parts[0],
         lastName: parts.slice(1).join(' '),
         email: email || '-',
-        gender,
+        gender: '',
         notes: 'NIEUW',
         isNew: true,
     };

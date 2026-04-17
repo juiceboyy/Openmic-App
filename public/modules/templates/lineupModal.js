@@ -92,13 +92,6 @@ export const lineupSearchModalTemplate = /*html*/`
                     <i data-lucide="user-plus" class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0"></i>
                     Artiest niet gevonden. Vul e-mail in om direct toe te voegen.
                 </p>
-                <select id="new-artist-gender"
-                    class="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 dark:text-white mb-2">
-                    <option value="">Geslacht onbekend / zeg ik liever niet</option>
-                    <option value="Man">Man</option>
-                    <option value="Vrouw">Vrouw</option>
-                    <option value="Non-binair">Non-binair</option>
-                </select>
                 <div class="flex gap-2">
                     <input type="email" id="new-artist-email" placeholder="E-mailadres (optioneel)..."
                         class="flex-1 px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700 dark:text-white dark:placeholder-gray-500">
