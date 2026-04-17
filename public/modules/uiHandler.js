@@ -154,7 +154,9 @@ export function applyFilters() {
     const favFilter = getEl('filter-favs') ? getEl('filter-favs').value : 'all';
 
     state.currentFilteredData = state.allArtists.filter(artist => {
-        const matchesSearch = (artist.firstName + ' ' + artist.lastName + artist.artistName + artist.email).toLowerCase().includes(searchTerm);
+        const matchesSearch = (artist.firstName + ' ' + artist.lastName + artist.artistName + artist.email).toLowerCase().includes(searchTerm)
+            || artist.notities?.toLowerCase().includes(searchTerm)
+            || artist.opmerkingen?.toLowerCase().includes(searchTerm);
         let matchesRegion = regionFilter === 'all' || (regionFilter === 'Den Haag' && artist.regionDH) || (regionFilter === 'Rotterdam' && artist.regionRdam);
         const matchesType = typeFilter === 'all' || artist.type === typeFilter;
         let matchesBookable = bookableFilter === 'all' || (bookableFilter === 'ja' && artist.bookable) || (bookableFilter === 'nee' && !artist.bookable);
