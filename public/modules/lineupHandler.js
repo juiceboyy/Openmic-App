@@ -206,18 +206,48 @@ export async function exportLineupToClipboard() {
     else showToast("Kon niet kopiëren of lijst is leeg.", "error");
 }
 
+let pendingDOMRebuild = false;
+
+export function handleDragStart(event, index, list) {
+    DD.setSnapshots(currentLineup, reserveLineup);
+    pendingDOMRebuild = true;
+    DD.handleDragStart(event, index, list);
+}
+
 export function handleDropOnMain(event, targetIndex) {
     event.preventDefault();
     event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/50');
-    if (DD.processDropOnMain(targetIndex, currentLineup, reserveLineup)) { save(); DD.resetDraggedItem(); renderLineupUI(); }
+    if (DD.processDropOnMain(targetIndex, currentLineup, reserveLineup)) {
+        pendingDOMRebuild = false;
+        save(); DD.resetDraggedItem(); renderLineupUI();
+    }
 }
 
 export function handleDropOnReserve(event) {
     event.preventDefault();
-    if (DD.processDropOnReserve(currentLineup, reserveLineup)) { save(); DD.resetDraggedItem(); renderLineupUI(); }
+    if (DD.processDropOnReserve(currentLineup, reserveLineup)) {
+        pendingDOMRebuild = false;
+        save(); DD.resetDraggedItem(); renderLineupUI();
+    }
 }
 
-export const { handleDragStart, handleDragOver, handleDragEnter, handleDragLeave, handleDragEnd } = DD;
+export function handleDragEnd(event) {
+    DD.handleDragEnd(event);
+    if (pendingDOMRebuild) {
+        const { newMain, newReserve } = DD.rebuildFromDOM(
+            getEl('lineup-list-container'),
+            getEl('reserve-list-content')
+        );
+        for (let i = 0; i < newMain.length; i++) currentLineup[i] = newMain[i];
+        reserveLineup.length = 0;
+        newReserve.forEach(x => reserveLineup.push(x));
+        save();
+        renderLineupUI();
+    }
+    pendingDOMRebuild = false;
+}
+
+export const { handleDragOver, handleDragEnter, handleDragLeave } = DD;
 
 export async function saveLineupToDatabase() {
     if (!activeSessionName) return showToast('Laad eerst een sessie voordat je opslaat.', 'error');
