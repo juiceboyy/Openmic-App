@@ -78,13 +78,6 @@ export const lineupSearchModalTemplate = /*html*/`
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
-        <div id="gender-filter-bar" class="flex flex-wrap gap-1.5 px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-            <button data-gender-filter="all" onclick="setLineupGenderFilter('all')" class="px-2.5 py-1 rounded-full text-xs font-medium transition-colors bg-blue-600 text-white">Alle</button>
-            <button data-gender-filter="Man" onclick="setLineupGenderFilter('Man')" class="px-2.5 py-1 rounded-full text-xs font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">Man</button>
-            <button data-gender-filter="Vrouw" onclick="setLineupGenderFilter('Vrouw')" class="px-2.5 py-1 rounded-full text-xs font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">Vrouw</button>
-            <button data-gender-filter="Non-binair" onclick="setLineupGenderFilter('Non-binair')" class="px-2.5 py-1 rounded-full text-xs font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">Non-binair</button>
-            <button data-gender-filter="Onbekend" onclick="setLineupGenderFilter('Onbekend')" class="px-2.5 py-1 rounded-full text-xs font-medium transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300">Onbekend</button>
-        </div>
         <div id="slot-search-results" class="max-h-64 overflow-y-auto divide-y divide-gray-100 dark:divide-gray-700"></div>
         <div id="quick-add-new-artist" class="hidden border-t border-gray-100 dark:border-gray-700">
             <div class="px-4 py-4 bg-green-50/50 dark:bg-green-900/10">
