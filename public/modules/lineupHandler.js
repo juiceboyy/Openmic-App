@@ -12,6 +12,38 @@ let playedLastMonth = [];
 let activeSlotIndex = null;
 let activeSessionName = '';
 let addingToReserve = false;
+let activeGenderFilter = 'all';
+
+const isUnknownGender = (artist) => {
+    const g = (artist?.gender || '').toLowerCase().trim();
+    return !g || g === 'onbekend' || g.includes('zeg ik liever niet');
+};
+
+const matchesGender = (artist) => {
+    if (activeGenderFilter === 'all') return true;
+    if (activeGenderFilter === 'Onbekend') return isUnknownGender(artist);
+    return (artist?.gender || '').toLowerCase() === activeGenderFilter.toLowerCase();
+};
+
+function refreshGenderFilterUI() {
+    document.querySelectorAll('[data-gender-filter]').forEach(btn => {
+        const active = btn.dataset.genderFilter === activeGenderFilter;
+        btn.classList.toggle('bg-blue-600', active);
+        btn.classList.toggle('text-white', active);
+        btn.classList.toggle('bg-gray-100', !active);
+        btn.classList.toggle('text-gray-600', !active);
+        btn.classList.toggle('dark:bg-gray-700', !active);
+        btn.classList.toggle('dark:text-gray-300', !active);
+        btn.classList.toggle('hover:bg-gray-200', !active);
+    });
+}
+
+export function setLineupGenderFilter(filter) {
+    activeGenderFilter = filter;
+    refreshGenderFilterUI();
+    const input = getEl('slot-search-input');
+    if (input) handleLineupSearch({ target: input });
+}
 
 const save = () => saveToLocalStorage(currentLineup, reserveLineup);
 
@@ -113,15 +145,22 @@ export function closeSlotSearch() {
     if (quickAdd) quickAdd.classList.add('hidden');
     const emailInput = getEl('new-artist-email');
     if (emailInput) emailInput.value = '';
+    const genderSelect = getEl('new-artist-gender');
+    if (genderSelect) genderSelect.value = '';
     activeSlotIndex = null;
     addingToReserve = false;
+    activeGenderFilter = 'all';
+    refreshGenderFilterUI();
 }
 
 export function handleLineupSearch(event) {
     const q = event.target.value.toLowerCase().trim();
     const quickAdd = getEl('quick-add-new-artist');
     if (!q) { getEl('slot-search-results').innerHTML = ''; if (quickAdd) quickAdd.classList.add('hidden'); return; }
-    const matches = state.allArtists.filter(a => ((a.artistName || '').toLowerCase().includes(q) || (a.firstName || '').toLowerCase().includes(q) || (a.lastName || '').toLowerCase().includes(q)));
+    const matches = state.allArtists.filter(a =>
+        ((a.artistName || '').toLowerCase().includes(q) || (a.firstName || '').toLowerCase().includes(q) || (a.lastName || '').toLowerCase().includes(q) || (a.notes || '').toLowerCase().includes(q))
+        && matchesGender(a)
+    );
     if (matches.length === 0) {
         getEl('slot-search-results').innerHTML = '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Geen artiesten gevonden...</div>';
         if (quickAdd) { quickAdd.classList.remove('hidden'); lucide.createIcons(); }
@@ -139,6 +178,7 @@ export function handleLineupSearch(event) {
 export function addNewArtistFromSearch() {
     const rawName = getEl('slot-search-input').value.trim();
     const email = getEl('new-artist-email')?.value.trim() || '';
+    const gender = getEl('new-artist-gender')?.value || '';
     if (!rawName) return showToast('Voer eerst een naam in het zoekveld in.', 'error');
     const parts = rawName.split(/\s+/);
     const newArtist = {
@@ -147,6 +187,7 @@ export function addNewArtistFromSearch() {
         firstName: parts[0],
         lastName: parts.slice(1).join(' '),
         email: email || '-',
+        gender,
         notes: 'NIEUW',
         isNew: true,
     };
@@ -297,6 +338,7 @@ export async function saveLineupToDatabase() {
                 'Achternaam': artist.lastName || '',
                 'Artiestennaam': artist.artistName && artist.artistName !== '-' ? artist.artistName : '',
                 'E-mailadres': artist.email && artist.email !== '-' ? artist.email : '',
+                'Gender': artist.gender || '',
                 'Notities': 'NIEUW',
                 'Opmerkingen': 'NIEUW',
                 'Soort contact': 'Artiest',

@@ -136,7 +136,7 @@ export async function loadArtists() {
             workshops: isTrue(row['Interesse in workshops (Ja/Nee)']), workshop7Nov: isTrue(row['Workshop 7 nov (Ja/Nee)']),
             unsubscribed: isTrue(row['Unsubscribed (Ja/Nee)']), type: String(row['Soort contact'] || '-').trim(),
             blacklist: isTrue(row['Blacklist (Ja/Nee)']), notes: String(row['Notities'] || '-'), profilePic: String(row['Profielfoto'] || '-').trim(),
-            mailingSelection: isTrue(row['Mailing Selectie'])
+            mailingSelection: isTrue(row['Mailing Selectie']), gender: String(row['Gender'] || '').trim()
         }));
         toggleGlobalLoading(loadingState, false);
         applyFilters();
