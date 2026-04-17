@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aanmelden LuisterLab '26/'27 - Haagse Open Mic</title>
+
+    <!-- Tailwind & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=3">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        apple: { blue: '#0071e3' },
+                        luister: {
+                            amber: '#F59E0B',
+                            dark: '#1a1a2e',
+                            card: '#16213e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Gradient hero */
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1a2e 40%, #16213e 100%);
+        }
+
+        /* Subtle texture on dark bg */
+        .noise-bg {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+        }
+
+        /* Accent line */
+        .accent-line {
+            background: linear-gradient(90deg, #F59E0B, #EF4444, #8B5CF6);
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        /* Focus ring matching brand */
+        .input-field {
+            transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #F59E0B;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        }
+
+        /* Checkbox accent */
+        input[type="checkbox"]:checked {
+            accent-color: #F59E0B;
+        }
+
+        /* Submit button gradient */
+        .btn-submit {
+            background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn-submit:hover {
+            opacity: 0.92;
+        }
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Location badge */
+        .location-badge {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* Rules card */
+        .rules-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a2e; }
+        ::-webkit-scrollbar-thumb { background: #F59E0B; border-radius: 3px; }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen font-sans hero-gradient noise-bg text-white">
+
+    <!-- Hero Section -->
+    <div class="w-full px-4 pt-10 pb-0 flex flex-col items-center text-center">
+
+        <!-- Logo -->
+        <img src="/logo.png" alt="Haagse Open Mic Logo" class="w-20 h-20 object-contain mb-4 drop-shadow-xl">
+
+        <!-- Label -->
+        <span class="text-xs font-semibold tracking-[0.2em] uppercase text-amber-400 mb-3">Haagse Open Mic presenteert</span>
+
+        <!-- Title -->
+        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight leading-tight mb-2">
+            HOM <span class="text-transparent bg-clip-text" style="background-image: linear-gradient(90deg, #F59E0B, #EF4444);">LuisterLab</span>
+        </h1>
+        <p class="text-lg text-white/60 font-medium mb-5">Seizoen '26 / '27</p>
+
+        <!-- Accent line -->
+        <div class="accent-line w-16 mb-8"></div>
+
+        <!-- Intro text -->
+        <p class="text-base text-white/75 max-w-sm leading-relaxed mb-6">
+            Een gecureerd podium voor serieuze artiesten. Geen open mic, geen loterij — <strong class="text-white">jij wordt geselecteerd</strong> op basis van je talent en je achterban.
+        </p>
+
+        <!-- Location badges -->
+        <div class="flex flex-wrap gap-3 justify-center mb-10">
+            <div class="location-badge rounded-full px-4 py-2 flex items-center gap-2">
+                <i data-lucide="map-pin" class="w-4 h-4 text-amber-400"></i>
+                <span class="text-sm font-medium text-white/90">Amare, Den Haag</span>
+            </div>
+            <div class="location-badge rounded-full px-4 py-2 flex items-center gap-2">
+                <i data-lucide="train-front" class="w-4 h-4 text-amber-400"></i>
+                <span class="text-sm font-medium text-white/90">NS-rangeerterrein (zomer)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="w-full max-w-lg mx-auto px-4 pb-16">
+
+        <!-- Rules Block -->
+        <div class="rules-card rounded-2xl p-5 mb-6 backdrop-blur-sm">
+            <h2 class="text-sm font-semibold tracking-widest uppercase text-amber-400 mb-4">De spelregels</h2>
+            <ul class="space-y-3">
+                <li class="flex items-start gap-3">
+                    <span class="text-xl leading-none mt-0.5">⏱</span>
+                    <div>
+                        <p class="font-semibold text-white text-sm">20 minuten speeltijd</p>
+                        <p class="text-white/55 text-xs mt-0.5">Strak, scherp, geen uitloop. Maximale impact in minimale tijd.</p>
+                    </div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="text-xl leading-none mt-0.5">🎸</span>
+                    <div>
+                        <p class="font-semibold text-white text-sm">Serieuze podiumervaring vereist</p>
+                        <p class="text-white/55 text-xs mt-0.5">LuisterLab is geen beginnerspodium. We selecteren acts die al staan.</p>
+                    </div>
+                </li>
+                <li class="flex items-start gap-3">
+                    <span class="text-xl leading-none mt-0.5">🎟</span>
+                    <div>
+                        <p class="font-semibold text-white text-sm">Breng je eigen publiek mee</p>
+                        <p class="text-white/55 text-xs mt-0.5">Je zorgt zelf voor je achterban. Samen bouwen we een vol zaal.</p>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white/[0.07] border border-white/10 rounded-2xl p-6 backdrop-blur-sm" id="form-container">
+            <h2 class="text-sm font-semibold tracking-widest uppercase text-amber-400 mb-5">Aanmelden als act</h2>
+
+            <form id="luisterlab-form" class="space-y-4" novalidate>
+
+                <!-- Naam act -->
+                <div>
+                    <label for="actNaam" class="block text-sm font-medium text-white/80 mb-1.5">
+                        Naam act / artiest <span class="text-amber-400">*</span>
+                    </label>
+                    <input type="text" id="actNaam" name="actNaam" required autocomplete="off"
+                        class="input-field w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 text-base"
+                        placeholder="Bijv. The Wanderers">
+                    <p class="field-error hidden text-red-400 text-xs mt-1.5"></p>
+                </div>
+
+                <!-- Contactpersoon -->
+                <div>
+                    <label for="contactNaam" class="block text-sm font-medium text-white/80 mb-1.5">
+                        Contactpersoon (naam) <span class="text-amber-400">*</span>
+                    </label>
+                    <input type="text" id="contactNaam" name="contactNaam" required autocomplete="name"
+                        class="input-field w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 text-base"
+                        placeholder="Bijv. Maria Jansen">
+                    <p class="field-error hidden text-red-400 text-xs mt-1.5"></p>
+                </div>
+
+                <!-- Email & Telefoon naast elkaar op desktop, gestapeld op mobiel -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-white/80 mb-1.5">
+                            E-mailadres <span class="text-amber-400">*</span>
+                        </label>
+                        <input type="email" id="email" name="email" required autocomplete="email"
+                            class="input-field w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 text-base"
+                            placeholder="jouw@email.nl">
+                        <p class="field-error hidden text-red-400 text-xs mt-1.5"></p>
+                    </div>
+                    <div>
+                        <label for="telefoon" class="block text-sm font-medium text-white/80 mb-1.5">
+                            Telefoonnummer <span class="text-amber-400">*</span>
+                        </label>
+                        <input type="tel" id="telefoon" name="telefoon" required autocomplete="tel"
+                            class="input-field w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 text-base"
+                            placeholder="06 12345678">
+                        <p class="field-error hidden text-red-400 text-xs mt-1.5"></p>
+                    </div>
+                </div>
+
+                <!-- Omschrijving act -->
+                <div>
+                    <label for="omschrijving" class="block text-sm font-medium text-white/80 mb-1.5">
+                        Omschrijving van de act <span class="text-amber-400">*</span>
+                    </label>
+                    <textarea id="omschrijving" name="omschrijving" required rows="3"
+                        class="input-field w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 text-base resize-none"
+                        placeholder="Genre, bezetting, stijl — hoe zou jij je act omschrijven?"></textarea>
+                    <p class="field-error hidden text-red-400 text-xs mt-1.5"></p>
+                </div>
+
+                <!-- Live materiaal -->
+                <div>
+                    <label for="liveLink" class="block text-sm font-medium text-white/80 mb-1.5">
+                        Link naar live-materiaal <span class="text-amber-400">*</span>
+                        <span class="text-white/40 font-normal">(video of Spotify)</span>
+                    </label>
+                    <input type="url" id="liveLink" name="liveLink" required autocomplete="off"
+                        class="input-field w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 text-base"
+                        placeholder="https://youtube.com/...">
+                    <p class="text-white/35 text-xs mt-1.5">Verplicht — dit is hoe we je act beoordelen.</p>
+                    <p class="field-error hidden text-red-400 text-xs mt-1"></p>
+                </div>
+
+                <!-- Bandfoto -->
+                <div>
+                    <label for="bandfoto" class="block text-sm font-medium text-white/80 mb-1.5">
+                        Bandfoto <span class="text-amber-400">*</span>
+                        <span class="text-white/40 font-normal">(max. 10 MB)</span>
+                    </label>
+                    <label for="bandfoto"
+                        class="input-field flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors"
+                        id="bandfoto-label">
+                        <i data-lucide="image" class="w-5 h-5 text-white/40 flex-shrink-0"></i>
+                        <span id="bandfoto-name" class="text-white/40 text-sm truncate">Kies een afbeelding...</span>
+                    </label>
+                    <input type="file" id="bandfoto" name="bandfoto" accept="image/*" required
+                        class="sr-only">
+                    <p class="field-error hidden text-red-400 text-xs mt-1.5"></p>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-t border-white/10 pt-4 space-y-4">
+
+                    <!-- Checkbox 1 — Verplicht -->
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <div class="relative flex-shrink-0 mt-0.5">
+                            <input type="checkbox" id="akkoordRegels" name="akkoordRegels" required
+                                class="w-5 h-5 rounded-md cursor-pointer">
+                        </div>
+                        <span class="text-sm text-white/75 leading-relaxed group-hover:text-white/90 transition-colors">
+                            Ik ga akkoord met de <strong class="text-white">20-minuten regel</strong> en begrijp dat ik
+                            <strong class="text-white">mijn eigen publiek meeneem</strong>. <span class="text-amber-400">*</span>
+                        </span>
+                    </label>
+                    <p id="error-checkbox" class="hidden text-red-400 text-xs -mt-2 ml-8">Vereist om door te gaan.</p>
+
+                    <!-- Checkbox 2 — Optioneel -->
+                    <label class="flex items-start gap-3 cursor-pointer group">
+                        <div class="relative flex-shrink-0 mt-0.5">
+                            <input type="checkbox" id="vrijwilliger" name="vrijwilliger"
+                                class="w-5 h-5 rounded-md cursor-pointer">
+                        </div>
+                        <span class="text-sm text-white/55 leading-relaxed group-hover:text-white/75 transition-colors">
+                            Ik — of iemand uit mijn act — wil graag helpen als <strong class="text-white/75">vrijwilliger</strong>
+                            (bardienst / promo).
+                        </span>
+                    </label>
+
+                </div>
+
+                <!-- Error message general -->
+                <p id="error-general"
+                    class="hidden text-red-400 text-sm text-center bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
+                </p>
+
+                <!-- Submit -->
+                <button type="submit" id="submit-btn"
+                    class="btn-submit w-full text-white font-semibold py-4 px-6 rounded-xl shadow-lg flex justify-center items-center gap-2 mt-2 text-base">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                    Aanmelden voor LuisterLab
+                </button>
+
+                <p class="text-center text-white/30 text-xs">
+                    Aanmelden is geen garantie op een plek. We nemen contact met je op na selectie.
+                </p>
+
+            </form>
+        </div>
+
+        <!-- Success State (hidden) -->
+        <div id="success-msg" class="hidden">
+            <div class="bg-white/[0.07] border border-white/10 rounded-2xl p-8 text-center backdrop-blur-sm">
+                <div class="bg-green-500/15 border border-green-500/25 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <i data-lucide="check-circle-2" class="text-green-400 w-10 h-10"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">Aanmelding ontvangen!</h2>
+                <p class="text-white/60 text-sm leading-relaxed max-w-xs mx-auto">
+                    Bedankt voor je aanmelding bij HOM LuisterLab. We bekijken je materiaal en nemen contact op als je
+                    geselecteerd wordt voor het seizoen '26/'27.
+                </p>
+                <div class="mt-6 pt-5 border-t border-white/10">
+                    <p class="text-white/35 text-xs">Volg ons voor updates</p>
+                    <div class="flex justify-center gap-4 mt-3">
+                        <span class="text-white/50 text-sm font-medium">@haagse.open.mic</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        const form = document.getElementById('luisterlab-form');
+
+        // Bandfoto label updaten bij selectie
+        document.getElementById('bandfoto').addEventListener('change', function () {
+            const nameEl = document.getElementById('bandfoto-name');
+            const label = document.getElementById('bandfoto-label');
+            if (this.files && this.files[0]) {
+                nameEl.textContent = this.files[0].name;
+                nameEl.classList.remove('text-white/40');
+                nameEl.classList.add('text-white/80');
+                label.style.borderColor = 'rgba(245,158,11,0.5)';
+                clearFieldError(this);
+            }
+        });
+
+        function setFieldError(input, message) {
+            const errorEl = input.closest('div').querySelector('.field-error');
+            if (!errorEl) return;
+            input.style.borderColor = 'rgba(239,68,68,0.6)';
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+        }
+
+        function clearFieldError(input) {
+            const errorEl = input.closest('div').querySelector('.field-error');
+            if (!errorEl) return;
+            input.style.borderColor = '';
+            errorEl.classList.add('hidden');
+        }
+
+        form.querySelectorAll('input:not([type="file"]):not([type="checkbox"]), textarea').forEach(el => {
+            el.addEventListener('input', () => clearFieldError(el));
+        });
+
+        function validateForm() {
+            let valid = true;
+
+            const fields = [
+                { id: 'actNaam', label: 'Naam act' },
+                { id: 'contactNaam', label: 'Contactpersoon' },
+                { id: 'email', label: 'E-mailadres' },
+                { id: 'telefoon', label: 'Telefoonnummer' },
+                { id: 'omschrijving', label: 'Omschrijving' },
+                { id: 'liveLink', label: 'Link naar live-materiaal' },
+            ];
+
+            fields.forEach(({ id, label }) => {
+                const el = document.getElementById(id);
+                if (!el.value.trim()) {
+                    setFieldError(el, `${label} is verplicht.`);
+                    valid = false;
+                } else if (id === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim())) {
+                    setFieldError(el, 'Vul een geldig e-mailadres in.');
+                    valid = false;
+                } else if (id === 'liveLink') {
+                    try { new URL(el.value.trim()); clearFieldError(el); }
+                    catch { setFieldError(el, 'Vul een geldige URL in (begin met https://).'); valid = false; }
+                } else {
+                    clearFieldError(el);
+                }
+            });
+
+            const foto = document.getElementById('bandfoto');
+            if (!foto.files || !foto.files[0]) {
+                setFieldError(foto, 'Bandfoto is verplicht.');
+                valid = false;
+            }
+
+            const checkbox = document.getElementById('akkoordRegels');
+            const checkboxError = document.getElementById('error-checkbox');
+            if (!checkbox.checked) {
+                checkboxError.classList.remove('hidden');
+                valid = false;
+            } else {
+                checkboxError.classList.add('hidden');
+            }
+
+            return valid;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const generalError = document.getElementById('error-general');
+            generalError.classList.add('hidden');
+
+            if (!validateForm()) {
+                const firstError = form.querySelector('.field-error:not(.hidden), #error-checkbox:not(.hidden)');
+                if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return;
+            }
+
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Aanmelding versturen...';
+            lucide.createIcons();
+
+            try {
+                const formData = new FormData();
+                formData.append('actNaam', document.getElementById('actNaam').value.trim());
+                formData.append('contactNaam', document.getElementById('contactNaam').value.trim());
+                formData.append('email', document.getElementById('email').value.trim());
+                formData.append('telefoon', document.getElementById('telefoon').value.trim());
+                formData.append('omschrijving', document.getElementById('omschrijving').value.trim());
+                formData.append('liveLink', document.getElementById('liveLink').value.trim());
+                formData.append('akkoordRegels', document.getElementById('akkoordRegels').checked);
+                formData.append('vrijwilliger', document.getElementById('vrijwilliger').checked);
+                formData.append('bandfoto', document.getElementById('bandfoto').files[0]);
+
+                const response = await fetch('/api/luisterlab', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    document.getElementById('form-container').classList.add('hidden');
+                    document.getElementById('success-msg').classList.remove('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    throw new Error(result.message || 'Onbekende serverfout.');
+                }
+            } catch (error) {
+                console.error('[LuisterLab] Aanmelding mislukt:', error);
+                generalError.textContent = error.message || 'Er ging iets mis. Probeer het later nog eens.';
+                generalError.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="send" class="w-5 h-5"></i> Aanmelden voor LuisterLab';
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+
+</html>

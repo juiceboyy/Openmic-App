@@ -37,7 +37,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 5. Stateless API Authenticatie Middleware
 app.use('/api', (req, res, next) => {
-  if (req.path === '/verify-pin' || req.path === '/public-subscribe' || req.path === '/sync/callback') return next(); // De check zélf mag altijd door
+  if (req.path === '/verify-pin' || req.path === '/public-subscribe' || req.path === '/sync/callback' || req.path === '/luisterlab') return next(); // De check zélf mag altijd door
   
   const clientPin = req.headers['x-app-pin'];
   if (clientPin && clientPin === process.env.APP_PIN) return next();
@@ -119,6 +119,7 @@ app.use('/api/mailing', require('./routes/mailing'));
 app.use('/api/speelschema', require('./routes/speelschema'));
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/generate-mailing', require('./routes/generateMailing'));
+app.use('/api/luisterlab', require('./routes/luisterlab'));
 
 // 7. Statische bestanden Fallback (Voor Single Page Applications)
 app.get(/.*/, (req, res) => {
