@@ -74,9 +74,9 @@ export function renderTable(dataToRender, elements) {
         const artistNameBadge = `<div class="inline-flex items-center px-1.5 py-0 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-[11px] font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2 h-2 mr-1"></i>${editableSpan('Artiestennaam', artist.artistName, 'Artiestennaam')}</div>`;
 
         const genderSymbol = artist.gender === 'Vrouw' ? '♀' : artist.gender === 'Man' ? '♂' : artist.gender === 'Non-binair' ? '⚧' : '·';
-        const genderColor = artist.gender === 'Vrouw' ? 'text-rose-400 dark:text-rose-400' : artist.gender === 'Man' ? 'text-blue-400 dark:text-blue-400' : artist.gender === 'Non-binair' ? 'text-purple-400 dark:text-purple-400' : 'text-gray-300 dark:text-gray-600';
-        const genderIconSelect = `<select data-field="Gender" data-row="${artist.rowIndex}" onchange="window.updateArtistField(event)" title="${artist.gender || 'Gender instellen'}" class="appearance-none bg-transparent ${genderColor} hover:text-gray-500 dark:hover:text-gray-300 text-sm font-medium cursor-pointer outline-none border-none p-0 m-0 leading-none transition-colors shrink-0 w-[1.1em]">
-            <option value="" ${!artist.gender ? 'selected' : ''}>·</option>
+        const genderColor = artist.gender === 'Vrouw' ? 'text-rose-400 dark:text-rose-400' : artist.gender === 'Man' ? 'text-blue-400 dark:text-blue-400' : artist.gender === 'Non-binair' ? 'text-purple-400 dark:text-purple-400' : 'text-gray-400 dark:text-gray-500';
+        const genderIconSelect = `<select data-field="Gender" data-row="${artist.rowIndex}" onchange="window.updateArtistField(event)" title="${artist.gender || 'Gender instellen'}" class="appearance-none bg-transparent ${genderColor} hover:text-gray-600 dark:hover:text-gray-300 text-sm font-medium cursor-pointer outline-none border-none p-0 m-0 leading-none transition-colors shrink-0 w-[1.1em]">
+            <option value="" ${!artist.gender ? 'selected' : ''}>?</option>
             <option value="Man" ${artist.gender === 'Man' ? 'selected' : ''}>♂</option>
             <option value="Vrouw" ${artist.gender === 'Vrouw' ? 'selected' : ''}>♀</option>
             <option value="Non-binair" ${artist.gender === 'Non-binair' ? 'selected' : ''}>⚧</option>
