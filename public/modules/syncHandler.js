@@ -52,7 +52,13 @@ function openAuthPopup(url) {
         window.addEventListener('message', messageHandler);
         // Fallback: als popup gesloten wordt zonder success
         const closedCheck = setInterval(() => {
-            if (popup && popup.closed) {
+            try {
+                if (popup && popup.closed) {
+                    clearInterval(closedCheck);
+                    window.removeEventListener('message', messageHandler);
+                    resolve(false);
+                }
+            } catch (e) {
                 clearInterval(closedCheck);
                 window.removeEventListener('message', messageHandler);
                 resolve(false);
