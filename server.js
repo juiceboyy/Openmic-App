@@ -19,6 +19,10 @@ app.set('trust proxy', 1);
 // 3. Middleware instellen (De portiers van je server)
 app.use(cors());
 app.use(express.json()); // Zorgt dat we inkomende JSON-data (de 'payload') kunnen lezen
+app.use((req, res, next) => {
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
+});
 
 // 🛠️ DEBUG LOGGING: Klikspaan die ELK inkomend verzoek print
 app.use((req, res, next) => {
