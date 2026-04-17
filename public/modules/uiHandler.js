@@ -151,7 +151,6 @@ export async function loadArtists() {
             blacklist: isTrue(row['Blacklist (Ja/Nee)']), notes: String(row['Notities'] || '-'), profilePic: String(row['Profielfoto'] || '-').trim(),
             mailingSelection: isTrue(row['Mailing Selectie']), gender: String(row['Gender'] || '').trim()
         }));
-        window.artists = state.allArtists;
         toggleGlobalLoading(loadingState, false);
         applyFilters();
     } catch (error) { 
