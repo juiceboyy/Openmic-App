@@ -207,6 +207,7 @@ const App = {
         window.handleDropOnMain = Lineup.handleDropOnMain;
         window.handleDropOnReserve = Lineup.handleDropOnReserve;
         window.handleDragEnd = Lineup.handleDragEnd;
+        window.addNewArtistFromSearch = Lineup.addNewArtistFromSearch;
         window.toggleTheme = Theme.toggleTheme;
         window.loadArtists = UI.loadArtists;
     }

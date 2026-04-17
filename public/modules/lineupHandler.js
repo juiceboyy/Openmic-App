@@ -109,20 +109,55 @@ export function openReserveSearch() {
 
 export function closeSlotSearch() {
     getEl('lineup-search-modal').classList.add('hidden');
+    const quickAdd = getEl('quick-add-new-artist');
+    if (quickAdd) quickAdd.classList.add('hidden');
+    const emailInput = getEl('new-artist-email');
+    if (emailInput) emailInput.value = '';
     activeSlotIndex = null;
     addingToReserve = false;
 }
 
 export function handleLineupSearch(event) {
     const q = event.target.value.toLowerCase().trim();
-    if (!q) { getEl('slot-search-results').innerHTML = ''; return; }
+    const quickAdd = getEl('quick-add-new-artist');
+    if (!q) { getEl('slot-search-results').innerHTML = ''; if (quickAdd) quickAdd.classList.add('hidden'); return; }
     const matches = state.allArtists.filter(a => ((a.artistName || '').toLowerCase().includes(q) || (a.firstName || '').toLowerCase().includes(q) || (a.lastName || '').toLowerCase().includes(q)));
-    getEl('slot-search-results').innerHTML = matches.length === 0 ? '<div class="px-4 py-3 text-sm text-gray-500">Geen artiesten gevonden...</div>' : matches.map(a => {
-        const dn = getDisplayName(a);
-        return currentLineup.some(s => s?.rowIndex === a.rowIndex) 
-            ? `<div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 opacity-60 cursor-not-allowed flex justify-between items-center"><div><div class="font-medium text-gray-500 dark:text-gray-400">${dn}</div><div class="text-xs text-gray-400 dark:text-gray-500">${a.firstName} ${a.lastName}</div></div><span class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Al in lijst</span></div>`
-            : `<div onclick="selectLineupArtist(${a.rowIndex})" class="px-4 py-3 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"><div class="font-medium text-gray-900 dark:text-gray-100">${dn}</div><div class="text-xs text-gray-500 dark:text-gray-400">${a.firstName} ${a.lastName}</div></div>`;
-    }).join('');
+    if (matches.length === 0) {
+        getEl('slot-search-results').innerHTML = '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Geen artiesten gevonden...</div>';
+        if (quickAdd) { quickAdd.classList.remove('hidden'); lucide.createIcons(); }
+    } else {
+        if (quickAdd) quickAdd.classList.add('hidden');
+        getEl('slot-search-results').innerHTML = matches.map(a => {
+            const dn = getDisplayName(a);
+            return currentLineup.some(s => s?.rowIndex === a.rowIndex)
+                ? `<div class="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 opacity-60 cursor-not-allowed flex justify-between items-center"><div><div class="font-medium text-gray-500 dark:text-gray-400">${dn}</div><div class="text-xs text-gray-400 dark:text-gray-500">${a.firstName} ${a.lastName}</div></div><span class="text-xs font-medium text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">Al in lijst</span></div>`
+                : `<div onclick="selectLineupArtist(${a.rowIndex})" class="px-4 py-3 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"><div class="font-medium text-gray-900 dark:text-gray-100">${dn}</div><div class="text-xs text-gray-500 dark:text-gray-400">${a.firstName} ${a.lastName}</div></div>`;
+        }).join('');
+    }
+}
+
+export function addNewArtistFromSearch() {
+    const rawName = getEl('slot-search-input').value.trim();
+    const email = getEl('new-artist-email')?.value.trim() || '';
+    if (!rawName) return showToast('Voer eerst een naam in het zoekveld in.', 'error');
+    const parts = rawName.split(/\s+/);
+    const newArtist = {
+        rowIndex: null,
+        artistName: rawName,
+        firstName: parts[0],
+        lastName: parts.slice(1).join(' '),
+        email: email || '-',
+        notes: 'NIEUW',
+        isNew: true,
+    };
+    if (addingToReserve) {
+        reserveLineup.push(newArtist);
+        showToast(`${rawName} toegevoegd aan reservelijst als nieuwe artiest.`, 'success');
+    } else if (activeSlotIndex !== null) {
+        currentLineup[activeSlotIndex] = newArtist;
+        showToast(`${rawName} toegevoegd aan speelschema als nieuwe artiest.`, 'success');
+    } else { return; }
+    save(); closeSlotSearch(); renderLineupUI();
 }
 
 export async function selectLineupArtist(rowIndex) {
@@ -253,9 +288,27 @@ export async function saveLineupToDatabase() {
     if (!activeSessionName) return showToast('Laad eerst een sessie voordat je opslaat.', 'error');
     const btn = getEl('btn-save-lineup'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
+        const newArtists = [...currentLineup.filter(a => a?.isNew), ...reserveLineup.filter(a => a?.isNew)];
+        const today = new Date().toLocaleDateString('nl-NL');
+        for (const artist of newArtists) {
+            await apiRequest({
+                _action: 'add',
+                'Voornaam': artist.firstName || '',
+                'Achternaam': artist.lastName || '',
+                'Artiestennaam': artist.artistName && artist.artistName !== '-' ? artist.artistName : '',
+                'E-mailadres': artist.email && artist.email !== '-' ? artist.email : '',
+                'Notities': 'NIEUW',
+                'Opmerkingen': 'NIEUW',
+                'Soort contact': 'Artiest',
+                'Datum toegevoegd': today,
+            });
+        }
         const res = await apiRequest({ _action: 'save_lineup', sheetName: activeSessionName, lineup: currentLineup, reserve: reserveLineup });
         if (res.status === "success") {
-            showToast("Lineup succesvol opgeslagen!", "success");
+            const msg = newArtists.length > 0
+                ? `Lineup opgeslagen! ${newArtists.length} nieuwe artiest(en) ook toegevoegd aan contacten.`
+                : "Lineup succesvol opgeslagen!";
+            showToast(msg, "success");
             clearLocalStorage();
         } else showToast("Fout: " + res.message, "error");
     } catch (e) { showToast("Opslaan mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
