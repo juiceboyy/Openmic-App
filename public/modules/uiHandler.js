@@ -101,6 +101,14 @@ export function renderTable(dataToRender, elements) {
             <option value="-" ${artist.type === '-' ? 'selected' : ''} class="dark:bg-gray-800">-</option>
         </select>`;
 
+        let genderSelect = `<select data-field="Gender" data-row="${artist.rowIndex}" onchange="window.updateArtistField(event)" class="bg-transparent text-gray-500 dark:text-gray-400 text-xs outline-none cursor-pointer focus:ring-1 focus:ring-apple-blue rounded hover:bg-gray-100 dark:hover:bg-gray-700 py-0 m-0 px-1 -ml-1 h-auto leading-tight transition-colors mt-0.5">
+            <option value="" ${!artist.gender ? 'selected' : ''} class="dark:bg-gray-800">Gender?</option>
+            <option value="Man" ${artist.gender === 'Man' ? 'selected' : ''} class="dark:bg-gray-800">Man</option>
+            <option value="Vrouw" ${artist.gender === 'Vrouw' ? 'selected' : ''} class="dark:bg-gray-800">Vrouw</option>
+            <option value="Non-binair" ${artist.gender === 'Non-binair' ? 'selected' : ''} class="dark:bg-gray-800">Non-binair</option>
+            <option value="Zeg ik liever niet" ${artist.gender === 'Zeg ik liever niet' ? 'selected' : ''} class="dark:bg-gray-800">Zeg ik liever niet</option>
+        </select>`;
+
         let unsubHTML = `<label class="inline-flex items-center px-1.5 py-0 rounded text-xs font-medium border cursor-pointer transition-colors text-gray-600 border-gray-200 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700 h-5 leading-none">
             <input type="checkbox" class="form-checkbox h-3 w-3 mr-1 rounded text-gray-500 focus:ring-gray-500" data-row="${artist.rowIndex}" data-field="Unsubscribed (Ja/Nee)" ${artist.unsubscribed ? 'checked' : ''} onchange="window.updateArtistField(event)">
             Unsubscribed
@@ -112,7 +120,7 @@ export function renderTable(dataToRender, elements) {
             <td class="px-2 py-1.5 text-center w-8 align-middle"><div class="flex flex-col items-center gap-2"><input type="checkbox" class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer" ${artist.mailingSelection ? 'checked' : ''} onchange="window.toggleMailingSelection(${artist.rowIndex}, this.checked)"><button data-index="${artist.rowIndex}" class="btn-delete text-red-300 hover:text-red-600 p-1 rounded transition-colors focus:outline-none opacity-0 group-hover:opacity-100" title="Verwijder Artiest"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
             <td class="px-2 py-1.5 min-w-[140px]"><div class="flex items-center gap-2.5">${photoHTML}<div class="flex flex-col items-start"><div class="font-medium text-gray-900 dark:text-gray-100 text-sm flex flex-wrap gap-1 mb-0">${editableSpan('Voornaam', artist.firstName, 'Voor')} ${editableSpan('Achternaam', artist.lastName, 'Achter')}</div>${artistNameHTML}</div></div></td>
             <td class="px-2 py-1.5 min-w-[200px] max-w-[250px]"><div class="flex flex-col gap-0.5 w-full overflow-hidden"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs w-full overflow-hidden">${artist.email && artist.email !== '-' ? `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${artist.email}" target="_blank" rel="noopener noreferrer" class="mr-1.5 text-gray-400 hover:text-apple-blue dark:hover:text-blue-400 transition-colors shrink-0" title="Stuur e-mail naar ${artist.email}"><i data-lucide="mail" class="w-3 h-3"></i></a>` : '<i data-lucide="mail" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i>'} <div class="w-full overflow-hidden" title="${artist.email}">${editableSpan('E-mailadres', artist.email, 'E-mail', 'block truncate w-full')}</div></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs w-full overflow-hidden"><i data-lucide="phone" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i> <div class="w-full overflow-hidden">${editableSpan('Telefoonnummer', artist.phone, 'Tel', 'block truncate w-full')}</div></div>${instaHTML}</div></td>
-            <td class="px-2 py-1.5 w-[140px]"><div class="mb-0">${typeSelect}</div><div class="flex flex-col gap-0 text-xs text-gray-500 dark:text-gray-400"><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors leading-tight"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Den Haag" ${artist.regionDH ? 'checked' : ''} onchange="window.updateArtistField(event)"> Den Haag</label><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors leading-tight"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Rotterdam" ${artist.regionRdam ? 'checked' : ''} onchange="window.updateArtistField(event)"> Rotterdam</label></div></td>
+            <td class="px-2 py-1.5 w-[140px]"><div class="mb-0">${typeSelect}</div><div class="mb-0.5">${genderSelect}</div><div class="flex flex-col gap-0 text-xs text-gray-500 dark:text-gray-400"><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors leading-tight"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Den Haag" ${artist.regionDH ? 'checked' : ''} onchange="window.updateArtistField(event)"> Den Haag</label><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors leading-tight"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Rotterdam" ${artist.regionRdam ? 'checked' : ''} onchange="window.updateArtistField(event)"> Rotterdam</label></div></td>
             <td class="px-2 py-1.5 w-[160px]"><div class="flex flex-col">${detailsHTML}</div></td>
             <td class="px-2 py-1.5 w-[180px]"><div class="flex flex-wrap items-center gap-1">${renderBadges(artist)} ${unsubHTML}</div></td>
             <td class="px-2 py-1.5 max-w-[130px]">${notesHTML}</td>`;
@@ -146,12 +154,18 @@ export async function loadArtists() {
     }
 }
 
+function isUnknownGender(artist) {
+    const g = (artist.gender || '').toLowerCase().trim();
+    return !g || g === 'onbekend' || g.includes('zeg ik liever niet');
+}
+
 export function applyFilters() {
     const searchTerm = getEl('search-input').value.toLowerCase();
     const regionFilter = getEl('filter-region').value;
     const typeFilter = getEl('filter-type').value;
     const bookableFilter = getEl('filter-bookable').value;
     const favFilter = getEl('filter-favs') ? getEl('filter-favs').value : 'all';
+    const genderFilter = getEl('filter-gender') ? getEl('filter-gender').value : 'all';
 
     state.currentFilteredData = state.allArtists.filter(artist => {
         const matchesSearch = (artist.firstName + ' ' + artist.lastName + artist.artistName + artist.email).toLowerCase().includes(searchTerm)
@@ -159,14 +173,17 @@ export function applyFilters() {
         let matchesRegion = regionFilter === 'all' || (regionFilter === 'Den Haag' && artist.regionDH) || (regionFilter === 'Rotterdam' && artist.regionRdam);
         const matchesType = typeFilter === 'all' || artist.type === typeFilter;
         let matchesBookable = bookableFilter === 'all' || (bookableFilter === 'ja' && artist.bookable) || (bookableFilter === 'nee' && !artist.bookable);
-        
+
         let matchesFavs = true;
         if (favFilter === 'gijs') matchesFavs = artist.favGijs;
         else if (favFilter === 'ro') matchesFavs = artist.favRo;
         else if (favFilter === 'both') matchesFavs = artist.favGijs && artist.favRo;
 
+        const matchesGender = genderFilter === 'all' ||
+            (genderFilter === 'Onbekend' ? isUnknownGender(artist) : (artist.gender || '').toLowerCase() === genderFilter.toLowerCase());
+
         const matchesImport = !state.importFilterActive || state.recentlyImportedEmails.has((artist.email || '').toLowerCase().trim());
-        return matchesSearch && matchesRegion && matchesType && matchesBookable && matchesFavs && matchesImport;
+        return matchesSearch && matchesRegion && matchesType && matchesBookable && matchesFavs && matchesGender && matchesImport;
     });
 
     const domElements = {
