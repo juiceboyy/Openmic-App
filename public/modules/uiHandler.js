@@ -152,6 +152,7 @@ export async function loadArtists() {
             mailingSelection: isTrue(row['Mailing Selectie']), gender: String(row['Gender'] || '').trim()
         }));
         toggleGlobalLoading(loadingState, false);
+        window.loadedArtists = state.allArtists;
         applyFilters();
     } catch (error) { 
         console.error(error);
