@@ -43,7 +43,7 @@ const App = {
 
     bindEvents() {
         // Filter Events
-        ['search-input', 'filter-region', 'filter-type', 'filter-bookable', 'filter-favs'].forEach(id => {
+        ['search-input', 'filter-region', 'filter-type', 'filter-bookable', 'filter-favs', 'filter-gender'].forEach(id => {
             const el = getEl(id);
             if (el) el.addEventListener(id === 'search-input' ? 'input' : 'change', UI.applyFilters);
         });
