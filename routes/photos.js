@@ -121,31 +121,30 @@ router.post('/scan', async (req, res) => {
   }
 });
 
-// Send-route: Emails versturen via Gmail
-router.post('/send', async (req, res) => {
+function buildEmailBody(artistName, folderLink) {
+  return `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">Hoi ${artistName},<br><br>Bedankt voor je optreden! We hebben de foto's binnengekregen van JCSFotografie.<br><br>Via de onderstaande link kun je jouw persoonlijke foto's bekijken en downloaden:<br><a href="${folderLink}" style="color: #0071e3;">${folderLink}</a><br><br>Deel je ze op Instagram? Vergeet dan niet de fotograaf (<b>@jcsfotografie_</b>) en ons (<b>@haagseopenmic</b>) te taggen!<br><br>Hartelijke groet,<br><br>Gijs en Ro<br><br><b>Haagse Open Mic</b><br>Elke 2e dinsdag van de maand<br>19u - 22u<br>IG: <a href="https://instagram.com/haagseopenmic" style="color: #0071e3; text-decoration: none;">@HaagseOpenMic</a></div>`;
+}
+
+// Send-single route: Één email per request (voorkomt connection timeout bij bulk)
+router.post('/send-single', async (req, res) => {
   try {
-    const { matches, testMode, testEmail } = req.body;
-    let sentCount = 0;
+    const { match } = req.body;
+    if (!match || !match.email || match.email === '-') {
+      return res.json({ status: 'skipped' });
+    }
 
-    const emailPromises = matches.map(async (match) => {
-      if (match.selected && match.email && match.email !== '-') {
-        let subject = testMode ? "[TEST] Jouw foto's van de Haagse Open Mic!" : "Jouw foto's van de Haagse Open Mic!";
-        let recipientEmail = testMode ? testEmail : match.email;
-        let testWarning = testMode ? `<p style="color:#d97706; font-size:12px; background:#fef3c7; padding:8px; border-radius:4px;"><b>TEST MODUS ACTIEF:</b> Deze mail zou in het echt verstuurd worden naar: <b>${match.email}</b><br>En in Cc naar: <b>haagseopenmic@gmail.com</b></p>` : "";
-        let body = `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">${testWarning}Hoi ${match.artistName},<br><br>Bedankt voor je optreden! We hebben de foto's binnengekregen van JCSFotografie.<br><br>Via de onderstaande link kun je jouw persoonlijke foto's bekijken en downloaden:<br><a href="${match.folderLink}" style="color: #0071e3;">${match.folderLink}</a><br><br>Deel je ze op Instagram? Vergeet dan niet de fotograaf (<b>@jcsfotografie_</b>) en ons (<b>@haagseopenmic</b>) te taggen!<br><br>Hartelijke groet,<br><br>Gijs en Ro<br><br><b>Haagse Open Mic</b><br>Elke 2e dinsdag van de maand<br>19u - 22u<br>IG: <a href="https://instagram.com/haagseopenmic" style="color: #0071e3; text-decoration: none;">@HaagseOpenMic</a></div>`;
+    const mailOptions = {
+      from: '"Haagse Open Mic" <haagseopenmic@gmail.com>',
+      to: match.email,
+      cc: 'haagseopenmic@gmail.com',
+      subject: "Jouw foto's van de Haagse Open Mic!",
+      html: buildEmailBody(match.artistName, match.folderLink)
+    };
 
-        let mailOptions = { from: '"Haagse Open Mic" <haagseopenmic@gmail.com>', to: recipientEmail, subject: subject, html: body };
-        if (!testMode) mailOptions.cc = "haagseopenmic@gmail.com";
-
-        await transporter.sendMail(mailOptions);
-        sentCount++;
-      }
-    });
-
-    await Promise.all(emailPromises);
-    res.json({ status: 'success', sentCount });
+    await transporter.sendMail(mailOptions);
+    res.json({ status: 'success' });
   } catch (error) {
-    console.error('Email send error:', error);
+    console.error('Single email error:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });

@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
-import { getEl, toggleButtonLoading } from './utils.js';
+import { getEl } from './utils.js';
 import { showToast, showConfirm } from './notifications.js';
 
 export function renderMatches(matches, elements) {
@@ -53,11 +53,42 @@ export function resolveMultipleMatch(index, selectElement) {
 
 export async function sendPhotos() {
     state.scannedMatches.forEach((m, idx) => { const cb = getEl(`match-cb-${idx}`); m.selected = cb ? cb.checked : false; });
-    const toSend = state.scannedMatches.filter(m => m.selected); if(toSend.length === 0) { showToast("Geen vinkjes gezet!", "error"); return; }
-    if(!await showConfirm(`Stuur e-mail naar ${toSend.length} artiest(en)?`)) return;
-    const btn = getEl('btn-send-photos'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
+    const toSend = state.scannedMatches.filter(m => m.selected);
+    if (toSend.length === 0) { showToast("Geen vinkjes gezet!", "error"); return; }
+    if (!await showConfirm(`Stuur e-mail naar ${toSend.length} artiest(en)?`)) return;
+
+    const btn = getEl('btn-send-photos');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+
+    let sentCount = 0;
+    let errorCount = 0;
+
     try {
-        const result = await apiRequest({ _action: 'send_emails', matches: state.scannedMatches });
-        if (result.status === "success") { showToast(`Gelukt! ${result.sentCount} e-mails verstuurd.`, "success"); getEl('photo-modal').classList.add('hidden'); } else { showToast("Fout: " + result.message, "error"); }
-    } catch (e) { showToast("Verzenden mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
+        for (let i = 0; i < toSend.length; i++) {
+            btn.innerHTML = `Verzenden... (${i + 1}/${toSend.length})`;
+            try {
+                const result = await apiRequest({ _action: 'send_single_email', match: toSend[i] });
+                if (result.status === 'success') sentCount++;
+            } catch (e) {
+                errorCount++;
+                console.error('Email mislukt voor', toSend[i].email, e);
+            }
+            if (i < toSend.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 800));
+            }
+        }
+
+        if (errorCount === 0) {
+            showToast(`Gelukt! ${sentCount} e-mails verstuurd.`, "success");
+        } else {
+            showToast(`${sentCount} verstuurd, ${errorCount} mislukt.`, "warning");
+        }
+        getEl('photo-modal').classList.add('hidden');
+    } catch (e) {
+        showToast("Verzenden mislukt.", "error");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+    }
 }
