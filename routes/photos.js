@@ -135,6 +135,11 @@ function buildEmailBody(artistName, folderLink) {
 
 // Send-single route: Één email per request (voorkomt connection timeout bij bulk)
 router.post('/send-single', async (req, res) => {
+  if (!process.env.EMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.error('Missende e-mail credentials!');
+    return res.status(500).json({ status: 'error', message: 'E-mail instellingen ontbreken op de server' });
+  }
+
   try {
     const { match } = req.body;
     if (!match || !match.email || match.email === '-') {
@@ -142,9 +147,9 @@ router.post('/send-single', async (req, res) => {
     }
 
     const mailOptions = {
-      from: '"Haagse Open Mic" <haagseopenmic@gmail.com>',
+      from: `"Haagse Open Mic" <${process.env.EMAIL_USER}>`,
       to: match.email,
-      cc: 'haagseopenmic@gmail.com',
+      cc: process.env.EMAIL_USER,
       subject: "Jouw foto's van de Haagse Open Mic!",
       html: buildEmailBody(match.artistName, match.folderLink)
     };
@@ -152,7 +157,7 @@ router.post('/send-single', async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.json({ status: 'success' });
   } catch (error) {
-    console.error('Single email error:', error);
+    console.error('Nodemailer Error:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
