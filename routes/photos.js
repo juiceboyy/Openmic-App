@@ -1,31 +1,10 @@
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first');
-
 const express = require('express');
 const router = express.Router();
-const nodemailer = require('nodemailer');
 require('dotenv').config();
 const { getSubFolders } = require('../googleDrive.js');
 const { getSheetData } = require('../googleSheets.js');
 
-// Configureer de email transporter
-// Poort 587 + STARTTLS ipv 465/SMTPS — Railway blokkeert uitgaand 465
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  requireTLS: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
-  tls: {
-    rejectUnauthorized: false
-  }
-});
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 // Scan-route: Foto map scannen en matchen met artiesten
 router.post('/scan', async (req, res) => {
@@ -138,10 +117,10 @@ function buildEmailBody(artistName, folderLink) {
   return `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">Hoi ${artistName},<br><br>Bedankt voor je optreden! We hebben de foto's binnengekregen van JCSFotografie.<br><br>Via de onderstaande link kun je jouw persoonlijke foto's bekijken en downloaden:<br><a href="${folderLink}" style="color: #0071e3;">${folderLink}</a><br><br>Deel je ze op Instagram? Vergeet dan niet de fotograaf (<b>@jcsfotografie_</b>) en ons (<b>@haagseopenmic</b>) te taggen!<br><br>Hartelijke groet,<br><br>Gijs en Ro<br><br><b>Haagse Open Mic</b><br>Elke 2e dinsdag van de maand<br>19u - 22u<br>IG: <a href="https://instagram.com/haagseopenmic" style="color: #0071e3; text-decoration: none;">@HaagseOpenMic</a></div>`;
 }
 
-// Send-single route: Één email per request (voorkomt connection timeout bij bulk)
+// Send-single route: Één email via Brevo API (HTTPS/443 — geen SMTP nodig)
 router.post('/send-single', async (req, res) => {
-  if (!process.env.EMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    console.error('Missende e-mail credentials!');
+  if (!process.env.BREVO_API_KEY) {
+    console.error('Missende BREVO_API_KEY!');
     return res.status(500).json({ status: 'error', message: 'E-mail instellingen ontbreken op de server' });
   }
 
@@ -151,18 +130,33 @@ router.post('/send-single', async (req, res) => {
       return res.json({ status: 'skipped' });
     }
 
-    const mailOptions = {
-      from: `"Haagse Open Mic" <${process.env.EMAIL_USER}>`,
-      to: match.email,
-      cc: process.env.EMAIL_USER,
+    const payload = {
+      sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER || 'haagseopenmic@gmail.com' },
+      to: [{ email: match.email, name: match.artistName || match.email }],
+      cc: [{ email: process.env.EMAIL_USER || 'haagseopenmic@gmail.com' }],
       subject: "Jouw foto's van de Haagse Open Mic!",
-      html: buildEmailBody(match.artistName, match.folderLink)
+      htmlContent: buildEmailBody(match.artistName, match.folderLink)
     };
 
-    await transporter.sendMail(mailOptions);
+    const response = await fetch(BREVO_API_URL, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}));
+      console.error('Brevo API Error:', response.status, errorBody);
+      return res.status(500).json({ status: 'error', message: errorBody.message || `Brevo fout (${response.status})` });
+    }
+
     res.json({ status: 'success' });
   } catch (error) {
-    console.error('Nodemailer Error:', error);
+    console.error('Send-single fout:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });
