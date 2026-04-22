@@ -38,7 +38,6 @@ No build step. The frontend is vanilla JS/HTML served directly from `public/`. N
 |---------|----------|
 | Google Sheets | Artist contacts, performance lineups |
 | Google Drive | Scanning photo folders |
-| Gmail | Emailing photos to artists |
 | Google People | Importing from Google Contacts |
 
 Credentials: `google-credentials.json` (dev) or `GOOGLE_CREDENTIALS_JSON` env var (prod). The app is deployed on Railway.
@@ -48,12 +47,11 @@ Credentials: `google-credentials.json` (dev) or `GOOGLE_CREDENTIALS_JSON` env va
 ```
 SPREADSHEET_ID                # Main contacts Google Sheet
 SPEELSCHEMA_SPREADSHEET_ID    # Lineups Google Sheet
-BREVO_API_KEY                 # Newsletter service
-GMAIL_APP_PASSWORD            # Gmail sending
+BREVO_API_KEY                 # Brevo — newsletters AND transactional photo emails
 APP_PIN                       # App authentication PIN
 PORT                          # Default 3000
 NOTIFICATION_EMAIL            # Email for new signup notifications
-EMAIL_USER                    # Gmail sender address
+EMAIL_USER                    # Sender address — currently info@haagseopenmic.nl
 GOOGLE_CREDENTIALS_JSON       # Service account JSON (production)
 ```
 
@@ -81,7 +79,7 @@ POST /api/artists/add
 POST /api/artists/edit
 POST /api/artists/delete
 POST /api/photos/scan
-POST /api/photos/send
+POST /api/photos/send-single    # Per-artist, chunked — avoids Railway request timeout
 POST /api/mailing
 POST /api/speelschema/sheets
 POST /api/speelschema/previous
@@ -94,7 +92,7 @@ POST /api/speelschema/save
 - Code and comments are mixed Dutch/English (Dutch for domain language: artiesten, speelschema, boekbaar, etc.)
 - The public signup page is `public/aanmelden.html` — it's a separate HTML file, not part of the SPA
 - Lineup feature uses HTML5 drag-and-drop with a mobile polyfill (`mobile-drag-drop`)
-- Brevo handles newsletter campaigns; Gmail handles individual photo emails
+- Brevo handles both newsletter campaigns and individual photo emails (via `POST /api/photos/send-single`). Railway blocks all outbound SMTP (ports 465 and 587), so Nodemailer/Gmail SMTP cannot be used — always use the Brevo HTTP API for email sending.
 
 ## iOS Safari Modal Scrolling — Lessons Learned
 
