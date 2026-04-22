@@ -68,7 +68,11 @@ export async function apiRequest(payload) {
             throw new Error('Sessie verlopen of PIN onjuist');
         }
 
-        return await response.json();
+        const data = await response.json();
+        if (!response.ok && data.status !== 'error') {
+            throw new Error(data.message || `Server fout (${response.status})`);
+        }
+        return data;
     } catch (error) {
         console.error('API Request failed for URL:', url, 'Error:', error);
         throw error;

@@ -34,12 +34,37 @@ export function closePhotoModal(modalId) {
 }
 
 export async function scanFolder() {
-    const url = getEl('drive-folder-url').value; if(!url) { showToast("Plak eerst een link!", "error"); return; }
-    const btn = getEl('btn-scan-folder'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
+    const rawUrl = getEl('drive-folder-url').value.trim();
+    if (!rawUrl) { showToast("Plak eerst een Google Drive link!", "error"); return; }
+
+    const folderIdMatch = rawUrl.match(/\/folders\/([a-zA-Z0-9_-]{10,})/);
+    if (!folderIdMatch) {
+        showToast("Ongeldige Google Drive URL. Gebruik een link met '/folders/...' erin.", "error");
+        return;
+    }
+
+    const btn = getEl('btn-scan-folder');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Scannen... ⏳';
+
     try {
-        const result = await apiRequest({ _action: 'scan_folder', folderUrl: url });
-        if (result.status === "success") { state.scannedMatches = result.matches; renderMatches(state.scannedMatches, { photoMatchesBody: getEl('photo-matches-body') }); getEl('photo-step-1').classList.add('hidden'); getEl('photo-step-2').classList.remove('hidden'); getEl('photo-modal-footer').classList.remove('hidden'); } else { showToast("Fout: " + result.message, "error"); }
-    } catch (e) { showToast("Scan mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
+        const result = await apiRequest({ _action: 'scan_folder', folderUrl: rawUrl });
+        if (result.status === 'success') {
+            state.scannedMatches = result.matches;
+            renderMatches(state.scannedMatches, { photoMatchesBody: getEl('photo-matches-body') });
+            getEl('photo-step-1').classList.add('hidden');
+            getEl('photo-step-2').classList.remove('hidden');
+            getEl('photo-modal-footer').classList.remove('hidden');
+        } else {
+            showToast('Scan mislukt: ' + (result.message || 'Onbekende fout'), 'error');
+        }
+    } catch (e) {
+        showToast('Scan mislukt: ' + (e.message || 'Controleer je internetverbinding'), 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+    }
 }
 
 export function resolveMultipleMatch(index, selectElement) {
