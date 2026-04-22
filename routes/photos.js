@@ -1,18 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const nodemailer = require('nodemailer');
 require('dotenv').config();
 const { getSubFolders } = require('../googleDrive.js');
 const { getSheetData } = require('../googleSheets.js');
 
-// Configureer de email transporter
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: 'haagseopenmic@gmail.com',
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-});
+const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
 // Scan-route: Foto map scannen en matchen met artiesten
 router.post('/scan', async (req, res) => {
@@ -121,31 +113,50 @@ router.post('/scan', async (req, res) => {
   }
 });
 
-// Send-route: Emails versturen via Gmail
-router.post('/send', async (req, res) => {
+function buildEmailBody(artistName, folderLink) {
+  return `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">Hoi ${artistName},<br><br>Bedankt voor je optreden! We hebben de foto's binnengekregen van JCSFotografie.<br><br>Via de onderstaande link kun je jouw persoonlijke foto's bekijken en downloaden:<br><a href="${folderLink}" style="color: #0071e3;">${folderLink}</a><br><br>Deel je ze op Instagram? Vergeet dan niet de fotograaf (<b>@jcsfotografie_</b>) en ons (<b>@haagseopenmic</b>) te taggen!<br><br>Hartelijke groet,<br><br>Gijs en Ro<br><br><b>Haagse Open Mic</b><br>Elke 2e dinsdag van de maand<br>19u - 22u<br>IG: <a href="https://instagram.com/haagseopenmic" style="color: #0071e3; text-decoration: none;">@HaagseOpenMic</a></div>`;
+}
+
+// Send-single route: Één email via Brevo API (HTTPS/443 — geen SMTP nodig)
+router.post('/send-single', async (req, res) => {
+  if (!process.env.BREVO_API_KEY) {
+    console.error('Missende BREVO_API_KEY!');
+    return res.status(500).json({ status: 'error', message: 'E-mail instellingen ontbreken op de server' });
+  }
+
   try {
-    const { matches, testMode, testEmail } = req.body;
-    let sentCount = 0;
+    const { match } = req.body;
+    if (!match || !match.email || match.email === '-') {
+      return res.json({ status: 'skipped' });
+    }
 
-    const emailPromises = matches.map(async (match) => {
-      if (match.selected && match.email && match.email !== '-') {
-        let subject = testMode ? "[TEST] Jouw foto's van de Haagse Open Mic!" : "Jouw foto's van de Haagse Open Mic!";
-        let recipientEmail = testMode ? testEmail : match.email;
-        let testWarning = testMode ? `<p style="color:#d97706; font-size:12px; background:#fef3c7; padding:8px; border-radius:4px;"><b>TEST MODUS ACTIEF:</b> Deze mail zou in het echt verstuurd worden naar: <b>${match.email}</b><br>En in Cc naar: <b>haagseopenmic@gmail.com</b></p>` : "";
-        let body = `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">${testWarning}Hoi ${match.artistName},<br><br>Bedankt voor je optreden! We hebben de foto's binnengekregen van JCSFotografie.<br><br>Via de onderstaande link kun je jouw persoonlijke foto's bekijken en downloaden:<br><a href="${match.folderLink}" style="color: #0071e3;">${match.folderLink}</a><br><br>Deel je ze op Instagram? Vergeet dan niet de fotograaf (<b>@jcsfotografie_</b>) en ons (<b>@haagseopenmic</b>) te taggen!<br><br>Hartelijke groet,<br><br>Gijs en Ro<br><br><b>Haagse Open Mic</b><br>Elke 2e dinsdag van de maand<br>19u - 22u<br>IG: <a href="https://instagram.com/haagseopenmic" style="color: #0071e3; text-decoration: none;">@HaagseOpenMic</a></div>`;
+    const payload = {
+      sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER || 'info@haagseopenmic.nl' },
+      to: [{ email: match.email, name: match.artistName || match.email }],
+      cc: [{ email: 'haagseopenmic@gmail.com' }],
+      subject: "Jouw foto's van de Haagse Open Mic!",
+      htmlContent: buildEmailBody(match.artistName, match.folderLink)
+    };
 
-        let mailOptions = { from: '"Haagse Open Mic" <haagseopenmic@gmail.com>', to: recipientEmail, subject: subject, html: body };
-        if (!testMode) mailOptions.cc = "haagseopenmic@gmail.com";
-
-        await transporter.sendMail(mailOptions);
-        sentCount++;
-      }
+    const response = await fetch(BREVO_API_URL, {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(payload)
     });
 
-    await Promise.all(emailPromises);
-    res.json({ status: 'success', sentCount });
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}));
+      console.error('Brevo API Error:', response.status, errorBody);
+      return res.status(500).json({ status: 'error', message: errorBody.message || `Brevo fout (${response.status})` });
+    }
+
+    res.json({ status: 'success' });
   } catch (error) {
-    console.error('Email send error:', error);
+    console.error('Send-single fout:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 });

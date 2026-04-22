@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
-import { getEl, toggleButtonLoading } from './utils.js';
+import { getEl } from './utils.js';
 import { showToast, showConfirm } from './notifications.js';
 
 export function renderMatches(matches, elements) {
@@ -34,12 +34,37 @@ export function closePhotoModal(modalId) {
 }
 
 export async function scanFolder() {
-    const url = getEl('drive-folder-url').value; if(!url) { showToast("Plak eerst een link!", "error"); return; }
-    const btn = getEl('btn-scan-folder'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
+    const rawUrl = getEl('drive-folder-url').value.trim();
+    if (!rawUrl) { showToast("Plak eerst een Google Drive link!", "error"); return; }
+
+    const folderIdMatch = rawUrl.match(/\/folders\/([a-zA-Z0-9_-]{10,})/);
+    if (!folderIdMatch) {
+        showToast("Ongeldige Google Drive URL. Gebruik een link met '/folders/...' erin.", "error");
+        return;
+    }
+
+    const btn = getEl('btn-scan-folder');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Scannen... ⏳';
+
     try {
-        const result = await apiRequest({ _action: 'scan_folder', folderUrl: url });
-        if (result.status === "success") { state.scannedMatches = result.matches; renderMatches(state.scannedMatches, { photoMatchesBody: getEl('photo-matches-body') }); getEl('photo-step-1').classList.add('hidden'); getEl('photo-step-2').classList.remove('hidden'); getEl('photo-modal-footer').classList.remove('hidden'); } else { showToast("Fout: " + result.message, "error"); }
-    } catch (e) { showToast("Scan mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
+        const result = await apiRequest({ _action: 'scan_folder', folderUrl: rawUrl });
+        if (result.status === 'success') {
+            state.scannedMatches = result.matches;
+            renderMatches(state.scannedMatches, { photoMatchesBody: getEl('photo-matches-body') });
+            getEl('photo-step-1').classList.add('hidden');
+            getEl('photo-step-2').classList.remove('hidden');
+            getEl('photo-modal-footer').classList.remove('hidden');
+        } else {
+            showToast('Scan mislukt: ' + (result.message || 'Onbekende fout'), 'error');
+        }
+    } catch (e) {
+        showToast('Scan mislukt: ' + (e.message || 'Controleer je internetverbinding'), 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+    }
 }
 
 export function resolveMultipleMatch(index, selectElement) {
@@ -53,11 +78,42 @@ export function resolveMultipleMatch(index, selectElement) {
 
 export async function sendPhotos() {
     state.scannedMatches.forEach((m, idx) => { const cb = getEl(`match-cb-${idx}`); m.selected = cb ? cb.checked : false; });
-    const toSend = state.scannedMatches.filter(m => m.selected); if(toSend.length === 0) { showToast("Geen vinkjes gezet!", "error"); return; }
-    if(!await showConfirm(`Stuur e-mail naar ${toSend.length} artiest(en)?`)) return;
-    const btn = getEl('btn-send-photos'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
+    const toSend = state.scannedMatches.filter(m => m.selected);
+    if (toSend.length === 0) { showToast("Geen vinkjes gezet!", "error"); return; }
+    if (!await showConfirm(`Stuur e-mail naar ${toSend.length} artiest(en)?`)) return;
+
+    const btn = getEl('btn-send-photos');
+    const orig = btn.innerHTML;
+    btn.disabled = true;
+
+    let sentCount = 0;
+    let errorCount = 0;
+
     try {
-        const result = await apiRequest({ _action: 'send_emails', matches: state.scannedMatches });
-        if (result.status === "success") { showToast(`Gelukt! ${result.sentCount} e-mails verstuurd.`, "success"); getEl('photo-modal').classList.add('hidden'); } else { showToast("Fout: " + result.message, "error"); }
-    } catch (e) { showToast("Verzenden mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
+        for (let i = 0; i < toSend.length; i++) {
+            btn.innerHTML = `Verzenden... (${i + 1}/${toSend.length})`;
+            try {
+                const result = await apiRequest({ _action: 'send_single_email', match: toSend[i] });
+                if (result.status === 'success') sentCount++;
+            } catch (e) {
+                errorCount++;
+                console.error('Email mislukt voor', toSend[i].email, e);
+            }
+            if (i < toSend.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 800));
+            }
+        }
+
+        if (errorCount === 0) {
+            showToast(`Gelukt! ${sentCount} e-mails verstuurd.`, "success");
+        } else {
+            showToast(`${sentCount} verstuurd, ${errorCount} mislukt.`, "warning");
+        }
+        getEl('photo-modal').classList.add('hidden');
+    } catch (e) {
+        showToast("Verzenden mislukt.", "error");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+    }
 }
