@@ -131,9 +131,9 @@ router.post('/send-single', async (req, res) => {
     }
 
     const payload = {
-      sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER || 'haagseopenmic@gmail.com' },
+      sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER || 'info@haagseopenmic.nl' },
       to: [{ email: match.email, name: match.artistName || match.email }],
-      cc: [{ email: process.env.EMAIL_USER || 'haagseopenmic@gmail.com' }],
+      cc: [{ email: process.env.EMAIL_USER || 'info@haagseopenmic.nl' }],
       subject: "Jouw foto's van de Haagse Open Mic!",
       htmlContent: buildEmailBody(match.artistName, match.folderLink)
     };
