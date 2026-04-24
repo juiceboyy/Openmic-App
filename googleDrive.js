@@ -24,4 +24,4 @@ async function getSubFolders(folderId) {
   }
 }
 
-module.exports = { getSubFolders };
+module.exports = { drive, getSubFolders };

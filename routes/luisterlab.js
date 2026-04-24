@@ -1,25 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { google } = require('googleapis');
 const { Readable } = require('stream');
 const path = require('path');
-require('dotenv').config();
-
-const SCOPES = [
-  'https://www.googleapis.com/auth/drive.file',
-  'https://www.googleapis.com/auth/spreadsheets',
-];
-
-function getAuth() {
-  return new google.auth.GoogleAuth({
-    credentials: {
-      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      private_key: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-    },
-    scopes: SCOPES,
-  });
-}
+const { drive } = require('../googleDrive');
+const { sheets, SPREADSHEET_ID } = require('../googleSheets');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -54,11 +39,6 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
     if (akkoordRegels !== 'true' && akkoordRegels !== true) {
       return res.status(400).json({ error: 'Akkoord met spelregels is verplicht.' });
     }
-
-    const auth = getAuth();
-    const drive = google.drive({ version: 'v3', auth });
-    const sheets = google.sheets({ version: 'v4', auth });
-    const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
 
     // 1. Upload bandfoto naar Google Drive
     const folderId = process.env.LUISTERLAB_DRIVE_FOLDER_ID;
