@@ -263,6 +263,17 @@
                     <p class="field-error hidden text-red-400 text-xs mt-1"></p>
                 </div>
 
+                <!-- Speelduur -->
+                <div>
+                    <label for="speelduur" class="block text-sm font-medium text-white/80 mb-1.5">
+                        Gewenste speelduur (minuten) <span class="text-amber-400">*</span>
+                    </label>
+                    <input type="number" id="speelduur" name="speelduur" required min="1" max="120" value="20"
+                        class="input-field w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 text-base"
+                        placeholder="20">
+                    <p class="field-error hidden text-red-400 text-xs mt-1.5"></p>
+                </div>
+
                 <!-- Bandfoto -->
                 <div>
                     <label class="block text-sm font-medium text-white/80 mb-1.5">
@@ -405,6 +416,7 @@
                 { id: 'telefoon', label: 'Telefoonnummer' },
                 { id: 'omschrijving', label: 'Omschrijving' },
                 { id: 'liveLink', label: 'Link naar live-materiaal' },
+                { id: 'speelduur', label: 'Speelduur' },
             ];
 
             fields.forEach(({ id, label }) => {
@@ -473,6 +485,7 @@
             formData.append('liveLink', document.getElementById('liveLink').value.trim());
             formData.append('akkoordRegels', document.getElementById('akkoordRegels').checked);
             formData.append('vrijwilliger', document.getElementById('vrijwilliger').checked);
+            formData.append('speelduur', document.getElementById('speelduur').value);
             formData.append('bandfoto', bandfotoInput.files[0]);
 
             try {
