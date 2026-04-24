@@ -43,3 +43,5 @@ yarn-error.log*
 # Als je de 'clasp' tool gebruikt en je Script ID privé wilt houden, 
 # haal dan het hekje (#) voor de volgende regel weg:
 # .clasp.json
+
+google-credentials.json
