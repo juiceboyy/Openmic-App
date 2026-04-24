@@ -1,23 +1,15 @@
 const { google } = require('googleapis');
-const path = require('path');
 require('dotenv').config();
 
 const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
-let authOptions = { scopes: SCOPES };
 
-if (process.env.GOOGLE_CREDENTIALS_JSON) {
-  try {
-    authOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
-  } catch (error) {
-    console.error('FOUT: Kon GOOGLE_CREDENTIALS_JSON niet parsen.', error);
-  }
-}
-
-if (!authOptions.credentials) {
-  authOptions.keyFile = path.join(__dirname, 'google-credentials.json');
-}
-
-const auth = new google.auth.GoogleAuth(authOptions);
+const auth = new google.auth.GoogleAuth({
+  credentials: {
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    private_key: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+  },
+  scopes: SCOPES,
+});
 
 const drive = google.drive({ version: 'v3', auth });
 

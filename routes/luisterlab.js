@@ -3,7 +3,6 @@ const router = express.Router();
 const multer = require('multer');
 const { google } = require('googleapis');
 const { Readable } = require('stream');
-const path = require('path');
 require('dotenv').config();
 
 const SCOPES = [
@@ -12,18 +11,13 @@ const SCOPES = [
 ];
 
 function getAuth() {
-  const authOptions = { scopes: SCOPES };
-  if (process.env.GOOGLE_CREDENTIALS_JSON) {
-    try {
-      authOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
-    } catch (e) {
-      console.error('[LuisterLab] Kon GOOGLE_CREDENTIALS_JSON niet parsen:', e);
-    }
-  }
-  if (!authOptions.credentials) {
-    authOptions.keyFile = path.join(__dirname, '..', 'google-credentials.json');
-  }
-  return new google.auth.GoogleAuth(authOptions);
+  return new google.auth.GoogleAuth({
+    credentials: {
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      private_key: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+    },
+    scopes: SCOPES,
+  });
 }
 
 const upload = multer({
