@@ -1,26 +1,15 @@
 const { google } = require('googleapis');
-const path = require('path');
 require('dotenv').config();
 
-// 1. Laat de virtuele robot inloggen met de sleutel
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-let authOptions = { scopes: SCOPES };
 
-// Check of we in productie (Railway) zijn en de credentials via ENV krijgen
-if (process.env.GOOGLE_CREDENTIALS_JSON) {
-  try {
-    authOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
-  } catch (error) {
-    console.error('FOUT: Kon GOOGLE_CREDENTIALS_JSON niet parsen.', error);
-  }
-}
-
-// Fallback naar lokaal bestand (voor development) als er geen credentials in ENV zitten
-if (!authOptions.credentials) {
-  authOptions.keyFile = path.join(__dirname, 'google-credentials.json');
-}
-
-const auth = new google.auth.GoogleAuth(authOptions);
+const auth = new google.auth.GoogleAuth({
+  credentials: {
+    client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    private_key: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
+  },
+  scopes: SCOPES,
+});
 
 const sheets = google.sheets({ version: 'v4', auth });
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;

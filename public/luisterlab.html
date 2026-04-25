@@ -98,6 +98,21 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        /* File input */
+        .file-input-label {
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .file-input-label:hover {
+            border-color: rgba(245, 158, 11, 0.5);
+        }
+        .file-input-label.has-file {
+            border-color: rgba(245, 158, 11, 0.6);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+        }
+        .file-input-label.error-state {
+            border-color: rgba(239, 68, 68, 0.6);
+        }
+
         /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #1a1a2e; }
@@ -168,7 +183,7 @@
                     <span class="text-xl leading-none mt-0.5">🎟</span>
                     <div>
                         <p class="font-semibold text-white text-sm">Breng je eigen publiek mee</p>
-                        <p class="text-white/55 text-xs mt-0.5">Je zorgt zelf voor je achterban. Samen bouwen we een vol zaal.</p>
+                        <p class="text-white/55 text-xs mt-0.5">Je zorgt zelf voor je achterban. Samen bouwen we een volle zaal.</p>
                     </div>
                 </li>
             </ul>
@@ -248,6 +263,32 @@
                     <p class="field-error hidden text-red-400 text-xs mt-1"></p>
                 </div>
 
+                <!-- Speelduur -->
+                <div>
+                    <label for="speelduur" class="block text-sm font-medium text-white/80 mb-1.5">
+                        Gewenste speelduur (minuten) <span class="text-amber-400">*</span>
+                    </label>
+                    <input type="number" id="speelduur" name="speelduur" required min="1" max="120" value="20"
+                        class="input-field w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 text-white placeholder-white/30 text-base"
+                        placeholder="20">
+                    <p class="field-error hidden text-red-400 text-xs mt-1.5"></p>
+                </div>
+
+                <!-- Bandfoto -->
+                <div>
+                    <label class="block text-sm font-medium text-white/80 mb-1.5">
+                        Bandfoto <span class="text-amber-400">*</span>
+                        <span class="text-white/40 font-normal">(JPG, PNG of WEBP)</span>
+                    </label>
+                    <label for="bandfoto" id="bandfoto-label"
+                        class="file-input-label flex items-center gap-3 w-full px-4 py-3 rounded-xl border border-white/15 bg-white/5 cursor-pointer">
+                        <i data-lucide="image" class="w-5 h-5 text-amber-400 flex-shrink-0"></i>
+                        <span id="bandfoto-text" class="text-white/40 text-sm truncate">Klik om een foto te kiezen...</span>
+                    </label>
+                    <input type="file" id="bandfoto" name="bandfoto" accept="image/*" required class="sr-only">
+                    <p id="error-bandfoto" class="hidden text-red-400 text-xs mt-1.5">Bandfoto is verplicht.</p>
+                </div>
+
                 <!-- Divider -->
                 <div class="border-t border-white/10 pt-4 space-y-4">
 
@@ -324,6 +365,27 @@
 
         const form = document.getElementById('luisterlab-form');
 
+        // Bandfoto file picker feedback
+        const bandfotoInput = document.getElementById('bandfoto');
+        const bandfotoLabel = document.getElementById('bandfoto-label');
+        const bandfotoText = document.getElementById('bandfoto-text');
+        bandfotoInput.addEventListener('change', () => {
+            const file = bandfotoInput.files[0];
+            if (file) {
+                bandfotoText.textContent = file.name;
+                bandfotoText.classList.remove('text-white/40');
+                bandfotoText.classList.add('text-white/90');
+                bandfotoLabel.classList.add('has-file');
+                bandfotoLabel.classList.remove('error-state');
+                document.getElementById('error-bandfoto').classList.add('hidden');
+            } else {
+                bandfotoText.textContent = 'Klik om een foto te kiezen...';
+                bandfotoText.classList.add('text-white/40');
+                bandfotoText.classList.remove('text-white/90');
+                bandfotoLabel.classList.remove('has-file');
+            }
+        });
+
         function setFieldError(input, message) {
             const errorEl = input.closest('div').querySelector('.field-error');
             if (!errorEl) return;
@@ -340,7 +402,7 @@
         }
 
         // Live clear on input
-        form.querySelectorAll('input, textarea').forEach(el => {
+        form.querySelectorAll('input:not([type="file"]):not([type="checkbox"]), textarea').forEach(el => {
             el.addEventListener('input', () => clearFieldError(el));
         });
 
@@ -354,6 +416,7 @@
                 { id: 'telefoon', label: 'Telefoonnummer' },
                 { id: 'omschrijving', label: 'Omschrijving' },
                 { id: 'liveLink', label: 'Link naar live-materiaal' },
+                { id: 'speelduur', label: 'Speelduur' },
             ];
 
             fields.forEach(({ id, label }) => {
@@ -377,6 +440,13 @@
                 }
             });
 
+            // Bandfoto
+            if (!bandfotoInput.files || !bandfotoInput.files[0]) {
+                document.getElementById('error-bandfoto').classList.remove('hidden');
+                bandfotoLabel.classList.add('error-state');
+                valid = false;
+            }
+
             const checkbox = document.getElementById('akkoordRegels');
             const checkboxError = document.getElementById('error-checkbox');
             if (!checkbox.checked) {
@@ -389,15 +459,14 @@
             return valid;
         }
 
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const generalError = document.getElementById('error-general');
             generalError.classList.add('hidden');
 
             if (!validateForm()) {
-                // Scroll to first error
-                const firstError = form.querySelector('.field-error:not(.hidden), #error-checkbox:not(.hidden)');
+                const firstError = form.querySelector('.field-error:not(.hidden), #error-bandfoto:not(.hidden), #error-checkbox:not(.hidden)');
                 if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 return;
             }
@@ -407,25 +476,41 @@
             btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Even geduld...';
             lucide.createIcons();
 
-            const data = {
-                actNaam: document.getElementById('actNaam').value.trim(),
-                contactNaam: document.getElementById('contactNaam').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                telefoon: document.getElementById('telefoon').value.trim(),
-                omschrijving: document.getElementById('omschrijving').value.trim(),
-                liveLink: document.getElementById('liveLink').value.trim(),
-                akkoordRegels: document.getElementById('akkoordRegels').checked,
-                vrijwilliger: document.getElementById('vrijwilliger').checked,
-            };
+            const formData = new FormData();
+            formData.append('actNaam', document.getElementById('actNaam').value.trim());
+            formData.append('contactNaam', document.getElementById('contactNaam').value.trim());
+            formData.append('email', document.getElementById('email').value.trim());
+            formData.append('telefoon', document.getElementById('telefoon').value.trim());
+            formData.append('omschrijving', document.getElementById('omschrijving').value.trim());
+            formData.append('liveLink', document.getElementById('liveLink').value.trim());
+            formData.append('akkoordRegels', document.getElementById('akkoordRegels').checked);
+            formData.append('vrijwilliger', document.getElementById('vrijwilliger').checked);
+            formData.append('speelduur', document.getElementById('speelduur').value);
+            formData.append('bandfoto', bandfotoInput.files[0]);
 
-            console.log('[LuisterLab] Aanmelding:', data);
+            try {
+                const response = await fetch('/api/luisterlab', { method: 'POST', body: formData });
 
-            // Simulate brief delay for UX, then show success (backend koppeling volgt)
-            setTimeout(() => {
+                if (!response.ok) {
+                    const json = await response.json().catch(() => ({}));
+                    generalError.textContent = json.error || 'Er is iets misgegaan. Probeer het opnieuw.';
+                    generalError.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i data-lucide="send" class="w-5 h-5"></i> Aanmelden voor LuisterLab';
+                    lucide.createIcons();
+                    return;
+                }
+
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-msg').classList.remove('hidden');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 800);
+            } catch (err) {
+                generalError.textContent = 'Geen verbinding. Controleer je internet en probeer opnieuw.';
+                generalError.classList.remove('hidden');
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="send" class="w-5 h-5"></i> Aanmelden voor LuisterLab';
+                lucide.createIcons();
+            }
         });
     </script>
 </body>

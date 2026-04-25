@@ -1,25 +1,13 @@
 const { google } = require('googleapis');
-const path = require('path');
 require('dotenv').config();
 
-const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
-let authOptions = { scopes: SCOPES };
+const oauth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_OAUTH_CLIENT_ID,
+  process.env.GOOGLE_OAUTH_CLIENT_SECRET
+);
+oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_OAUTH_REFRESH_TOKEN });
 
-if (process.env.GOOGLE_CREDENTIALS_JSON) {
-  try {
-    authOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
-  } catch (error) {
-    console.error('FOUT: Kon GOOGLE_CREDENTIALS_JSON niet parsen.', error);
-  }
-}
-
-if (!authOptions.credentials) {
-  authOptions.keyFile = path.join(__dirname, 'google-credentials.json');
-}
-
-const auth = new google.auth.GoogleAuth(authOptions);
-
-const drive = google.drive({ version: 'v3', auth });
+const drive = google.drive({ version: 'v3', auth: oauth2Client });
 
 async function getSubFolders(folderId) {
   try {
@@ -36,4 +24,4 @@ async function getSubFolders(folderId) {
   }
 }
 
-module.exports = { getSubFolders };
+module.exports = { drive, getSubFolders };
