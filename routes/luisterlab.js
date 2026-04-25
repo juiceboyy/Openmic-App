@@ -190,7 +190,7 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
         },
         body: JSON.stringify({
           sender: { name: 'Haagse Open Mic', email: 'nieuwsbrief@haagseopenmic.nl' },
-          to: [{ email: 'info@haagseopenmic.nl', name: 'Haagse Open Mic' }],
+          to: [{ email: 'openmicamare@gmail.com', name: 'Haagse Open Mic' }],
           subject,
           htmlContent: htmlBody,
         }),
