@@ -109,7 +109,7 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
       actNaam,                                                           // [2]  Artiestennaam
       notities,                                                          // [3]  Notities
       email,                                                             // [4]  E-mailadres
-      telefoon,                                                          // [5]  Telefoonnummer
+      telefoon ? `'${telefoon}` : '',                                    // [5]  Telefoonnummer
       '',                                                                // [6]  Instagram account
       '',                                                                // [7]  Profielfoto
       speelduur || '20',                                                 // [8]  Speelduur
