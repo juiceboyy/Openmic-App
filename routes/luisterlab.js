@@ -158,6 +158,48 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
       console.log(`[LuisterLab] Geüpdatet: ${actNaam} (${email}), rij ${existingRowNum}`);
     }
 
+    // 7. Stuur notificatie-e-mail naar info@haagseopenmic.nl
+    try {
+      const subject = isNew
+        ? `Nieuwe LuisterLab Aanmelding: ${actNaam}`
+        : `LuisterLab Update: ${actNaam}`;
+
+      const htmlBody = `
+        <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.8; max-width: 600px;">
+          <h2 style="color: #1a1a1a;">${isNew ? '🎶 Nieuwe LuisterLab Aanmelding' : '🔄 LuisterLab Update'}</h2>
+          <table style="border-collapse: collapse; width: 100%;">
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Artiestennaam</td><td>${actNaam}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Contactpersoon</td><td>${contactNaam}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">E-mailadres</td><td><a href="mailto:${email}">${email}</a></td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Telefoonnummer</td><td>${telefoon || '—'}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Speelduur</td><td>${speelduur || '20'} minuten</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Vrijwilliger</td><td>${vrijwilliger === 'true' || vrijwilliger === true ? 'Ja' : 'Nee'}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap; vertical-align: top;">Omschrijving</td><td>${omschrijving}</td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Live Link</td><td><a href="${liveLink}">${liveLink}</a></td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Bandfoto Link</td><td><a href="${photoLink}">${photoLink}</a></td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Status</td><td><strong>${isNew ? 'NIEUW' : 'UPDATE van bestaand contact'}</strong></td></tr>
+          </table>
+        </div>`;
+
+      await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'api-key': process.env.BREVO_API_KEY,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: 'Haagse Open Mic', email: 'nieuwsbrief@haagseopenmic.nl' },
+          to: [{ email: 'info@haagseopenmic.nl', name: 'Haagse Open Mic' }],
+          subject,
+          htmlContent: htmlBody,
+        }),
+      });
+      console.log(`[LuisterLab] Notificatie-e-mail verstuurd voor: ${actNaam}`);
+    } catch (mailError) {
+      console.error('[LuisterLab] Notificatie-e-mail mislukt (niet kritiek):', mailError.message);
+    }
+
     res.json({ success: true });
 
   } catch (error) {
