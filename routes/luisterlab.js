@@ -100,7 +100,15 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
     const lastName = nameParts.slice(1).join(' ') || '';
 
     // 4. Notities bepalen
-    const notities = isNew ? 'LuisterLab - NIEUW' : (existingNotes || 'LuisterLab - Update');
+    let notities;
+    if (isNew) {
+      notities = 'LuisterLab - NIEUW';
+    } else {
+      const currentNotes = existingNotes || '';
+      notities = currentNotes.includes('LuisterLab')
+        ? currentNotes
+        : (currentNotes ? `${currentNotes} | LuisterLab - Update` : 'LuisterLab - Update');
+    }
 
     // 5. 25-koloms array opbouwen (volgorde = exacte kolomvolgorde in de sheet)
     const rowData = [
