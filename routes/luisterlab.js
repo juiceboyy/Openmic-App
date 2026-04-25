@@ -120,7 +120,7 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
       '',                                                                // [13] Regio Den Haag
       '',                                                                // [14] Regio Rotterdam
       'Artiest',                                                         // [15] Soort contact
-      'Ja',                                                              // [16] Boekbaar
+      true,                                                              // [16] Boekbaar
       '',                                                                // [17] Favoriet Gijs
       '',                                                                // [18] Favoriet Ro
       '',                                                                // [19] Mailing Selectie
@@ -128,7 +128,7 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
       omschrijving,                                                      // [21] Omschrijving
       liveLink,                                                          // [22] Live Link
       photoLink,                                                         // [23] Bandfoto Link
-      vrijwilliger === 'true' || vrijwilliger === true ? 'Ja' : 'Nee',  // [24] Vrijwilliger
+      vrijwilliger === 'true' || vrijwilliger === true,                  // [24] Vrijwilliger
     ];
 
     // 6. Schrijf naar Google Sheets
