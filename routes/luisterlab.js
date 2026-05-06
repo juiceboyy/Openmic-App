@@ -104,10 +104,11 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
     if (isNew) {
       notities = 'LuisterLab - NIEUW';
     } else {
-      const currentNotes = existingNotes || '';
-      notities = currentNotes.includes('LuisterLab')
-        ? currentNotes
-        : (currentNotes ? `${currentNotes} | LuisterLab - Update` : 'LuisterLab - Update');
+      const currentNotes = (existingNotes || '').trim();
+      const basisNotes = currentNotes === '-' ? '' : currentNotes;
+      notities = basisNotes.includes('LuisterLab')
+        ? basisNotes
+        : (basisNotes ? `${basisNotes} | LuisterLab - Update` : 'LuisterLab - Update');
     }
 
     // 5. 25-koloms array opbouwen (volgorde = exacte kolomvolgorde in de sheet)

@@ -6,7 +6,7 @@ require('dotenv').config(); // Laadt geheime variabelen uit je .env bestand
 const express = require('express'); // Het web-framework
 const cors = require('cors'); // Zorgt dat je frontend met je backend mag praten
 const path = require('path');
-const { addArtistData } = require('./googleSheets.js');
+const { addArtistData, getSheetData, updateArtistData } = require('./googleSheets.js');
 const rateLimit = require('express-rate-limit');
 
 // 2. De server (app) opstarten
@@ -67,26 +67,56 @@ const subscribeLimiter = rateLimit({
 app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
   try {
     const { firstName, lastName, email } = req.body;
-    
-    const newContact = {
-      "Voornaam": firstName || "",
-      "Achternaam": lastName || "",
-      "E-mailadres": email || "",
-      "Soort contact": "Publiek",
-      "Datum toegevoegd": new Date().toLocaleDateString('nl-NL')
-    };
 
-    await addArtistData(newContact);
+    const data = await getSheetData();
+    const headers = data[0];
+    const rows = data.slice(1);
+    const emailColIndex = headers.indexOf('E-mailadres');
+    const notesColIndex = headers.indexOf('Notities');
+
+    const existingRowIndex = rows.findIndex(row =>
+      (row[emailColIndex] || '').toLowerCase() === (email || '').toLowerCase()
+    );
+
+    let isUpdate = false;
+
+    if (existingRowIndex !== -1) {
+      // Bestaand contact gevonden — alleen Notities bijwerken, Soort contact ongemoeid laten
+      isUpdate = true;
+      const sheetRowIndex = existingRowIndex + 2; // rij 1 = header, data begint op rij 2
+      const huidigNotities = (rows[existingRowIndex][notesColIndex] || '').trim();
+      const basisNotities = huidigNotities === '-' ? '' : huidigNotities;
+      const nieuweNotities = basisNotities.includes('Nieuwsbrief')
+        ? basisNotities
+        : (basisNotities ? `${basisNotities} | Nieuwsbrief` : 'Nieuwsbrief');
+
+      await updateArtistData(sheetRowIndex, { "Notities": nieuweNotities });
+      console.log(`Bestaand contact bijgewerkt (rij ${sheetRowIndex}): Nieuwsbrief toegevoegd aan notities.`);
+    } else {
+      // Nieuw contact — toevoegen als Publiek met Nieuwsbrief in notities
+      const newContact = {
+        "Voornaam": firstName || "",
+        "Achternaam": lastName || "",
+        "E-mailadres": email || "",
+        "Soort contact": "Publiek",
+        "Notities": "Nieuwsbrief",
+        "Datum toegevoegd": new Date().toLocaleDateString('nl-NL')
+      };
+      await addArtistData(newContact);
+      console.log(`Nieuw contact toegevoegd: ${email}`);
+    }
 
     // Succes-response direct sturen zodat de bezoeker niet hoeft te wachten
     res.json({ success: true, message: "Aanmelding gelukt!" });
 
     // Notificatie e-mail asynchroon sturen via Brevo (Fire and forget)
-     const brevoPayload = {
+    const actieLabel = isUpdate ? 'UPDATE bestaand contact' : 'NIEUW contact';
+    const brevoPayload = {
       sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER },
       to: [{ email: process.env.NOTIFICATION_EMAIL, name: 'Beheerder' }],
-      subject: `🎉 Nieuwe Publiek Aanmelding: ${firstName || ''} ${lastName || ''}`.trim(),
-      htmlContent: `<p>Er is een nieuwe aanmelding binnengekomen via de publieke pagina:</p>
+      subject: `🎉 Nieuwsbrief aanmelding (${actieLabel}): ${firstName || ''} ${lastName || ''}`.trim(),
+      htmlContent: `<p>Er is een aanmelding binnengekomen via de publieke pagina.</p>
+             <p><strong>Type:</strong> ${actieLabel}</p>
              <p><strong>Naam:</strong> ${firstName || ''} ${lastName || ''}</p>
              <p><strong>E-mailadres:</strong> ${email || ''}</p>`
     };
