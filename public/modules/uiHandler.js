@@ -69,7 +69,7 @@ export function renderTable(dataToRender, elements) {
         }
         const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.firstName || '')}+${encodeURIComponent(artist.lastName || 'X')}&background=random`;
         const basePhotoUrl = igHandle ? `https://unavatar.io/instagram/${igHandle}` : fallbackUrl;
-        const photoUrl = artist.profilePic && artist.profilePic !== '-' ? artist.profilePic : (artist.bandfotoLink && artist.bandfotoLink !== '-' ? artist.bandfotoLink : basePhotoUrl);
+        const photoUrl = (artist.profilePic && artist.profilePic !== '-') ? artist.profilePic : basePhotoUrl;
         const photoHTML = `<img src="${photoUrl}" onerror="this.onerror=null; this.src='${fallbackUrl}';" onclick="window.openPhotoEditModal(${artist.rowIndex}, '${artist.profilePic !== '-' ? artist.profilePic : ''}', '${basePhotoUrl}')" class="w-9 h-9 rounded-full object-cover border border-gray-200 dark:border-gray-700 cursor-pointer shadow-sm shrink-0 hover:opacity-80 transition-opacity" title="Klik om profielfoto aan te passen" alt="Foto">`;
 
         const artistNameBadge = `<div class="inline-flex items-center px-1.5 py-0 rounded-full bg-blue-50 dark:bg-blue-900/30 text-apple-blue dark:text-blue-400 text-[11px] font-medium border border-blue-100 dark:border-blue-800"><i data-lucide="mic-2" class="w-2 h-2 mr-1"></i>${editableSpan('Artiestennaam', artist.artistName, 'Artiestennaam')}</div>`;
@@ -161,7 +161,7 @@ export async function loadArtists() {
             blacklist: isTrue(row['Blacklist (Ja/Nee)']), notes: String(row['Notities'] || '-'), profilePic: String(row['Profielfoto'] || '-').trim(),
             mailingSelection: isTrue(row['Mailing Selectie']), gender: String(row['Gender'] || '').trim(),
             omschrijving: String(row['Omschrijving'] || '-'), liveLink: String(row['Live Link'] || '-'),
-            bandfotoLink: String(row['Bandfoto Link'] || '-'), vrijwilliger: isTrue(row['Vrijwilliger'])
+            vrijwilliger: isTrue(row['Vrijwilliger'])
         }));
         toggleGlobalLoading(loadingState, false);
         window.loadedArtists = state.allArtists;

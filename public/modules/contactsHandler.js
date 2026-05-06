@@ -8,7 +8,7 @@ const FIELD_MAP = {
     'Voornaam': 'firstName', 'Achternaam': 'lastName', 'Artiestennaam': 'artistName',
     'E-mailadres': 'email', 'Telefoonnummer': 'phone', 'Instagram account': 'instagram',
     'Soort contact': 'type', 'Speelduur': 'setLength', 'Notities': 'notes', 'Profielfoto': 'profilePic',
-    'Gender': 'gender', 'Omschrijving': 'omschrijving', 'Live Link': 'liveLink', 'Bandfoto Link': 'bandfotoLink'
+    'Gender': 'gender', 'Omschrijving': 'omschrijving', 'Live Link': 'liveLink'
 };
 
 const BOOL_MAP = {

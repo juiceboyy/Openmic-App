@@ -104,10 +104,6 @@ export const contactModalTemplate = /*html*/`
                             <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Live Link</label>
                             <input type="text" name="Live Link" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white" placeholder="https://...">
                         </div>
-                        <div>
-                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Bandfoto Link</label>
-                            <input type="text" name="Bandfoto Link" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white" placeholder="https://...">
-                        </div>
                     </div>
                 </div>
                 <div>
