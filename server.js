@@ -84,10 +84,11 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
       // Bestaand contact gevonden — alleen Notities bijwerken, Soort contact ongemoeid laten
       isUpdate = true;
       const sheetRowIndex = existingRowIndex + 2; // rij 1 = header, data begint op rij 2
-      const huidigNotities = rows[existingRowIndex][notesColIndex] || '';
-      const nieuweNotities = huidigNotities
-        ? (huidigNotities.includes('Nieuwsbrief') ? huidigNotities : `${huidigNotities} | Nieuwsbrief`)
-        : 'Nieuwsbrief';
+      const huidigNotities = (rows[existingRowIndex][notesColIndex] || '').trim();
+      const basisNotities = huidigNotities === '-' ? '' : huidigNotities;
+      const nieuweNotities = basisNotities.includes('Nieuwsbrief')
+        ? basisNotities
+        : (basisNotities ? `${basisNotities} | Nieuwsbrief` : 'Nieuwsbrief');
 
       await updateArtistData(sheetRowIndex, { "Notities": nieuweNotities });
       console.log(`Bestaand contact bijgewerkt (rij ${sheetRowIndex}): Nieuwsbrief toegevoegd aan notities.`);
