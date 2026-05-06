@@ -135,6 +135,44 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
       console.log('Brevo notificatie succesvol verstuurd!');
     })
     .catch(err => console.error('Fout bij sturen Brevo mail:', err));
+
+    // Welkomstmail naar de aanmelder (Fire and forget)
+    const welcomePayload = {
+      sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER },
+      to: [{ email: email, name: firstName || 'Muziekliefhebber' }],
+      subject: 'Welkom bij Haagse Open Mic Nieuws in Den Haag! 🎸✨',
+      htmlContent: `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px;">
+          <p>Hoi ${firstName || 'muziekliefhebber'},</p>
+          <p>Wat leuk dat je je hebt aangemeld! Voortaan ben jij als eerste op de hoogte van de nieuwste muziek in de stad.</p>
+          <p>Haagse Open Mic is een community voor en door makers, waar we een 'speelplaats' creëren voor nieuw, eigen werk. Als publiek ben jij onmisbaar in dit proces.</p>
+          <p>Noteer in je agenda:</p>
+          <ul>
+            <li><strong>Wanneer:</strong> Elke 2e dinsdag van de maand.</li>
+            <li><strong>Locatie:</strong> De intieme setting van Amare (Spuiplein 150).</li>
+            <li><strong>Wat:</strong> Een positief en warm bad vol nieuwe songs, variërend van intieme solo's tot beats en neo-klassiek.</li>
+          </ul>
+          <p>Naast onze avonden in Amare zijn we ook regelmatig te vinden op inspirerende plekken zoals Pianino.</p>
+          <p>Wil je meer weten over onze community of de volgende open mic? Check dan onze website: 👉 <a href="https://www.haagseopenmic.nl" style="color: #0071e3; text-decoration: none;">www.haagseopenmic.nl</a></p>
+          <p>Tot snel bij de volgende sessie!<br>
+          Met muzikale groet,<br>
+          <strong>Haagse Open Mic 🎙️📝</strong></p>
+        </div>`
+    };
+
+    fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(welcomePayload)
+    })
+    .then(async (response) => {
+      if (!response.ok) throw new Error(await response.text());
+      console.log(`Welkomstmail verstuurd naar: ${email}`);
+    })
+    .catch(err => console.error('Fout bij sturen welkomstmail:', err));
   } catch (error) {
     console.error("Fout bij openbare aanmelding:", error);
     res.status(500).json({ success: false, message: "Aanmelding mislukt door een serverfout." });
