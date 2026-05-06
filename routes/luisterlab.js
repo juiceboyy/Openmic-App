@@ -56,6 +56,7 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
 
     const fileId = driveResponse.data.id;
     const photoLink = driveResponse.data.webViewLink;
+    const fileUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w500`;
 
     await drive.permissions.create({
       fileId,
@@ -120,7 +121,7 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
       email,                                                             // [4]  E-mailadres
       telefoon ? `'${telefoon}` : '',                                    // [5]  Telefoonnummer
       '',                                                                // [6]  Instagram account
-      '',                                                                // [7]  Profielfoto
+      fileUrl,                                                           // [7]  Profielfoto
       speelduur || '20',                                                 // [8]  Speelduur
       '',                                                                // [9]  Interesse in workshops
       '',                                                                // [10] Workshop 7 nov
@@ -136,7 +137,7 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
       '',                                                                // [20] Gender
       omschrijving,                                                      // [21] Omschrijving
       liveLink,                                                          // [22] Live Link
-      photoLink,                                                         // [23] Bandfoto Link
+      '',                                                                // [23] Bandfoto Link (niet meer in gebruik)
       vrijwilliger === 'true' || vrijwilliger === true,                  // [24] Vrijwilliger
     ];
 
@@ -177,7 +178,7 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
             <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Vrijwilliger</td><td>${vrijwilliger === 'true' || vrijwilliger === true ? 'Ja' : 'Nee'}</td></tr>
             <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap; vertical-align: top;">Omschrijving</td><td>${omschrijving}</td></tr>
             <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Live Link</td><td><a href="${liveLink}">${liveLink}</a></td></tr>
-            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Bandfoto Link</td><td><a href="${photoLink}">${photoLink}</a></td></tr>
+            <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Profielfoto Link</td><td><a href="${photoLink}">${photoLink}</a></td></tr>
             <tr><td style="padding: 4px 12px 4px 0; font-weight: bold; white-space: nowrap;">Status</td><td><strong>${isNew ? 'NIEUW' : 'UPDATE van bestaand contact'}</strong></td></tr>
           </table>
         </div>`;

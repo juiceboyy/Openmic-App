@@ -8,14 +8,14 @@ const FIELD_MAP = {
     'Voornaam': 'firstName', 'Achternaam': 'lastName', 'Artiestennaam': 'artistName',
     'E-mailadres': 'email', 'Telefoonnummer': 'phone', 'Instagram account': 'instagram',
     'Soort contact': 'type', 'Speelduur': 'setLength', 'Notities': 'notes', 'Profielfoto': 'profilePic',
-    'Gender': 'gender'
+    'Gender': 'gender', 'Omschrijving': 'omschrijving', 'Live Link': 'liveLink'
 };
 
 const BOOL_MAP = {
     'Regio Den Haag': 'regionDH', 'Regio Rotterdam': 'regionRdam', 'Boekbaar (Ja/Nee)': 'bookable',
     'Favoriet Gijs (Ja/Nee)': 'favGijs', 'Favoriet Ro (Ja/Nee)': 'favRo', 'Interesse in workshops (Ja/Nee)': 'workshops',
     'Workshop 7 nov (Ja/Nee)': 'workshop7Nov', 'Unsubscribed (Ja/Nee)': 'unsubscribed', 'Blacklist (Ja/Nee)': 'blacklist',
-    'Mailing Selectie': 'mailingSelection'
+    'Mailing Selectie': 'mailingSelection', 'Vrijwilliger': 'vrijwilliger'
 };
 
 export function openModal(rowIndex = null) {

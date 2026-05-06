@@ -88,6 +88,22 @@ export const contactModalTemplate = /*html*/`
                         <label class="flex items-center space-x-2 text-sm cursor-pointer dark:text-gray-300">
                             <input type="checkbox" name="Blacklist (Ja/Nee)" class="rounded text-red-500 focus:ring-red-500"><span class="text-red-700 dark:text-red-400 font-medium">Blacklist</span>
                         </label>
+                        <label class="flex items-center space-x-2 text-sm cursor-pointer dark:text-gray-300">
+                            <input type="checkbox" name="Vrijwilliger" class="rounded text-yellow-500 focus:ring-yellow-500"><span class="text-yellow-700 dark:text-yellow-400">Vrijwilliger</span>
+                        </label>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">LuisterLab</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="col-span-2">
+                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Omschrijving / Genre</label>
+                            <textarea name="Omschrijving" rows="2" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 placeholder-gray-400 bg-white dark:bg-gray-700 dark:text-white" placeholder="Genre, stijl, korte omschrijving..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Live Link</label>
+                            <input type="text" name="Live Link" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white" placeholder="https://...">
+                        </div>
                     </div>
                 </div>
                 <div>
