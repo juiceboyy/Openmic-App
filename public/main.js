@@ -87,7 +87,8 @@ const App = {
         
         getEl('btn-mailing-test').addEventListener('click', () => Mailing.sendMailing(true));
         getEl('btn-mailing-send').addEventListener('click', () => Mailing.sendMailing(false));
-        getEl('btn-generate-ai').addEventListener('click', () => Mailing.generateMailingWithAI());
+        getEl('btn-generate-ai-artist').addEventListener('click', () => Mailing.generateMailingWithAI('artist', 'btn-generate-ai-artist'));
+        getEl('btn-generate-ai-public').addEventListener('click', () => Mailing.generateMailingWithAI('public', 'btn-generate-ai-public'));
         
         getEl('btn-scan-folder').addEventListener('click', Photo.scanFolder);
         getEl('btn-send-photos').addEventListener('click', Photo.sendPhotos);

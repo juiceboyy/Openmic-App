@@ -25,8 +25,8 @@ export function getNextSecondTuesday(fromDate) {
     return getSecondTuesdayOfMonth(nextYear, nextMonth);
 }
 
-export async function generateMailingWithAI() {
-    const btn = getEl('btn-generate-ai');
+export async function generateMailingWithAI(type = 'artist', btnId = 'btn-generate-ai-artist') {
+    const btn = getEl(btnId);
     const origHTML = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> Bezig...';
@@ -43,7 +43,7 @@ export async function generateMailingWithAI() {
                 'Content-Type': 'application/json',
                 'x-app-pin': localStorage.getItem('appPin') || ''
             },
-            body: JSON.stringify({ eventDate: formattedDate, extraInput })
+            body: JSON.stringify({ eventDate: formattedDate, extraInput, type })
         });
 
         const data = await result.json();
