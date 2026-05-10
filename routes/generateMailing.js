@@ -23,9 +23,9 @@ router.post('/', async (req, res) => {
     const outputInstructions = `Belangrijk: Sluit de tekst NIET af met een groet (zoals 'Groet', 'Tot dan', namen, of een handtekening). Stop direct na de laatste inhoudelijke zin. De groet wordt er later door het systeem automatisch achter geplakt.
 
 Geef je antwoord in exact dit formaat:
-Onderwerp: [een pakkende, korte onderwerpregel]
+[De volledige e-mailtekst. Begin NIET met een aanhef zoals "Hoi [naam]," of "Beste," want die wordt automatisch voor de tekst geplaatst.]
 
-[De volledige e-mailtekst. Begin NIET met een aanhef zoals "Hoi [naam]," of "Beste," want die wordt automatisch voor de tekst geplaatst.]`;
+Onderwerp: [een pakkende, korte onderwerpregel — bedenk deze NADAT je de volledige tekst hebt geschreven, zodat de onderwerpregel de inhoud (inclusief eventuele extra mededelingen) weerspiegelt]`;
 
     let prompt;
 
@@ -100,27 +100,23 @@ ${outputInstructions}`;
 
         if (!text) throw new Error('Geen tekst ontvangen van Gemini.');
 
-        // Splits onderwerp van de bodytekst
+        // Splits onderwerp (staat nu achteraan) van de bodytekst
         const lines = text.split('\n');
         let subject = '';
-        let bodyLines = [];
-        let foundSubject = false;
+        const subjectIdx = lines.findLastIndex(l => l.toLowerCase().startsWith('onderwerp:'));
 
-        for (const line of lines) {
-            if (!foundSubject && line.toLowerCase().startsWith('onderwerp:')) {
-                subject = line.replace(/^onderwerp:/i, '').trim();
-                foundSubject = true;
-            } else if (foundSubject) {
-                bodyLines.push(line);
-            }
+        let bodyLines;
+        if (subjectIdx !== -1) {
+            subject = lines[subjectIdx].replace(/^onderwerp:/i, '').trim();
+            bodyLines = lines.slice(0, subjectIdx);
+        } else {
+            bodyLines = lines;
         }
 
-        // Verwijder lege regels aan het begin van de body
+        // Verwijder lege regels aan het begin en einde van de body
         while (bodyLines.length > 0 && bodyLines[0].trim() === '') {
             bodyLines.shift();
         }
-
-        // Verwijder ook eventuele AI-gegenereerde groet aan het einde (voor de zekerheid)
         while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1].trim() === '') {
             bodyLines.pop();
         }
