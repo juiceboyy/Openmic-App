@@ -33,7 +33,7 @@ Onderwerp: [een pakkende, korte onderwerpregel]
         prompt = `Schrijf een uitnodigings-e-mail in het Nederlands voor het publiek voor de Haagse Open Mic avond op ${eventDate}.
 
 Gebruik deze vaste gegevens ALTIJD letterlijk:
-- Locatie: Amare Den Haag
+- Locatie: Amare, Spuiplein 150 in Den Haag (noem dit adres uitnodigend in de tekst)
 - Aanvang: 19:00 uur
 - Wat te verwachten: Een ontdekkingsreis door de lokale muziekscene. Van intieme singer-songwriters tot beats en spoken word. Alleen eigen, origineel werk.
 - Sfeer: Een warme, intieme huiskamersetting midden in de stad.
