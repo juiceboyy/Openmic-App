@@ -18,10 +18,9 @@ export const mailingModalTemplate = /*html*/`
                 </div>
             </div>
             <div class="space-y-4">
-                <div class="flex justify-end">
-                    <button id="btn-generate-ai" class="bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-800/40 text-purple-700 dark:text-purple-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
-                        <i data-lucide="sparkles" class="w-4 h-4"></i> Genereer met AI
-                    </button>
+                <div class="flex justify-end gap-2">
+                    <button id="btn-generate-ai-artist" class="bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/30 dark:hover:bg-purple-800/40 text-purple-700 dark:text-purple-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm"><i data-lucide="sparkles" class="w-4 h-4"></i> AI: Voor Artiesten</button>
+                    <button id="btn-generate-ai-public" class="bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-900/30 dark:hover:bg-emerald-800/40 text-emerald-700 dark:text-emerald-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm"><i data-lucide="sparkles" class="w-4 h-4"></i> AI: Voor Publiek</button>
                 </div>
                 <div>
                     <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1 font-semibold">Onderwerp</label>

@@ -5,7 +5,7 @@ const router = express.Router();
 const MOLLIE_LOGO_LINK = process.env.MOLLIE_LOGO_LINK || 'https://pay.mollie.com/haagse-open-mic-logo';
 
 router.post('/', async (req, res) => {
-    const { eventDate, extraInput } = req.body;
+    const { eventDate, extraInput, type = 'artist' } = req.body;
 
     if (!eventDate) {
         return res.status(400).json({ status: 'error', message: 'eventDate is verplicht.' });
@@ -16,7 +16,37 @@ router.post('/', async (req, res) => {
         return res.status(500).json({ status: 'error', message: 'GEMINI_API_KEY is niet geconfigureerd op de server.' });
     }
 
-const prompt = `Schrijf een uitnodigings-e-mail in het Nederlands voor artiesten voor de Haagse Open Mic avond op ${eventDate}.
+    const extraBlock = extraInput && extraInput.trim() !== ''
+        ? `EXTRA MEDEDELING VAN DE ORGANISATIE:\nVerwerk de volgende specifieke mededeling op een logische en natuurlijke manier ergens in de e-mail:\n"${extraInput}"\n`
+        : '';
+
+    const outputInstructions = `Belangrijk: Sluit de tekst NIET af met een groet (zoals 'Groet', 'Tot dan', namen, of een handtekening). Stop direct na de laatste inhoudelijke zin. De groet wordt er later door het systeem automatisch achter geplakt.
+
+Geef je antwoord in exact dit formaat:
+Onderwerp: [een pakkende, korte onderwerpregel]
+
+[De volledige e-mailtekst. Begin NIET met een aanhef zoals "Hoi [naam]," of "Beste," want die wordt automatisch voor de tekst geplaatst.]`;
+
+    let prompt;
+
+    if (type === 'public') {
+        prompt = `Schrijf een uitnodigings-e-mail in het Nederlands voor het publiek voor de Haagse Open Mic avond op ${eventDate}.
+
+Gebruik deze vaste gegevens ALTIJD letterlijk:
+- Locatie: Amare Den Haag
+- Aanvang: 19:00 uur
+- Wat te verwachten: Een ontdekkingsreis door de lokale muziekscene. Van intieme singer-songwriters tot beats en spoken word. Alleen eigen, origineel werk.
+- Sfeer: Een warme, intieme huiskamersetting midden in de stad.
+- Merchandise: Je kunt een opstrijklogo van Haagse Open Mic kopen. Neem een eigen shirt mee, betalen kan gewoon ter plekke.
+
+${extraBlock}Schrijfstijl: uitnodigend, warm en enthousiast, maar nuchter en to-the-point. Gebruik GEEN overdreven bloemrijk taalgebruik, clichés, of onnodige bijvoeglijke naamwoorden. Geen formele toon, gewoon heldere en vlotte spreektaal.
+
+Instructie voor de output:
+Schrijf een unieke en frisse tekst voor de editie op ${eventDate}.
+
+${outputInstructions}`;
+    } else {
+        prompt = `Schrijf een uitnodigings-e-mail in het Nederlands voor artiesten voor de Haagse Open Mic avond op ${eventDate}.
 
 Gebruik deze vaste gegevens ALTIJD letterlijk:
 - Locatie: Amare, Den Haag
@@ -25,7 +55,7 @@ Gebruik deze vaste gegevens ALTIJD letterlijk:
 - Regels: alleen eigen werk (geen covers), max 3 liedjes of 4 gedichten, max 10 minuten optreden
 - Merchandise: artiesten kunnen een opstrijklogo van Haagse Open Mic kopen. Neem een eigen shirt mee, betalen kan gewoon ter plekke.
 
-${extraInput && extraInput.trim() !== '' ? `EXTRA MEDEDELING VAN DE ORGANISATIE:\nVerwerk de volgende specifieke mededeling op een logische en natuurlijke manier ergens in de e-mail:\n"${extraInput}"\n` : ''}Schrijfstijl: enthousiast, muzikaal en persoonlijk, maar hou het nuchter en to-the-point. Gebruik GEEN overdreven bloemrijk taalgebruik, clichés, of onnodige bijvoeglijke naamwoorden. Geen formele toon, gewoon heldere en vlotte spreektaal.
+${extraBlock}Schrijfstijl: enthousiast, muzikaal en persoonlijk, maar hou het nuchter en to-the-point. Gebruik GEEN overdreven bloemrijk taalgebruik, clichés, of onnodige bijvoeglijke naamwoorden. Geen formele toon, gewoon heldere en vlotte spreektaal.
 
 --- VOORBEELD VAN STIJL EN OPBOUW ---
 Onderwerp: Zet je gitaar alvast klaar: Open Mic op [Datum]!
@@ -45,12 +75,8 @@ LET OP: neem je eigen shirt mee, je scoort je opstrijklogo gewoon ter plekke bij
 Instructie voor de output:
 Gebruik bovenstaand voorbeeld als inspiratie voor de sfeer, maar zorg dat de tekst uniek en fris aanvoelt voor de editie op ${eventDate}.
 
-Belangrijk: Sluit de tekst NIET af met een groet (zoals 'Groet', 'Tot dan', namen, of een handtekening). Stop direct na de laatste inhoudelijke zin of de Mollie-link. De groet wordt er later door het systeem automatisch achter geplakt.
-
-Geef je antwoord in exact dit formaat:
-Onderwerp: [een pakkende, korte onderwerpregel]
-
-[De volledige e-mailtekst. Begin NIET met een aanhef zoals "Hoi [naam]," of "Beste artist," want die wordt automatisch voor de tekst geplaatst.]`;
+${outputInstructions}`;
+    }
 
     try {
         const response = await fetch(
