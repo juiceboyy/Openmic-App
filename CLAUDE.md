@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to coding assistants when working with code in this repository.
 
 ## What This Is
 
@@ -24,7 +24,7 @@ No build step. The frontend is vanilla JS/HTML served directly from `public/`. N
 
 ### Key Architectural Patterns
 
-**Authentication:** PIN-based. Client stores PIN in localStorage; every API request sends it as `x-app-pin` header. Backend middleware validates it.
+**Authentication:** PIN-based. Client stores PIN in localStorage; every API request sends it as `x-app-pin` header. Backend middleware validates it. Standalone public forms (`aanmelden.html`, `luisterlab.html`) bypass PIN checks.
 
 **Frontend state:** Simple JS object in `public/modules/state.js`. No reactivity — handlers mutate state and manually re-render DOM.
 
@@ -36,23 +36,29 @@ No build step. The frontend is vanilla JS/HTML served directly from `public/`. N
 
 | Service | Used for |
 |---------|----------|
-| Google Sheets | Artist contacts, performance lineups |
-| Google Drive | Scanning photo folders |
-| Google People | Importing from Google Contacts |
+| Google Sheets | Artist contacts, performance lineups, LuisterLab signups |
+| Google Drive | Scanning photo folders, uploading LuisterLab band/artist photos |
+| Google People (Contacts) | Importing and syncing contacts from Google Contacts |
 
-Credentials: `google-credentials.json` (dev) or `GOOGLE_CREDENTIALS_JSON` env var (prod). The app is deployed on Railway.
+Credentials: Google OAuth2 Refresh Token (standard for Drive and Contact Sync, fallback Service Account for Sheets).
 
 ### Environment Variables
 
 ```
-SPREADSHEET_ID                # Main contacts Google Sheet
-SPEELSCHEMA_SPREADSHEET_ID    # Lineups Google Sheet
-BREVO_API_KEY                 # Brevo — newsletters AND transactional photo emails
-APP_PIN                       # App authentication PIN
+SPREADSHEET_ID                # Main contacts Google Sheet ID
+SPEELSCHEMA_SPREADSHEET_ID    # Lineups Google Sheet ID
+LUISTERLAB_DRIVE_FOLDER_ID    # Google Drive Folder ID for uploaded artist photos
+BREVO_API_KEY                 # Brevo — newsletters AND transactional photo/notification emails
+APP_PIN                       # Admin app authentication PIN
 PORT                          # Default 3000
-NOTIFICATION_EMAIL            # Email for new signup notifications
-EMAIL_USER                    # Sender address — currently info@haagseopenmic.nl
-GOOGLE_CREDENTIALS_JSON       # Service account JSON (production)
+NOTIFICATION_EMAIL            # Email for new signup notifications (e.g. openmicamare@gmail.com)
+EMAIL_USER                    # Sender address — info@haagseopenmic.nl or nieuwsbrief@haagseopenmic.nl
+GOOGLE_OAUTH_CLIENT_ID        # Google Client ID for OAuth2 / Drive / Contacts Sync
+GOOGLE_OAUTH_CLIENT_SECRET    # Google Client Secret for OAuth2 / Drive / Contacts Sync
+GOOGLE_OAUTH_REDIRECT_URI     # Google OAuth2 Redirect Callback URL
+GOOGLE_OAUTH_REFRESH_TOKEN    # Persistent Refresh Token for OAuth2 authentication
+GOOGLE_SERVICE_ACCOUNT_EMAIL  # (Legacy/Fallback) Service account email for Google Sheets
+GOOGLE_PRIVATE_KEY            # (Legacy/Fallback) Service account private key for Google Sheets
 ```
 
 ## Frontend Data Model
@@ -61,13 +67,17 @@ Artists loaded into `state.allArtists` on init. Sheet columns are in Dutch:
 - `Voornaam` / `Achternaam` (first/last name)
 - `Artiestennaam` (stage name)
 - `E-mailadres`
-- `Soort contact` (contact type)
-- `Boekbaar` (Ja/Nee — bookable)
+- `Soort contact` (contact type - e.g., 'Artiest', 'Publiek')
+- `Boekbaar` (TRUE/FALSE — bookable)
 - `Favoriet Gijs`, `Favoriet Ro` (favorites per organizer)
-- `Blacklist` (Ja/Nee)
+- `Blacklist` (TRUE/FALSE)
 - `Datum toegevoegd` (date added)
+- `Profielfoto` (URL of the uploaded photo in Google Drive)
+- `Omschrijving` (LuisterLab bio/description)
+- `Live Link` (LuisterLab live demo URL)
+- `Vrijwilliger` (TRUE/FALSE - volunteer interest)
 
-Filtering (by name, region, contact type, bookable) is done client-side against `state.allArtists`.
+Filtering is done client-side against `state.allArtists`.
 
 ## API Endpoints
 
@@ -79,20 +89,26 @@ POST /api/artists/add
 POST /api/artists/edit
 POST /api/artists/delete
 POST /api/photos/scan
-POST /api/photos/send-single    # Per-artist, chunked — avoids Railway request timeout
+POST /api/photos/send-single        # Per-artist, chunked — avoids Railway request timeout
 POST /api/mailing
+POST /api/generate-mailing          # Generates AI mailing variants for Artists and Public
 POST /api/speelschema/sheets
 POST /api/speelschema/previous
 POST /api/speelschema/current
 POST /api/speelschema/save
+POST /api/luisterlab                # Public signup form for LuisterLab, processes photo + 25-col sheet mapping
+GET  /api/sync/auth-url             # Google Contacts OAuth2 initiation url
+GET  /api/sync/callback             # Google Contacts OAuth2 callback handler
+POST /api/sync/contacts             # Lists Google Contacts and compares with Sheet
+POST /api/sync/import               # Appends selected contacts to Sheets
 ```
 
 ## Notes
 
 - Code and comments are mixed Dutch/English (Dutch for domain language: artiesten, speelschema, boekbaar, etc.)
-- The public signup page is `public/aanmelden.html` — it's a separate HTML file, not part of the SPA
+- The public signup pages are `public/aanmelden.html` and `public/luisterlab.html` — they are separate HTML files, not part of the PIN-protected SPA.
 - Lineup feature uses HTML5 drag-and-drop with a mobile polyfill (`mobile-drag-drop`)
-- Brevo handles both newsletter campaigns and individual photo emails (via `POST /api/photos/send-single`). Railway blocks all outbound SMTP (ports 465 and 587), so Nodemailer/Gmail SMTP cannot be used — always use the Brevo HTTP API for email sending.
+- Brevo handles both newsletter campaigns and individual/transactional emails (including photo emails and notifications). Outbound Gmail SMTP is blocked on Railway, so the Brevo HTTP API is used exclusively.
 
 ## iOS Safari Modal Scrolling — Lessons Learned
 
