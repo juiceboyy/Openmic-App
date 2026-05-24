@@ -1,15 +1,32 @@
 const { google } = require('googleapis');
+const path = require('path');
 require('dotenv').config();
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
-const auth = new google.auth.GoogleAuth({
-  credentials: {
+let authOptions = { scopes: SCOPES };
+
+// 1. Check individuele env vars
+if (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL && process.env.GOOGLE_PRIVATE_KEY) {
+  authOptions.credentials = {
     client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    private_key: (process.env.GOOGLE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
-  },
-  scopes: SCOPES,
-});
+    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  };
+} 
+// 2. Check complete JSON string env var
+else if (process.env.GOOGLE_CREDENTIALS_JSON) {
+  try {
+    authOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+  } catch (error) {
+    console.error('FOUT: Kon GOOGLE_CREDENTIALS_JSON niet parsen.', error);
+  }
+} 
+// 3. Fallback naar lokaal bestand
+else {
+  authOptions.keyFile = path.join(__dirname, 'google-credentials.json');
+}
+
+const auth = new google.auth.GoogleAuth(authOptions);
 
 const sheets = google.sheets({ version: 'v4', auth });
 const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
