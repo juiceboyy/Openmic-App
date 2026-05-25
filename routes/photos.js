@@ -6,6 +6,15 @@ const { getSheetData } = require('../googleSheets.js');
 
 const BREVO_API_URL = 'https://api.brevo.com/v3/smtp/email';
 
+// Helperfunctie om strings te normaliseren (verwijder accenten, spaties, koppeltekens, etc. voor robuuste matching)
+function normalizeString(str) {
+  return String(str || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
 // Scan-route: Foto map scannen en matchen met artiesten
 router.post('/scan', async (req, res) => {
   try {
@@ -46,6 +55,7 @@ router.post('/scan', async (req, res) => {
       let fName = sub.name;
       let fLink = sub.webViewLink;
       let folderStr = String(fName).toLowerCase().trim();
+      let folderNorm = normalizeString(fName);
       let candidates = [];
 
       let exactEmailMatch = artists.find(a => {
@@ -56,9 +66,16 @@ router.post('/scan', async (req, res) => {
       if (exactEmailMatch) {
         candidates.push(exactEmailMatch);
       } else {
+        // A. Artiestennaam matching (eerst exact of gedeeltelijk via normalisatie)
         let artistNameMatches = artists.filter(a => {
           let actName = String(a['Artiestennaam'] || '').toLowerCase().trim();
           if (actName && actName !== '-') {
+            let actNorm = normalizeString(actName);
+            if (actNorm.length > 2) {
+              if (folderNorm.includes(actNorm)) return true;
+              if (actNorm.includes(folderNorm)) return true;
+            }
+            // Fallback op oude logic
             if (folderStr.includes(actName)) return true;
             if (folderStr.length > 2 && actName.includes(folderStr)) return true;
           }
@@ -68,11 +85,22 @@ router.post('/scan', async (req, res) => {
         if (artistNameMatches.length > 0) {
           candidates = artistNameMatches;
         } else {
+          // B. Echte naam matching
           let realNameMatches = artists.filter(a => {
             let firstName = String(a['Voornaam'] || '').toLowerCase().trim();
             let lastName = String(a['Achternaam'] || '').toLowerCase().trim();
             let fullName = `${firstName} ${lastName}`.trim();
             
+            let firstNorm = normalizeString(firstName);
+            let fullNorm = normalizeString(fullName);
+            
+            if (fullNorm && fullNorm.length > 2) {
+              if (folderNorm.includes(fullNorm)) return true;
+              if (fullNorm.includes(folderNorm)) return true;
+            }
+            if (firstNorm && firstNorm.length > 2 && folderNorm.includes(firstNorm)) return true;
+
+            // Fallback op oude logic
             if (fullName && fullName !== '-' && folderStr.includes(fullName)) return true;
             if (firstName && firstName !== '-' && firstName.length > 2 && folderStr.includes(firstName)) return true;
             if (folderStr.length > 2 && fullName && fullName !== '-' && fullName.includes(folderStr)) return true;
