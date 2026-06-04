@@ -196,6 +196,7 @@ async function getPreviousLineup(sheetName) {
     const mainNames = [];
     const reserveNames = [];
     let inReserveSection = false;
+    let rowIndex = 0;
 
     for (const row of rows) {
       const colA = String(row[0] || '').toLowerCase();
@@ -203,7 +204,6 @@ async function getPreviousLineup(sheetName) {
 
       if (colA.includes('reserve')) {
         inReserveSection = true;
-        // geen continue: de naam op deze zelfde rij (colB) ook meenemen
       }
 
       // Voeg de naam toe als deze niet leeg is en geen pauze bevat.
@@ -214,6 +214,7 @@ async function getPreviousLineup(sheetName) {
           mainNames.push(colB);
         }
       }
+      rowIndex++;
     }
 
     return { mainNames, reserveNames };
@@ -235,14 +236,13 @@ async function getCurrentLineup(sheetName) {
     const reserveData = [];
     let inReserveSection = false;
 
-    rawData.forEach(row => {
+    rawData.forEach((row, rowIndex) => {
       const colA = String(row[0] || '').toLowerCase();
       const name = row[1] ? row[1].toString().trim() : "";
       const notes = row[5] ? row[5].toString().trim() : "";
 
       if (colA.includes('reserve')) {
         inReserveSection = true;
-        // geen continue: naam op deze rij ook meenemen
       }
 
       if (name.includes("PAUZE") || name.includes("☕")) return;
@@ -325,11 +325,77 @@ async function saveLineup(sheetName, lineup, reserves = []) {
       requestBody: { values: rowsToInsert },
     });
 
+    // Cache leegmaken zodat de eerstvolgende geschiedenis-check verse data ophaalt
+    pastPerformersCache = null;
+
     return { status: 'success' };
   } catch (error) {
     console.error('Fout bij opslaan lineup:', error);
     throw error;
   }
+}
+
+let pastPerformersCache = null;
+let pastPerformersCacheTime = 0;
+
+async function getAllPastPerformers(excludeSheetName) {
+  const now = Date.now();
+  
+  if (!pastPerformersCache || (now - pastPerformersCacheTime >= 5 * 60 * 1000)) {
+    try {
+      const sheetNames = await getSheetNames();
+      const newCache = {};
+
+      if (sheetNames.length > 0) {
+        const ranges = sheetNames.map(name => `${name}!A3:B40`);
+        const response = await sheets.spreadsheets.values.batchGet({
+          spreadsheetId: SPEELSCHEMA_ID,
+          ranges: ranges
+        });
+
+        const valueRanges = response.data.valueRanges || [];
+        valueRanges.forEach((vr, index) => {
+          const sheetName = sheetNames[index];
+          const rows = vr.values || [];
+          const sheetNamesList = [];
+          let inReserve = false;
+
+          rows.forEach((row, rowIndex) => {
+            const colA = String(row[0] || '').toLowerCase();
+            const colB = String(row[1] || '').trim();
+
+            if (colA.includes('reserve')) {
+              inReserve = true;
+            }
+
+            // Voeg de naam toe als het niet de pauze is en niet in de reserve-sectie staat
+            if (colB && !inReserve && !colB.includes("PAUZE") && !colB.includes("☕")) {
+              sheetNamesList.push(colB.toLowerCase());
+            }
+          });
+          newCache[sheetName.toLowerCase()] = sheetNamesList;
+        });
+      }
+      pastPerformersCache = newCache;
+      pastPerformersCacheTime = now;
+    } catch (error) {
+      console.error('Fout bij ophalen alle eerdere artiesten:', error);
+      throw error;
+    }
+  }
+
+  // Bouw de samengevoegde lijst op, met uitzondering van het huidige tabblad
+  const allNames = new Set();
+  const excludeLower = excludeSheetName ? excludeSheetName.toLowerCase().trim() : null;
+
+  for (const [sheetName, names] of Object.entries(pastPerformersCache)) {
+    if (excludeLower && sheetName.trim() === excludeLower) {
+      continue;
+    }
+    names.forEach(name => allNames.add(name));
+  }
+
+  return Array.from(allNames);
 }
 
 module.exports = {
@@ -342,5 +408,6 @@ module.exports = {
   getSheetNames,
   getPreviousLineup,
   getCurrentLineup,
-  saveLineup
+  saveLineup,
+  getAllPastPerformers
 };

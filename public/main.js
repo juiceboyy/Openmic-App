@@ -108,6 +108,10 @@ const App = {
         getEl('slot-search-input').addEventListener('input', Lineup.handleLineupSearch);
         getEl('btn-close-slot-search').addEventListener('click', Lineup.closeSlotSearch);
         getEl('btn-add-to-reserve').addEventListener('click', Lineup.openReserveSearch);
+        const btnAddCandidates = getEl('btn-add-to-candidates');
+        if (btnAddCandidates) {
+            btnAddCandidates.addEventListener('click', Lineup.openCandidateSearch);
+        }
 
         const reserveContainer = getEl('reserve-list-container');
         if (reserveContainer) {
@@ -115,6 +119,14 @@ const App = {
             reserveContainer.addEventListener('dragenter', Lineup.handleDragEnter);
             reserveContainer.addEventListener('dragleave', Lineup.handleDragLeave);
             reserveContainer.addEventListener('drop', Lineup.handleDropOnReserve);
+        }
+
+        const candidateContainer = getEl('candidate-list-container');
+        if (candidateContainer) {
+            candidateContainer.addEventListener('dragover', Lineup.handleDragOver);
+            candidateContainer.addEventListener('dragenter', Lineup.handleDragEnter);
+            candidateContainer.addEventListener('dragleave', Lineup.handleDragLeave);
+            candidateContainer.addEventListener('drop', Lineup.handleDropOnCandidate);
         }
 
         // Delegated Events (Table & Modals)
@@ -197,6 +209,10 @@ const App = {
         window.addArtistToLineup = Lineup.addArtistToLineup;
         window.removeArtistFromLineup = Lineup.removeArtistFromLineup;
         window.removeArtistFromReserve = Lineup.removeArtistFromReserve;
+        window.removeArtistFromCandidates = Lineup.removeArtistFromCandidates;
+        window.openCandidateSearch = Lineup.openCandidateSearch;
+        window.handleDropOnCandidate = Lineup.handleDropOnCandidate;
+        window.toggleMaidenOverride = Lineup.toggleMaidenOverride;
         window.saveLineupToDatabase = Lineup.saveLineupToDatabase;
         window.clearLineup = Lineup.clearLineup;
         window.resizeLineup = Lineup.resizeLineup;

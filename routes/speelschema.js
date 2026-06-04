@@ -1,6 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { getSheetNames, getPreviousLineup, getCurrentLineup, saveLineup } = require('../googleSheets.js');
+const { getSheetNames, getPreviousLineup, getCurrentLineup, saveLineup, getAllPastPerformers } = require('../googleSheets.js');
+
+router.post('/history-all', async (req, res) => {
+  try {
+    const { currentSheetName } = req.body;
+    const names = await getAllPastPerformers(currentSheetName);
+    res.json({ status: 'success', names });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
 
 router.post('/sheets', async (req, res) => {
   try {

@@ -44,6 +44,9 @@ export async function apiRequest(payload) {
         } else if (payload._action === 'verify_pin') {
             url = '/api/verify-pin';
             options.headers = { 'Content-Type': 'application/json' };
+        } else if (payload._action === 'get_all_past_performers') {
+            url = '/api/speelschema/history-all';
+            options.headers = { 'Content-Type': 'application/json' };
         } else if (payload._action === 'get_sync_auth_url') {
             url = '/api/sync/auth-url';
             options.method = 'GET';

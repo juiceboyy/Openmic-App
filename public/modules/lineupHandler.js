@@ -2,18 +2,22 @@ import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { showToast, showLineupConflictDialog, showConfirm } from './notifications.js';
 import { getEl, toggleButtonLoading } from './utils.js';
-import { isFuzzyMatch, saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, copyLineupToClipboard, getDisplayName, createLineupItemHTML, createEmptySlotHTML, createReserveItemHTML } from './lineupHelpers.js';
+import { isFuzzyMatch, saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, copyLineupToClipboard, getDisplayName, createLineupItemHTML, createEmptySlotHTML, createReserveItemHTML, createCandidateItemHTML, getArtistId } from './lineupHelpers.js';
 import * as DD from './lineupDragDrop.js';
 import { LINEUP_CONFIG } from './config.js';
 
 let currentLineup = new Array(LINEUP_CONFIG.MAX_SLOTS).fill(null);
 let reserveLineup = [];
+let candidateLineup = [];
 let playedLastMonth = [];
+let allPastPerformers = [];
+let maidenOverrides = [];
 let activeSlotIndex = null;
 let activeSessionName = '';
 let addingToReserve = false;
+let addingToCandidates = false;
 
-const save = () => saveToLocalStorage(currentLineup, reserveLineup);
+const save = () => saveToLocalStorage(currentLineup, reserveLineup, candidateLineup, maidenOverrides, activeSessionName);
 
 export function resizeLineup(newSize) {
     if (newSize > currentLineup.length) {
@@ -25,15 +29,42 @@ export function resizeLineup(newSize) {
 }
 
 export function openLineupModal() {
-    if (currentLineup.every(slot => slot === null)) {
+    if (currentLineup.every(slot => slot === null) && reserveLineup.length === 0 && candidateLineup.length === 0) {
         const p = loadFromLocalStorage();
-        if (p?.main) { currentLineup = p.main; reserveLineup = p.reserve || []; }
+        if (p?.main) { 
+            currentLineup = p.main; 
+            reserveLineup = p.reserve || []; 
+            candidateLineup = p.candidates || [];
+            maidenOverrides = p.maidenOverrides || [];
+            activeSessionName = p.activeSessionName || '';
+        }
         else if (Array.isArray(p) && p.length === LINEUP_CONFIG.MAX_SLOTS) currentLineup = p;
     }
-    getEl('lineup-modal').classList.remove('hidden'); renderLineupUI(); lucide.createIcons(); fetchAvailableSheets();
+    if (activeSessionName) {
+        getEl('lineup-editor-container').classList.remove('hidden');
+    } else {
+        getEl('lineup-editor-container').classList.add('hidden');
+    }
+    getEl('lineup-modal').classList.remove('hidden'); renderLineupUI(); lucide.createIcons(); fetchAvailableSheets(); fetchAllPastPerformers();
 }
 
 export const closeLineupModal = () => getEl('lineup-modal').classList.add('hidden');
+
+export async function fetchAllPastPerformers() {
+    if (!activeSessionName) return;
+    try {
+        const reqSessionName = activeSessionName;
+        const res = await apiRequest({ _action: 'get_all_past_performers', currentSheetName: reqSessionName });
+        if (res.status === 'success' && Array.isArray(res.names)) {
+            if (activeSessionName === reqSessionName) {
+                allPastPerformers = res.names || [];
+                renderLineupUI();
+            }
+        }
+    } catch (e) {
+        console.error("Kon eerdere artiestengeschiedenis niet laden:", e);
+    }
+}
 
 export async function loadCurrentSession(event) {
     const sessionName = getEl('current-session-name').value.trim();
@@ -44,6 +75,7 @@ export async function loadCurrentSession(event) {
         if (res.status !== "success") return showToast("Fout: " + res.message, "error");
         currentLineup = new Array(LINEUP_CONFIG.MAX_SLOTS).fill(null);
         reserveLineup = [];
+        candidateLineup = [];
         if (!res.isNew && Array.isArray(res.data)) {
             res.data.forEach((item, i) => {
                 if (i >= LINEUP_CONFIG.MAX_SLOTS || !item?.name || item.name.toLowerCase().includes('pauze') || item.name.includes('☕')) return;
@@ -61,7 +93,10 @@ export async function loadCurrentSession(event) {
             });
         }
         showToast(res.isNew ? 'Nieuwe sessie gestart.' : 'Bestaande sessie ingeladen!', 'success');
-        activeSessionName = sessionName; getEl('lineup-editor-container').classList.remove('hidden'); renderLineupUI();
+        activeSessionName = sessionName; getEl('lineup-editor-container').classList.remove('hidden'); 
+        save();
+        await fetchAllPastPerformers();
+        renderLineupUI();
     } catch (e) { showToast("Kon sessie niet laden.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
 
@@ -72,6 +107,10 @@ export async function fetchAvailableSheets() {
             const options = res.sheetNames.map(name => `<option value="${name}">${name}</option>`).join(''); 
             const setOpts = (id, txt) => { const el = getEl(id); if(el) el.innerHTML = `<option value="" disabled selected>${txt}</option>${options}`; };
             setOpts('current-session-name', 'Kies de huidige sessie...'); setOpts('prev-sheet-name', 'Kies de vorige sessie...');
+            if (activeSessionName) {
+                const el = getEl('current-session-name');
+                if (el) el.value = activeSessionName;
+            }
         }
     } catch (e) {}
 }
@@ -93,6 +132,7 @@ export async function loadPreviousLineup(event) {
 
 export function openSlotSearch(index) {
     addingToReserve = false;
+    addingToCandidates = false;
     activeSlotIndex = index;
     const input = getEl('slot-search-input');
     input.placeholder = 'Zoek artiest of naam...';
@@ -101,9 +141,19 @@ export function openSlotSearch(index) {
 
 export function openReserveSearch() {
     addingToReserve = true;
+    addingToCandidates = false;
     activeSlotIndex = null;
     const input = getEl('slot-search-input');
     input.placeholder = 'Zoek artiest voor reservelijst...';
+    getEl('lineup-search-modal').classList.remove('hidden'); input.value = ''; getEl('slot-search-results').innerHTML = ''; input.focus();
+}
+
+export function openCandidateSearch() {
+    addingToReserve = false;
+    addingToCandidates = true;
+    activeSlotIndex = null;
+    const input = getEl('slot-search-input');
+    input.placeholder = 'Meld artiest aan (kandidatenpool)...';
     getEl('lineup-search-modal').classList.remove('hidden'); input.value = ''; getEl('slot-search-results').innerHTML = ''; input.focus();
 }
 
@@ -115,6 +165,7 @@ export function closeSlotSearch() {
     if (emailInput) emailInput.value = '';
     activeSlotIndex = null;
     addingToReserve = false;
+    addingToCandidates = false;
 }
 
 export function handleLineupSearch(event) {
@@ -156,6 +207,9 @@ export function addNewArtistFromSearch() {
     if (addingToReserve) {
         reserveLineup.push(newArtist);
         showToast(`${rawName} toegevoegd aan reservelijst als nieuwe artiest.`, 'success');
+    } else if (addingToCandidates) {
+        candidateLineup.push(newArtist);
+        showToast(`${rawName} toegevoegd aan aanmeldingslijst als nieuwe artiest.`, 'success');
     } else if (activeSlotIndex !== null) {
         currentLineup[activeSlotIndex] = newArtist;
         showToast(`${rawName} toegevoegd aan speelschema als nieuwe artiest.`, 'success');
@@ -173,6 +227,17 @@ export async function selectLineupArtist(rowIndex) {
             showToast(`${getDisplayName(artist)} toegevoegd aan reservelijst.`, 'success');
         } else {
             showToast('Artiest staat al in de reservelijst.', 'error');
+        }
+        save(); closeSlotSearch(); renderLineupUI();
+        return;
+    }
+
+    if (addingToCandidates) {
+        if (!candidateLineup.some(a => a.rowIndex === artist.rowIndex)) {
+            candidateLineup.push(artist);
+            showToast(`${getDisplayName(artist)} toegevoegd aan aanmeldingslijst.`, 'success');
+        } else {
+            showToast('Artiest staat al in de aanmeldingslijst.', 'error');
         }
         save(); closeSlotSearch(); renderLineupUI();
         return;
@@ -227,11 +292,42 @@ export function removeArtistFromReserve(index) {
     }
 }
 
+export function removeArtistFromCandidates(index) {
+    try {
+        candidateLineup.splice(index, 1);
+        save();
+        renderLineupUI();
+    } catch (e) {
+        console.error('Fout bij verwijderen uit aanmeldingslijst:', e);
+        showToast('Kon artiest niet verwijderen.', 'error');
+    }
+}
+
+export function toggleMaidenOverride(artistId) {
+    const idStr = String(artistId);
+    const idx = maidenOverrides.findIndex(id => String(id) === idStr);
+    if (idx === -1) {
+        maidenOverrides.push(idStr);
+        showToast("Artiest aangemerkt als eerste-keer optredende.", "success");
+    } else {
+        maidenOverrides.splice(idx, 1);
+        showToast("Historie-check hersteld.", "info");
+    }
+    save();
+    renderLineupUI();
+}
+
 export async function clearLineup() {
     try {
-        if (currentLineup.every(slot => slot === null) && reserveLineup.length === 0) return;
-        if (await showConfirm("Weet je zeker dat je het hele speelschema wilt wissen?")) {
-            currentLineup.fill(null); reserveLineup = []; save(); renderLineupUI(); showToast("Speelschema leeggemaakt.", "success");
+        if (currentLineup.every(slot => slot === null) && reserveLineup.length === 0 && candidateLineup.length === 0) return;
+        if (await showConfirm("Weet je zeker dat je het hele speelschema en de aanmeldingslijst wilt wissen?")) {
+            currentLineup.fill(null); 
+            reserveLineup = []; 
+            candidateLineup = []; 
+            maidenOverrides = [];
+            save(); 
+            renderLineupUI(); 
+            showToast("Speelschema en aanmeldingslijst leeggemaakt.", "success");
         }
     } catch (e) {
         console.error('Fout bij wissen speelschema:', e);
@@ -247,7 +343,7 @@ export async function exportLineupToClipboard() {
 let pendingDOMRebuild = false;
 
 export function handleDragStart(event, index, list) {
-    DD.setSnapshots(currentLineup, reserveLineup);
+    DD.setSnapshots(currentLineup, reserveLineup, candidateLineup);
     pendingDOMRebuild = true;
     DD.handleDragStart(event, index, list);
 }
@@ -255,7 +351,7 @@ export function handleDragStart(event, index, list) {
 export function handleDropOnMain(event, targetIndex) {
     event.preventDefault();
     event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/50');
-    if (DD.processDropOnMain(targetIndex, currentLineup, reserveLineup)) {
+    if (DD.processDropOnMain(targetIndex, currentLineup, reserveLineup, candidateLineup)) {
         pendingDOMRebuild = false;
         save(); DD.resetDraggedItem(); renderLineupUI();
     }
@@ -263,7 +359,17 @@ export function handleDropOnMain(event, targetIndex) {
 
 export function handleDropOnReserve(event) {
     event.preventDefault();
-    if (DD.processDropOnReserve(currentLineup, reserveLineup)) {
+    event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/50');
+    if (DD.processDropOnReserve(currentLineup, reserveLineup, candidateLineup)) {
+        pendingDOMRebuild = false;
+        save(); DD.resetDraggedItem(); renderLineupUI();
+    }
+}
+
+export function handleDropOnCandidate(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('border-blue-400', 'bg-blue-50/50');
+    if (DD.processDropOnCandidate(currentLineup, reserveLineup, candidateLineup)) {
         pendingDOMRebuild = false;
         save(); DD.resetDraggedItem(); renderLineupUI();
     }
@@ -272,13 +378,16 @@ export function handleDropOnReserve(event) {
 export function handleDragEnd(event) {
     DD.handleDragEnd(event);
     if (pendingDOMRebuild) {
-        const { newMain, newReserve } = DD.rebuildFromDOM(
+        const { newMain, newReserve, newCandidates } = DD.rebuildFromDOM(
             getEl('lineup-list-container'),
-            getEl('reserve-list-content')
+            getEl('reserve-list-content'),
+            getEl('candidate-list-content')
         );
         for (let i = 0; i < newMain.length; i++) currentLineup[i] = newMain[i];
         reserveLineup.length = 0;
         newReserve.forEach(x => reserveLineup.push(x));
+        candidateLineup.length = 0;
+        if (newCandidates) newCandidates.forEach(x => candidateLineup.push(x));
         save();
         renderLineupUI();
     }
@@ -325,7 +434,22 @@ export function renderLineupUI() {
         if (i === LINEUP_CONFIG.PAUSE_INDEX) html += `<div class="pauze-divider flex items-center justify-center py-3 my-2 border-y border-dashed border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-700/30 rounded-lg"><span class="text-gray-500 dark:text-gray-400 font-medium text-sm">☕ Pauze</span></div>`;
         const artist = currentLineup[i];
         const starred = artist ? state.previousReserveList.some(name => isFuzzyMatch(artist, name)) : false;
-        html += artist ? createLineupItemHTML(i, artist, i + 1, starred) : createEmptySlotHTML(i, i + 1);
+        
+        // Regels check
+        let isFirstTimer = false;
+        let playedLast = false;
+        let isOverridden = false;
+        let matchedPastNames = [];
+
+        if (artist) {
+            const artistId = getArtistId(artist);
+            isOverridden = maidenOverrides.includes(String(artistId));
+            matchedPastNames = allPastPerformers.filter(name => isFuzzyMatch(artist, name));
+            isFirstTimer = matchedPastNames.length === 0 || isOverridden;
+            playedLast = !isOverridden && playedLastMonth.some(name => isFuzzyMatch(artist, name));
+        }
+
+        html += artist ? createLineupItemHTML(i, artist, i + 1, starred, isFirstTimer, playedLast, isOverridden, matchedPastNames) : createEmptySlotHTML(i, i + 1);
     }
     container.innerHTML = html;
 
@@ -333,7 +457,42 @@ export function renderLineupUI() {
         ? '<div class="text-sm text-orange-800/50 dark:text-orange-400/50 italic text-center py-2">Sleep artiesten hierheen voor de reservelijst</div>'
         : reserveLineup.map((artist, i) => {
             const starred = state.previousReserveList.some(name => isFuzzyMatch(artist, name));
-            return createReserveItemHTML(i, artist, starred);
+            let isFirstTimer = false;
+            let playedLast = false;
+            let isOverridden = false;
+            let matchedPastNames = [];
+
+            if (artist) {
+                const artistId = getArtistId(artist);
+                isOverridden = maidenOverrides.includes(String(artistId));
+                matchedPastNames = allPastPerformers.filter(name => isFuzzyMatch(artist, name));
+                isFirstTimer = matchedPastNames.length === 0 || isOverridden;
+                playedLast = !isOverridden && playedLastMonth.some(name => isFuzzyMatch(artist, name));
+            }
+            return createReserveItemHTML(i, artist, starred, isFirstTimer, playedLast, isOverridden, matchedPastNames);
           }).join('');
+
+    const candidateListContent = getEl('candidate-list-content');
+    if (candidateListContent) {
+        candidateListContent.innerHTML = candidateLineup.length === 0
+            ? '<div class="text-sm text-blue-800/50 dark:text-blue-400/50 italic text-center py-2">Noteer hier eerst alle aanmeldingen</div>'
+            : candidateLineup.map((artist, i) => {
+                let starred = false;
+                let isFirstTimer = false;
+                let playedLast = false;
+                let isOverridden = false;
+                let matchedPastNames = [];
+
+                if (artist) {
+                    starred = state.previousReserveList.some(name => isFuzzyMatch(artist, name));
+                    const artistId = getArtistId(artist);
+                    isOverridden = maidenOverrides.includes(String(artistId));
+                    matchedPastNames = allPastPerformers.filter(name => isFuzzyMatch(artist, name));
+                    isFirstTimer = matchedPastNames.length === 0 || isOverridden;
+                    playedLast = !isOverridden && playedLastMonth.some(name => isFuzzyMatch(artist, name));
+                }
+                return createCandidateItemHTML(i, artist, starred, isFirstTimer, playedLast, isOverridden, matchedPastNames);
+              }).join('');
+    }
     lucide.createIcons();
 }
