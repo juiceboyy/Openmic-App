@@ -202,7 +202,7 @@ async function getPreviousLineup(sheetName) {
       const colA = String(row[0] || '').toLowerCase();
       const colB = String(row[1] || '').trim();
 
-      if (colA.includes('reserve') || rowIndex >= 14) {
+      if (colA.includes('reserve')) {
         inReserveSection = true;
       }
 
@@ -241,7 +241,7 @@ async function getCurrentLineup(sheetName) {
       const name = row[1] ? row[1].toString().trim() : "";
       const notes = row[5] ? row[5].toString().trim() : "";
 
-      if (colA.includes('reserve') || rowIndex >= 14) {
+      if (colA.includes('reserve')) {
         inReserveSection = true;
       }
 
@@ -364,7 +364,7 @@ async function getAllPastPerformers(excludeSheetName) {
             const colA = String(row[0] || '').toLowerCase();
             const colB = String(row[1] || '').trim();
 
-            if (colA.includes('reserve') || rowIndex >= 14) {
+            if (colA.includes('reserve')) {
               inReserve = true;
             }
 
