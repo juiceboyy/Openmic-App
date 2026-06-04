@@ -325,6 +325,9 @@ async function saveLineup(sheetName, lineup, reserves = []) {
       requestBody: { values: rowsToInsert },
     });
 
+    // Cache leegmaken zodat de eerstvolgende geschiedenis-check verse data ophaalt
+    pastPerformersCache = null;
+
     return { status: 'success' };
   } catch (error) {
     console.error('Fout bij opslaan lineup:', error);
@@ -335,51 +338,64 @@ async function saveLineup(sheetName, lineup, reserves = []) {
 let pastPerformersCache = null;
 let pastPerformersCacheTime = 0;
 
-async function getAllPastPerformers() {
+async function getAllPastPerformers(excludeSheetName) {
   const now = Date.now();
-  // Cache voor 5 minuten om API-quota te sparen
-  if (pastPerformersCache && (now - pastPerformersCacheTime < 5 * 60 * 1000)) {
-    return pastPerformersCache;
+  
+  if (!pastPerformersCache || (now - pastPerformersCacheTime >= 5 * 60 * 1000)) {
+    try {
+      const sheetNames = await getSheetNames();
+      const newCache = {};
+
+      if (sheetNames.length > 0) {
+        const ranges = sheetNames.map(name => `${name}!A3:B40`);
+        const response = await sheets.spreadsheets.values.batchGet({
+          spreadsheetId: SPEELSCHEMA_ID,
+          ranges: ranges
+        });
+
+        const valueRanges = response.data.valueRanges || [];
+        valueRanges.forEach((vr, index) => {
+          const sheetName = sheetNames[index];
+          const rows = vr.values || [];
+          const sheetNamesList = [];
+          let inReserve = false;
+
+          rows.forEach((row, rowIndex) => {
+            const colA = String(row[0] || '').toLowerCase();
+            const colB = String(row[1] || '').trim();
+
+            if (colA.includes('reserve') || rowIndex >= 14) {
+              inReserve = true;
+            }
+
+            // Voeg de naam toe als het niet de pauze is en niet in de reserve-sectie staat
+            if (colB && !inReserve && !colB.includes("PAUZE") && !colB.includes("☕")) {
+              sheetNamesList.push(colB.toLowerCase());
+            }
+          });
+          newCache[sheetName.toLowerCase()] = sheetNamesList;
+        });
+      }
+      pastPerformersCache = newCache;
+      pastPerformersCacheTime = now;
+    } catch (error) {
+      console.error('Fout bij ophalen alle eerdere artiesten:', error);
+      throw error;
+    }
   }
 
-  try {
-    const sheetNames = await getSheetNames();
-    const allNames = new Set();
+  // Bouw de samengevoegde lijst op, met uitzondering van het huidige tabblad
+  const allNames = new Set();
+  const excludeLower = excludeSheetName ? excludeSheetName.toLowerCase().trim() : null;
 
-    if (sheetNames.length === 0) return [];
-
-    const ranges = sheetNames.map(name => `${name}!A3:B40`);
-    const response = await sheets.spreadsheets.values.batchGet({
-      spreadsheetId: SPEELSCHEMA_ID,
-      ranges: ranges
-    });
-
-    const valueRanges = response.data.valueRanges || [];
-    valueRanges.forEach(vr => {
-      const rows = vr.values || [];
-      let inReserve = false;
-      rows.forEach((row, rowIndex) => {
-        const colA = String(row[0] || '').toLowerCase();
-        const colB = String(row[1] || '').trim();
-
-        if (colA.includes('reserve') || rowIndex >= 14) {
-          inReserve = true;
-        }
-
-        // Voeg de naam toe als het niet de pauze is en niet in de reserve-sectie staat
-        if (colB && !inReserve && !colB.includes("PAUZE") && !colB.includes("☕")) {
-          allNames.add(colB.toLowerCase());
-        }
-      });
-    });
-
-    pastPerformersCache = Array.from(allNames);
-    pastPerformersCacheTime = now;
-    return pastPerformersCache;
-  } catch (error) {
-    console.error('Fout bij ophalen alle eerdere artiesten:', error);
-    throw error;
+  for (const [sheetName, names] of Object.entries(pastPerformersCache)) {
+    if (excludeLower && sheetName.trim() === excludeLower) {
+      continue;
+    }
+    names.forEach(name => allNames.add(name));
   }
+
+  return Array.from(allNames);
 }
 
 module.exports = {

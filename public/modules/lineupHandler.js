@@ -17,7 +17,7 @@ let activeSessionName = '';
 let addingToReserve = false;
 let addingToCandidates = false;
 
-const save = () => saveToLocalStorage(currentLineup, reserveLineup, candidateLineup, maidenOverrides);
+const save = () => saveToLocalStorage(currentLineup, reserveLineup, candidateLineup, maidenOverrides, activeSessionName);
 
 export function resizeLineup(newSize) {
     if (newSize > currentLineup.length) {
@@ -36,8 +36,14 @@ export function openLineupModal() {
             reserveLineup = p.reserve || []; 
             candidateLineup = p.candidates || [];
             maidenOverrides = p.maidenOverrides || [];
+            activeSessionName = p.activeSessionName || '';
         }
         else if (Array.isArray(p) && p.length === LINEUP_CONFIG.MAX_SLOTS) currentLineup = p;
+    }
+    if (activeSessionName) {
+        getEl('lineup-editor-container').classList.remove('hidden');
+    } else {
+        getEl('lineup-editor-container').classList.add('hidden');
     }
     getEl('lineup-modal').classList.remove('hidden'); renderLineupUI(); lucide.createIcons(); fetchAvailableSheets(); fetchAllPastPerformers();
 }
@@ -45,11 +51,15 @@ export function openLineupModal() {
 export const closeLineupModal = () => getEl('lineup-modal').classList.add('hidden');
 
 export async function fetchAllPastPerformers() {
+    if (!activeSessionName) return;
     try {
-        const res = await apiRequest({ _action: 'get_all_past_performers' });
+        const reqSessionName = activeSessionName;
+        const res = await apiRequest({ _action: 'get_all_past_performers', currentSheetName: reqSessionName });
         if (res.status === 'success' && Array.isArray(res.names)) {
-            allPastPerformers = res.names || [];
-            renderLineupUI();
+            if (activeSessionName === reqSessionName) {
+                allPastPerformers = res.names || [];
+                renderLineupUI();
+            }
         }
     } catch (e) {
         console.error("Kon eerdere artiestengeschiedenis niet laden:", e);
@@ -83,7 +93,10 @@ export async function loadCurrentSession(event) {
             });
         }
         showToast(res.isNew ? 'Nieuwe sessie gestart.' : 'Bestaande sessie ingeladen!', 'success');
-        activeSessionName = sessionName; getEl('lineup-editor-container').classList.remove('hidden'); renderLineupUI();
+        activeSessionName = sessionName; getEl('lineup-editor-container').classList.remove('hidden'); 
+        save();
+        await fetchAllPastPerformers();
+        renderLineupUI();
     } catch (e) { showToast("Kon sessie niet laden.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
 
@@ -94,6 +107,10 @@ export async function fetchAvailableSheets() {
             const options = res.sheetNames.map(name => `<option value="${name}">${name}</option>`).join(''); 
             const setOpts = (id, txt) => { const el = getEl(id); if(el) el.innerHTML = `<option value="" disabled selected>${txt}</option>${options}`; };
             setOpts('current-session-name', 'Kies de huidige sessie...'); setOpts('prev-sheet-name', 'Kies de vorige sessie...');
+            if (activeSessionName) {
+                const el = getEl('current-session-name');
+                if (el) el.value = activeSessionName;
+            }
         }
     } catch (e) {}
 }

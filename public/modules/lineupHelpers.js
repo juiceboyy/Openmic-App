@@ -35,7 +35,15 @@ export function isFuzzyMatch(artist, historicalName) {
     return false;
 }
 
-export const saveToLocalStorage = (currentLineup, reserveLineup, candidateLineup) => localStorage.setItem(STORAGE_KEYS.LINEUP_DRAFT, JSON.stringify({ main: currentLineup, reserve: reserveLineup, candidates: candidateLineup }));
+export const saveToLocalStorage = (currentLineup, reserveLineup, candidateLineup, maidenOverrides, activeSessionName) => {
+    localStorage.setItem(STORAGE_KEYS.LINEUP_DRAFT, JSON.stringify({
+        main: currentLineup,
+        reserve: reserveLineup,
+        candidates: candidateLineup,
+        maidenOverrides: maidenOverrides || [],
+        activeSessionName: activeSessionName || ''
+    }));
+};
 
 export function loadFromLocalStorage() {
     const stored = localStorage.getItem(STORAGE_KEYS.LINEUP_DRAFT);
