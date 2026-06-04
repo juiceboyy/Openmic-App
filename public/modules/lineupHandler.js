@@ -2,7 +2,7 @@ import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { showToast, showLineupConflictDialog, showConfirm } from './notifications.js';
 import { getEl, toggleButtonLoading } from './utils.js';
-import { isFuzzyMatch, saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, copyLineupToClipboard, getDisplayName, createLineupItemHTML, createEmptySlotHTML, createReserveItemHTML, createCandidateItemHTML } from './lineupHelpers.js';
+import { isFuzzyMatch, saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, copyLineupToClipboard, getDisplayName, createLineupItemHTML, createEmptySlotHTML, createReserveItemHTML, createCandidateItemHTML, getArtistId } from './lineupHelpers.js';
 import * as DD from './lineupDragDrop.js';
 import { LINEUP_CONFIG } from './config.js';
 
@@ -11,12 +11,13 @@ let reserveLineup = [];
 let candidateLineup = [];
 let playedLastMonth = [];
 let allPastPerformers = [];
+let maidenOverrides = [];
 let activeSlotIndex = null;
 let activeSessionName = '';
 let addingToReserve = false;
 let addingToCandidates = false;
 
-const save = () => saveToLocalStorage(currentLineup, reserveLineup, candidateLineup);
+const save = () => saveToLocalStorage(currentLineup, reserveLineup, candidateLineup, maidenOverrides);
 
 export function resizeLineup(newSize) {
     if (newSize > currentLineup.length) {
@@ -34,6 +35,7 @@ export function openLineupModal() {
             currentLineup = p.main; 
             reserveLineup = p.reserve || []; 
             candidateLineup = p.candidates || [];
+            maidenOverrides = p.maidenOverrides || [];
         }
         else if (Array.isArray(p) && p.length === LINEUP_CONFIG.MAX_SLOTS) currentLineup = p;
     }
@@ -284,6 +286,20 @@ export function removeArtistFromCandidates(index) {
     }
 }
 
+export function toggleMaidenOverride(artistId) {
+    const idStr = String(artistId);
+    const idx = maidenOverrides.findIndex(id => String(id) === idStr);
+    if (idx === -1) {
+        maidenOverrides.push(idStr);
+        showToast("Artiest aangemerkt als eerste-keer optredende.", "success");
+    } else {
+        maidenOverrides.splice(idx, 1);
+        showToast("Historie-check hersteld.", "info");
+    }
+    save();
+    renderLineupUI();
+}
+
 export async function clearLineup() {
     try {
         if (currentLineup.every(slot => slot === null) && reserveLineup.length === 0 && candidateLineup.length === 0) return;
@@ -291,6 +307,7 @@ export async function clearLineup() {
             currentLineup.fill(null); 
             reserveLineup = []; 
             candidateLineup = []; 
+            maidenOverrides = [];
             save(); 
             renderLineupUI(); 
             showToast("Speelschema en aanmeldingslijst leeggemaakt.", "success");
@@ -402,10 +419,20 @@ export function renderLineupUI() {
         const starred = artist ? state.previousReserveList.some(name => isFuzzyMatch(artist, name)) : false;
         
         // Regels check
-        const isFirstTimer = artist ? !allPastPerformers.some(name => isFuzzyMatch(artist, name)) : false;
-        const playedLast = artist ? playedLastMonth.some(name => isFuzzyMatch(artist, name)) : false;
+        let isFirstTimer = false;
+        let playedLast = false;
+        let isOverridden = false;
+        let matchedPastNames = [];
 
-        html += artist ? createLineupItemHTML(i, artist, i + 1, starred, isFirstTimer, playedLast) : createEmptySlotHTML(i, i + 1);
+        if (artist) {
+            const artistId = getArtistId(artist);
+            isOverridden = maidenOverrides.includes(String(artistId));
+            matchedPastNames = allPastPerformers.filter(name => isFuzzyMatch(artist, name));
+            isFirstTimer = matchedPastNames.length === 0 || isOverridden;
+            playedLast = !isOverridden && playedLastMonth.some(name => isFuzzyMatch(artist, name));
+        }
+
+        html += artist ? createLineupItemHTML(i, artist, i + 1, starred, isFirstTimer, playedLast, isOverridden, matchedPastNames) : createEmptySlotHTML(i, i + 1);
     }
     container.innerHTML = html;
 
@@ -413,9 +440,19 @@ export function renderLineupUI() {
         ? '<div class="text-sm text-orange-800/50 dark:text-orange-400/50 italic text-center py-2">Sleep artiesten hierheen voor de reservelijst</div>'
         : reserveLineup.map((artist, i) => {
             const starred = state.previousReserveList.some(name => isFuzzyMatch(artist, name));
-            const isFirstTimer = artist ? !allPastPerformers.some(name => isFuzzyMatch(artist, name)) : false;
-            const playedLast = artist ? playedLastMonth.some(name => isFuzzyMatch(artist, name)) : false;
-            return createReserveItemHTML(i, artist, starred, isFirstTimer, playedLast);
+            let isFirstTimer = false;
+            let playedLast = false;
+            let isOverridden = false;
+            let matchedPastNames = [];
+
+            if (artist) {
+                const artistId = getArtistId(artist);
+                isOverridden = maidenOverrides.includes(String(artistId));
+                matchedPastNames = allPastPerformers.filter(name => isFuzzyMatch(artist, name));
+                isFirstTimer = matchedPastNames.length === 0 || isOverridden;
+                playedLast = !isOverridden && playedLastMonth.some(name => isFuzzyMatch(artist, name));
+            }
+            return createReserveItemHTML(i, artist, starred, isFirstTimer, playedLast, isOverridden, matchedPastNames);
           }).join('');
 
     const candidateListContent = getEl('candidate-list-content');
@@ -423,9 +460,19 @@ export function renderLineupUI() {
         candidateListContent.innerHTML = candidateLineup.length === 0
             ? '<div class="text-sm text-blue-800/50 dark:text-blue-400/50 italic text-center py-2">Noteer hier eerst alle aanmeldingen</div>'
             : candidateLineup.map((artist, i) => {
-                const isFirstTimer = artist ? !allPastPerformers.some(name => isFuzzyMatch(artist, name)) : false;
-                const playedLast = artist ? playedLastMonth.some(name => isFuzzyMatch(artist, name)) : false;
-                return createCandidateItemHTML(i, artist, isFirstTimer, playedLast);
+                let isFirstTimer = false;
+                let playedLast = false;
+                let isOverridden = false;
+                let matchedPastNames = [];
+
+                if (artist) {
+                    const artistId = getArtistId(artist);
+                    isOverridden = maidenOverrides.includes(String(artistId));
+                    matchedPastNames = allPastPerformers.filter(name => isFuzzyMatch(artist, name));
+                    isFirstTimer = matchedPastNames.length === 0 || isOverridden;
+                    playedLast = !isOverridden && playedLastMonth.some(name => isFuzzyMatch(artist, name));
+                }
+                return createCandidateItemHTML(i, artist, isFirstTimer, playedLast, isOverridden, matchedPastNames);
               }).join('');
     }
     lucide.createIcons();

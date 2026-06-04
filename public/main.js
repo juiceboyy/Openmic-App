@@ -212,6 +212,7 @@ const App = {
         window.removeArtistFromCandidates = Lineup.removeArtistFromCandidates;
         window.openCandidateSearch = Lineup.openCandidateSearch;
         window.handleDropOnCandidate = Lineup.handleDropOnCandidate;
+        window.toggleMaidenOverride = Lineup.toggleMaidenOverride;
         window.saveLineupToDatabase = Lineup.saveLineupToDatabase;
         window.clearLineup = Lineup.clearLineup;
         window.resizeLineup = Lineup.resizeLineup;
