@@ -477,19 +477,21 @@ export function renderLineupUI() {
         candidateListContent.innerHTML = candidateLineup.length === 0
             ? '<div class="text-sm text-blue-800/50 dark:text-blue-400/50 italic text-center py-2">Noteer hier eerst alle aanmeldingen</div>'
             : candidateLineup.map((artist, i) => {
+                let starred = false;
                 let isFirstTimer = false;
                 let playedLast = false;
                 let isOverridden = false;
                 let matchedPastNames = [];
 
                 if (artist) {
+                    starred = state.previousReserveList.some(name => isFuzzyMatch(artist, name));
                     const artistId = getArtistId(artist);
                     isOverridden = maidenOverrides.includes(String(artistId));
                     matchedPastNames = allPastPerformers.filter(name => isFuzzyMatch(artist, name));
                     isFirstTimer = matchedPastNames.length === 0 || isOverridden;
                     playedLast = !isOverridden && playedLastMonth.some(name => isFuzzyMatch(artist, name));
                 }
-                return createCandidateItemHTML(i, artist, isFirstTimer, playedLast, isOverridden, matchedPastNames);
+                return createCandidateItemHTML(i, artist, starred, isFirstTimer, playedLast, isOverridden, matchedPastNames);
               }).join('');
     }
     lucide.createIcons();
