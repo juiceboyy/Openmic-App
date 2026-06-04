@@ -1,10 +1,12 @@
 let draggedEl = null;
 let mainSnap = null;
 let reserveSnap = null;
+let candidateSnap = null;
 
-export function setSnapshots(main, reserve) {
+export function setSnapshots(main, reserve, candidates) {
     mainSnap = [...main];
     reserveSnap = [...reserve];
+    candidateSnap = [...(candidates || [])];
 }
 
 export function handleDragStart(event, index, list) {
@@ -44,16 +46,24 @@ export function handleDragEnd(event) {
     draggedEl = null;
 }
 
-export function rebuildFromDOM(mainContainer, reserveContainer) {
+export function rebuildFromDOM(mainContainer, reserveContainer, candidateContainer) {
     const newMain = [];
     const newReserve = [];
+    const newCandidates = [];
+
+    const getItemFromSnap = (list, index) => {
+        if (list === 'main') return mainSnap[index];
+        if (list === 'reserve') return reserveSnap[index];
+        if (list === 'candidates') return candidateSnap[index];
+        return null;
+    };
 
     for (const child of mainContainer.children) {
         if (child.classList.contains('pauze-divider')) continue;
         if (child.classList.contains('draggable-item')) {
             const srcList = child.dataset.list;
             const srcIndex = parseInt(child.dataset.index, 10);
-            newMain.push(srcList === 'main' ? mainSnap[srcIndex] : reserveSnap[srcIndex]);
+            newMain.push(getItemFromSnap(srcList, srcIndex));
         } else {
             newMain.push(null);
         }
@@ -63,14 +73,23 @@ export function rebuildFromDOM(mainContainer, reserveContainer) {
         if (!child.classList.contains('draggable-item')) continue;
         const srcList = child.dataset.list;
         const srcIndex = parseInt(child.dataset.index, 10);
-        newReserve.push(srcList === 'main' ? mainSnap[srcIndex] : reserveSnap[srcIndex]);
+        newReserve.push(getItemFromSnap(srcList, srcIndex));
     }
 
-    return { newMain, newReserve };
+    if (candidateContainer) {
+        for (const child of candidateContainer.children) {
+            if (!child.classList.contains('draggable-item')) continue;
+            const srcList = child.dataset.list;
+            const srcIndex = parseInt(child.dataset.index, 10);
+            newCandidates.push(getItemFromSnap(srcList, srcIndex));
+        }
+    }
+
+    return { newMain, newReserve, newCandidates };
 }
 
-// Cross-list: reserve → main slot (or main → main slot, ignored)
-export function processDropOnMain(targetIndex, currentLineup, reserveLineup) {
+// Cross-list: reserve/candidates → main slot
+export function processDropOnMain(targetIndex, currentLineup, reserveLineup, candidatePool) {
     if (!draggedEl) return false;
     const srcList = draggedEl.dataset.list;
     const srcIndex = parseInt(draggedEl.dataset.index, 10);
@@ -82,12 +101,19 @@ export function processDropOnMain(targetIndex, currentLineup, reserveLineup) {
         reserveLineup.splice(srcIndex, 1);
         if (mainItem) reserveLineup.push(mainItem);
         return true;
+    } else if (srcList === 'candidates') {
+        const candidateItem = candidatePool[srcIndex];
+        const mainItem = currentLineup[targetIndex];
+        currentLineup[targetIndex] = candidateItem;
+        candidatePool.splice(srcIndex, 1);
+        if (mainItem) candidatePool.push(mainItem);
+        return true;
     }
     return false;
 }
 
-// Cross-list: main → reserve container
-export function processDropOnReserve(currentLineup, reserveLineup) {
+// Cross-list: main/candidates → reserve container
+export function processDropOnReserve(currentLineup, reserveLineup, candidatePool) {
     if (!draggedEl) return false;
     const srcList = draggedEl.dataset.list;
     const srcIndex = parseInt(draggedEl.dataset.index, 10);
@@ -96,8 +122,30 @@ export function processDropOnReserve(currentLineup, reserveLineup) {
         const item = currentLineup[srcIndex];
         if (item) { reserveLineup.push(item); currentLineup[srcIndex] = null; }
         return true;
+    } else if (srcList === 'candidates') {
+        const item = candidatePool[srcIndex];
+        if (item) { reserveLineup.push(item); candidatePool.splice(srcIndex, 1); }
+        return true;
     }
     return false;
 }
 
-export const resetDraggedItem = () => { draggedEl = null; mainSnap = null; reserveSnap = null; };
+// Cross-list: main/reserve → candidate container
+export function processDropOnCandidate(currentLineup, reserveLineup, candidatePool) {
+    if (!draggedEl) return false;
+    const srcList = draggedEl.dataset.list;
+    const srcIndex = parseInt(draggedEl.dataset.index, 10);
+
+    if (srcList === 'main') {
+        const item = currentLineup[srcIndex];
+        if (item) { candidatePool.push(item); currentLineup[srcIndex] = null; }
+        return true;
+    } else if (srcList === 'reserve') {
+        const item = reserveLineup[srcIndex];
+        if (item) { candidatePool.push(item); reserveLineup.splice(srcIndex, 1); }
+        return true;
+    }
+    return false;
+}
+
+export const resetDraggedItem = () => { draggedEl = null; mainSnap = null; reserveSnap = null; candidateSnap = null; };

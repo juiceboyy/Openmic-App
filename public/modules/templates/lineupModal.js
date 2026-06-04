@@ -1,6 +1,6 @@
 export const lineupModalTemplate = /*html*/`
 <div id="lineup-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl flex flex-col max-h-[85dvh] overflow-hidden transition-colors">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-5xl flex flex-col max-h-[85dvh] overflow-hidden transition-colors">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-700/50 rounded-t-2xl">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                 <i data-lucide="list-ordered" class="w-5 h-5 text-apple-blue"></i> Speelschema (Max 12)
@@ -31,19 +31,44 @@ export const lineupModalTemplate = /*html*/`
                     </button>
                 </div>
 
-                <div id="lineup-list-container" class="space-y-2">
-                    <!-- Lineup items injected here -->
-                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                    <!-- Linker kolom: Speelschema -->
+                    <div class="space-y-3">
+                        <h3 class="font-bold text-sm text-gray-700 dark:text-gray-300 flex items-center">
+                            <i data-lucide="calendar" class="w-4 h-4 mr-1.5 text-apple-blue"></i> Speelschema
+                        </h3>
+                        <div id="lineup-list-container" class="space-y-2">
+                            <!-- Lineup items injected here -->
+                        </div>
+                    </div>
 
-                <div id="reserve-list-container" class="mt-8 p-4 border-2 border-dashed border-orange-200 bg-orange-50/30 rounded-lg dark:border-orange-900/50 dark:bg-orange-900/10 min-h-[100px] transition-colors">
-                    <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center justify-between">
-                        <span class="flex items-center"><i data-lucide="clipboard-list" class="w-4 h-4 inline mr-2"></i> Reservelijst</span>
-                        <button id="btn-add-to-reserve" class="text-orange-600 hover:text-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 rounded-md px-2 py-1 text-xs font-medium flex items-center gap-1 transition-colors" title="Artiest direct toevoegen aan reservelijst">
-                            <i data-lucide="plus" class="w-3 h-3"></i> Toevoegen
-                        </button>
-                    </h3>
-                    <div id="reserve-list-content" class="space-y-2">
-                        <!-- Reserve items injected here -->
+                    <!-- Rechter kolom: Reserves & Aanmeldingen -->
+                    <div class="space-y-6">
+                        <!-- Reservelijst -->
+                        <div id="reserve-list-container" class="p-4 border-2 border-dashed border-orange-200 bg-orange-50/30 rounded-xl dark:border-orange-900/50 dark:bg-orange-900/10 min-h-[100px] transition-colors">
+                            <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center justify-between">
+                                <span class="flex items-center"><i data-lucide="clipboard-list" class="w-4 h-4 inline mr-2"></i> Reservelijst</span>
+                                <button id="btn-add-to-reserve" class="text-orange-600 hover:text-orange-800 hover:bg-orange-100 dark:hover:bg-orange-900/40 rounded-md px-2 py-1 text-xs font-medium flex items-center gap-1 transition-colors" title="Artiest direct toevoegen aan reservelijst">
+                                    <i data-lucide="plus" class="w-3 h-3"></i> Toevoegen
+                                </button>
+                            </h3>
+                            <div id="reserve-list-content" class="space-y-2">
+                                <!-- Reserve items injected here -->
+                            </div>
+                        </div>
+
+                        <!-- Aanmeldingslijst -->
+                        <div id="candidate-list-container" class="p-4 border-2 border-dashed border-blue-200 bg-blue-50/30 rounded-xl dark:border-blue-900/50 dark:bg-blue-900/10 min-h-[180px] transition-colors">
+                            <h3 class="font-bold text-blue-800 dark:text-blue-400 mb-3 flex items-center justify-between">
+                                <span class="flex items-center"><i data-lucide="users" class="w-4 h-4 inline mr-2"></i> Aanmeldingslijst (Pool)</span>
+                                <button id="btn-add-to-candidates" class="text-blue-600 hover:text-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-md px-2 py-1 text-xs font-medium flex items-center gap-1 transition-colors" title="Artiest toevoegen aan aanmeldlijst">
+                                    <i data-lucide="plus" class="w-3 h-3"></i> Artiest aanmelden
+                                </button>
+                            </h3>
+                            <div id="candidate-list-content" class="space-y-2">
+                                <!-- Candidate items injected here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
