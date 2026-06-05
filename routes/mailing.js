@@ -17,6 +17,16 @@ router.post('/', async (req, res) => {
     let actualRecipients = recipients;
     if (testMode) {
       actualRecipients = [{ email: testEmail || 'haagseopenmic@gmail.com', name: 'Test Ontvanger' }];
+    } else {
+      // Deduplicate recipients by email address (case-insensitive)
+      const seenEmails = new Set();
+      actualRecipients = recipients.filter(r => {
+        if (!r || !r.email) return false;
+        const emailLower = r.email.trim().toLowerCase();
+        if (seenEmails.has(emailLower)) return false;
+        seenEmails.add(emailLower);
+        return true;
+      });
     }
 
     const bodyHtml = message.replace(/\n/g, '<br>');

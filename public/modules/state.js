@@ -8,6 +8,7 @@ export const state = {
     recentlyImportedEmails: new Set(),
     importFilterActive: false,
     previousReserveList: [],
+    isSendingMailing: false,
 };
 
 export const isTrue = (val) => {

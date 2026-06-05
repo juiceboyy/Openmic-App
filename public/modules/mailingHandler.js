@@ -83,13 +83,21 @@ export function closeMailingModal(modalId) {
 }
 
 export async function sendMailing(isTest) {
+    if (state.isSendingMailing) return;
     const subject = getEl('mailing-subject').value.trim(); const message = getEl('mailing-body').value.trim();
     if (!subject || !message) { showToast("Vul onderwerp en bericht in.", "error"); return; }
     if (state.mailingRecipients.length === 0) return;
-    if (!await showConfirm(isTest ? "TEST: Stuur 1 mail naar halfhide@gmail.com?" : `Weet je zeker dat je ${state.mailingRecipients.length} mails wilt sturen?`)) return;
+    
+    state.isSendingMailing = true;
+    const isConfirmed = await showConfirm(isTest ? "TEST: Stuur 1 mail naar halfhide@gmail.com?" : `Weet je zeker dat je ${state.mailingRecipients.length} mails wilt sturen?`);
+    if (!isConfirmed) {
+        state.isSendingMailing = false;
+        return;
+    }
+    
     const btn = isTest ? getEl('btn-mailing-test') : getEl('btn-mailing-send'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
         const result = await apiRequest({ _action: 'send_mailing', recipients: isTest ? [state.mailingRecipients[0]] : state.mailingRecipients, subject, message, testMode: isTest, testEmail: 'halfhide@gmail.com' });
         if (result.status === "success") { showToast(`Gelukt! ${result.sentCount} mail(s) verzonden.`, "success"); if (!isTest) getEl('mailing-modal').classList.add('hidden'); } else { showToast("Fout: " + result.message, "error"); }
-    } catch (e) { showToast("Verzenden mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
+    } catch (e) { showToast("Verzenden mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); state.isSendingMailing = false; }
 }
