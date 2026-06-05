@@ -23,7 +23,8 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors());
-app.use(express.json()); // Zorgt dat we inkomende JSON-data (de 'payload') kunnen lezen
+app.use(express.json({ limit: '10mb' })); // Zorgt dat we inkomende JSON-data kunnen lezen (verhoogd naar 10mb)
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // 🛠️ DEBUG LOGGING: Klikspaan die ELK inkomend verzoek print
 app.use((req, res, next) => {

@@ -26,13 +26,21 @@ async function startAIGenderAnalysis() {
 
     try {
         const pin = localStorage.getItem('appPin') || '';
+        
+        // Stuur alleen de noodzakelijke velden om 413 Payload Too Large te voorkomen
+        const payloadArtists = unknown.map(a => ({
+            rowIndex: a.rowIndex,
+            firstName: a.firstName,
+            artistName: a.artistName
+        }));
+
         const response = await fetch('/api/artists/analyze-genders', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
                 'x-app-pin': pin
             },
-            body: JSON.stringify({ artists: unknown })
+            body: JSON.stringify({ artists: payloadArtists })
         });
 
         if (response.status === 401) {
