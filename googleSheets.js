@@ -398,10 +398,50 @@ async function getAllPastPerformers(excludeSheetName) {
   return Array.from(allNames);
 }
 
+async function batchUpdateGenders(updates) {
+  try {
+    if (!updates || updates.length === 0) {
+      return { status: 'success', updatedFields: 0 };
+    }
+
+    const headersResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: 'contacts!1:1',
+    });
+    const headers = headersResponse.data.values[0];
+    const columnIndex = headers.indexOf('Gender');
+
+    if (columnIndex === -1) {
+      throw new Error("Kolom 'Gender' niet gevonden in Google Sheets.");
+    }
+
+    const columnLetter = indexToLetter(columnIndex);
+
+    const changes = updates.map(u => ({
+      range: `contacts!${columnLetter}${u.rowIndex}`,
+      values: [[ u.gender ]]
+    }));
+
+    await sheets.spreadsheets.values.batchUpdate({
+      spreadsheetId: SPREADSHEET_ID,
+      requestBody: {
+        valueInputOption: 'USER_ENTERED',
+        data: changes
+      }
+    });
+
+    return { status: 'success', updatedFields: changes.length };
+  } catch (error) {
+    console.error('Fout bij batch updaten genders in Google Sheets:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   sheets,
   getSheetData,
   updateArtistData,
+  batchUpdateGenders,
   addArtistData,
   deleteArtistData,
   SPREADSHEET_ID,
