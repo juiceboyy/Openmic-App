@@ -1,3 +1,7 @@
+import { showToast } from './modules/notifications.js';
+import { state } from './modules/state.js';
+import { applyFilters } from './modules/uiHandler.js';
+
 async function startAIGenderAnalysis() {
     const btn = document.getElementById('ai-gender-btn');
     if (!btn) return;
@@ -9,63 +13,72 @@ async function startAIGenderAnalysis() {
     });
 
     if (unknown.length === 0) {
-        alert('Geen artiesten gevonden met onbekend gender.');
+        showToast('Geen artiesten gevonden met onbekend gender.', 'error');
         return;
     }
 
     const originalHTML = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '⏳';
-    btn.title = `Analyseren… (0/${unknown.length})`;
+    btn.innerHTML = '<span class="inline-block animate-spin">⏳</span>';
+    btn.title = `Analyseren… (${unknown.length} contacten)`;
 
-    let updated = 0;
+    showToast(`Gender-analyse gestart voor ${unknown.length} contacten met Gemini...`, 'success');
 
-    for (let i = 0; i < unknown.length; i++) {
-        const artist = unknown[i];
-        btn.title = `Analyseren… (${i + 1}/${unknown.length})`;
+    try {
+        const pin = localStorage.getItem('appPin') || '';
+        
+        // Stuur alleen de noodzakelijke velden om 413 Payload Too Large te voorkomen
+        const payloadArtists = unknown.map(a => ({
+            rowIndex: a.rowIndex,
+            firstName: a.firstName,
+            artistName: a.artistName
+        }));
 
-        let naam = (artist.firstName || '').trim();
-        if (!naam || naam === '-') {
-            const parts = (artist.artistName || '').trim().split(/\s+/);
-            naam = parts[0] || '';
-        }
-        if (!naam || naam === '-') continue;
+        const response = await fetch('/api/artists/analyze-genders', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'x-app-pin': pin
+            },
+            body: JSON.stringify({ artists: payloadArtists })
+        });
 
-        try {
-            const res = await fetch(`https://api.genderize.io/?name=${encodeURIComponent(naam)}`);
-
-            if (res.status === 429) {
-                alert('API limiet bereikt (1000/dag). Probeer het morgen weer of wissel van internetverbinding.');
-                break;
-            }
-
-            if (!res.ok) continue;
-
-            const data = await res.json();
-
-            if (data.gender && data.probability > 0.85) {
-                const genderValue = data.gender === 'male' ? 'Man' : data.gender === 'female' ? 'Vrouw' : null;
-                if (!genderValue) continue;
-
-                const select = document.querySelector(`select[data-field="Gender"][data-row="${artist.rowIndex}"]`);
-                if (select) {
-                    select.value = genderValue;
-                    select.dispatchEvent(new Event('change', { bubbles: true }));
-                    updated++;
-                }
-            }
-        } catch (e) {
-            console.warn('Genderize fout voor', naam, e);
+        if (response.status === 401) {
+            showToast('Niet geautoriseerd. Voer de pincode opnieuw in.', 'error');
+            setTimeout(() => window.location.reload(), 1500);
+            return;
         }
 
-        await new Promise(r => setTimeout(r, 1500));
+        const data = await response.json();
+
+        if (response.ok && data.status === 'success') {
+            const updatedCount = data.updatedCount || 0;
+            
+            // Werk de lokale client state bij
+            if (data.updates && Array.isArray(data.updates)) {
+                data.updates.forEach(upd => {
+                    const artist = state.allArtists.find(a => a.rowIndex === upd.rowIndex);
+                    if (artist) {
+                        artist.gender = upd.gender;
+                    }
+                });
+            }
+
+            // Update UI
+            applyFilters();
+            
+            showToast(`Klaar! ${updatedCount} van de ${unknown.length} genders succesvol ingevuld.`, 'success');
+        } else {
+            showToast(data.message || 'Fout bij gender analyse.', 'error');
+        }
+    } catch (e) {
+        console.error('Fout bij gender analyse:', e);
+        showToast('Er ging iets mis bij het verbinden met de server.', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+        btn.title = 'Auto-fill onbekende genders (AI)';
     }
-
-    btn.disabled = false;
-    btn.innerHTML = originalHTML;
-    btn.title = 'Auto-fill onbekende genders (AI)';
-
-    alert(`Klaar! ${updated} van de ${unknown.length} genders succesvol ingevuld.`);
 }
 
 window.startAIGenderAnalysis = startAIGenderAnalysis;
