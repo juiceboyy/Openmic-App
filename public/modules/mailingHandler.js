@@ -73,7 +73,8 @@ export function openMailingModal() {
     const btnTest = getEl('btn-mailing-test');
     const btnSend = getEl('btn-mailing-send');
     
-    btnTest.disabled = !hasRecipients; btnSend.disabled = !hasRecipients;
+    btnTest.disabled = false; // Altijd beschikbaar voor test e-mails
+    btnSend.disabled = !hasRecipients;
     btnSend.classList.toggle('opacity-50', !hasRecipients); btnSend.classList.toggle('cursor-not-allowed', !hasRecipients);
     getEl('mailing-subject').value = ''; getEl('mailing-body').value = ''; getEl('mailing-modal').classList.remove('hidden'); lucide.createIcons();
 }
@@ -86,7 +87,7 @@ export async function sendMailing(isTest) {
     if (state.isSendingMailing) return;
     const subject = getEl('mailing-subject').value.trim(); const message = getEl('mailing-body').value.trim();
     if (!subject || !message) { showToast("Vul onderwerp en bericht in.", "error"); return; }
-    if (state.mailingRecipients.length === 0) return;
+    if (!isTest && state.mailingRecipients.length === 0) return;
     
     state.isSendingMailing = true;
     const isConfirmed = await showConfirm(isTest ? "TEST: Stuur 1 mail naar halfhide@gmail.com?" : `Weet je zeker dat je ${state.mailingRecipients.length} mails wilt sturen?`);
@@ -97,7 +98,14 @@ export async function sendMailing(isTest) {
     
     const btn = isTest ? getEl('btn-mailing-test') : getEl('btn-mailing-send'); const orig = btn.innerHTML; toggleButtonLoading(btn, true);
     try {
-        const result = await apiRequest({ _action: 'send_mailing', recipients: isTest ? [state.mailingRecipients[0]] : state.mailingRecipients, subject, message, testMode: isTest, testEmail: 'halfhide@gmail.com' });
+        const result = await apiRequest({ 
+            _action: 'send_mailing', 
+            recipients: isTest ? [{ email: 'halfhide@gmail.com', name: 'Test Ontvanger' }] : state.mailingRecipients, 
+            subject, 
+            message, 
+            testMode: isTest, 
+            testEmail: 'halfhide@gmail.com' 
+        });
         if (result.status === "success") { showToast(`Gelukt! ${result.sentCount} mail(s) verzonden.`, "success"); if (!isTest) getEl('mailing-modal').classList.add('hidden'); } else { showToast("Fout: " + result.message, "error"); }
     } catch (e) { showToast("Verzenden mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); state.isSendingMailing = false; }
 }
