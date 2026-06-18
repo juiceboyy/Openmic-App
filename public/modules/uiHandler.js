@@ -1,6 +1,6 @@
 import { state, isTrue } from './state.js';
 import { fetchArtistsData } from './api.js';
-import { getEl } from './utils.js';
+import { getEl, checkSimilarity } from './utils.js';
 
 export function toggleGlobalLoading(element, show) {
     if (element) element.style.display = show ? 'flex' : 'none';
@@ -186,7 +186,12 @@ export function applyFilters() {
     const genderFilter = getEl('filter-gender') ? getEl('filter-gender').value : 'all';
 
     state.currentFilteredData = state.allArtists.filter(artist => {
-        const matchesSearch = (artist.firstName + ' ' + artist.lastName + artist.artistName + artist.email).toLowerCase().includes(searchTerm)
+        const matchesSearch = !searchTerm
+            || checkSimilarity(searchTerm, artist.firstName)
+            || checkSimilarity(searchTerm, artist.lastName)
+            || checkSimilarity(searchTerm, artist.artistName)
+            || checkSimilarity(searchTerm, artist.firstName + ' ' + artist.lastName)
+            || (artist.email || '').toLowerCase().includes(searchTerm)
             || (artist.notes || '').toLowerCase().includes(searchTerm)
             || (artist.omschrijving || '').toLowerCase().includes(searchTerm);
         let matchesRegion = regionFilter === 'all' || (regionFilter === 'Den Haag' && artist.regionDH) || (regionFilter === 'Rotterdam' && artist.regionRdam);

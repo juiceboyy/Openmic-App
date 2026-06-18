@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { showToast, showLineupConflictDialog, showConfirm } from './notifications.js';
-import { getEl, toggleButtonLoading } from './utils.js';
+import { getEl, toggleButtonLoading, checkSimilarity } from './utils.js';
 import { isFuzzyMatch, saveToLocalStorage, loadFromLocalStorage, clearLocalStorage, copyLineupToClipboard, getDisplayName, createLineupItemHTML, createEmptySlotHTML, createReserveItemHTML, createCandidateItemHTML, getArtistId } from './lineupHelpers.js';
 import * as DD from './lineupDragDrop.js';
 import { LINEUP_CONFIG } from './config.js';
@@ -173,7 +173,12 @@ export function handleLineupSearch(event) {
     const quickAdd = getEl('quick-add-new-artist');
     if (!q) { getEl('slot-search-results').innerHTML = ''; if (quickAdd) quickAdd.classList.add('hidden'); return; }
     const matches = state.allArtists.filter(a =>
-        (a.artistName || '').toLowerCase().includes(q) || (a.firstName || '').toLowerCase().includes(q) || (a.lastName || '').toLowerCase().includes(q) || (a.notes || '').toLowerCase().includes(q)
+        !q ||
+        checkSimilarity(q, a.artistName) ||
+        checkSimilarity(q, a.firstName) ||
+        checkSimilarity(q, a.lastName) ||
+        checkSimilarity(q, a.firstName + ' ' + a.lastName) ||
+        (a.notes || '').toLowerCase().includes(q)
     );
     if (matches.length === 0) {
         getEl('slot-search-results').innerHTML = '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Geen artiesten gevonden...</div>';

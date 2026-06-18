@@ -1,6 +1,6 @@
 import { state } from './state.js';
 import { apiRequest } from './api.js';
-import { getEl } from './utils.js';
+import { getEl, checkSimilarity } from './utils.js';
 import { showToast, showConfirm } from './notifications.js';
 import { getDisplayName } from './lineupHelpers.js';
 
@@ -79,12 +79,13 @@ export function handlePhotoArtistSearch(index, query) {
         return;
     }
     
-    const matches = state.allArtists.filter(a => {
-        const artistName = (a.artistName || '').toLowerCase();
-        const firstName = (a.firstName || '').toLowerCase();
-        const lastName = (a.lastName || '').toLowerCase();
-        return artistName.includes(q) || firstName.includes(q) || lastName.includes(q);
-    });
+    const matches = state.allArtists.filter(a =>
+        !q ||
+        checkSimilarity(q, a.artistName) ||
+        checkSimilarity(q, a.firstName) ||
+        checkSimilarity(q, a.lastName) ||
+        checkSimilarity(q, a.firstName + ' ' + a.lastName)
+    );
     
     if (matches.length === 0) {
         resultsContainer.innerHTML = `<div class="px-2 py-1.5 text-xs text-gray-500 dark:text-gray-400">Geen artiesten gevonden...</div>`;

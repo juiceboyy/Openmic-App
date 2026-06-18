@@ -1,36 +1,15 @@
 import { STORAGE_KEYS, LINEUP_CONFIG } from './config.js';
-
-export const normalize = (str) => (!str || str === '-') ? '' : str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9\s]/g, "").replace(/\s+/g, " ").trim();
-
-const levenshtein = (a, b) => {
-    if (!a.length) return b.length; if (!b.length) return a.length;
-    const matrix = Array(b.length + 1).fill(null).map((_, i) => [i]);
-    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-    for (let i = 1; i <= b.length; i++) {
-        for (let j = 1; j <= a.length; j++) {
-            matrix[i][j] = b[i - 1] === a[j - 1] ? matrix[i - 1][j - 1] : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
-        }
-    }
-    return matrix[b.length][a.length];
-};
+import { normalize, checkSimilarity } from './utils.js';
+export { normalize };
 
 export function isFuzzyMatch(artist, historicalName) {
     const h = normalize(historicalName);
     if (!h) return false;
     
-    const checkSimilarity = (strA, strB) => {
-        if (!strA || !strB) return false;
-        if (strB.includes(strA) || strA.includes(strB)) return true;
-        if (strA.length > 3 && strB.length > 3) {
-            const dist = levenshtein(strA, strB);
-            const maxDist = Math.floor(Math.min(strA.length, strB.length) / 4) + 1; 
-            return dist <= maxDist;
-        }
-        return false;
-    };
-
-    if (artist.artistName && artist.artistName !== '-' && checkSimilarity(normalize(artist.artistName), h)) return true;
-    const f = normalize(artist.firstName); const l = normalize(artist.lastName); const full = `${f} ${l}`.trim();
+    if (artist.artistName && artist.artistName !== '-' && checkSimilarity(artist.artistName, h)) return true;
+    const f = artist.firstName || '';
+    const l = artist.lastName || '';
+    const full = `${f} ${l}`.trim();
     if (full && checkSimilarity(full, h)) return true;
     return false;
 }
