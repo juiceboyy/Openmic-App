@@ -14,6 +14,11 @@ npm start          # node server.js, runs on port 3000
 
 No build step. The frontend is vanilla JS/HTML served directly from `public/`. No tests or linting configured.
 
+## Git & Deployment
+
+- We develop and work on the `dev` branch in GitHub.
+- After completing and verifying a change, you can directly push the changes to the `dev` branch (`git push origin dev`).
+
 ## Architecture
 
 **Backend:** Node.js + Express (CommonJS), entry point is `server.js`. Routes are split by feature in `routes/`.

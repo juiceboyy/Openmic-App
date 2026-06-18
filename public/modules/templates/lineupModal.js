@@ -108,7 +108,7 @@ export const lineupSearchModalTemplate = /*html*/`
             <div class="px-4 py-4 bg-green-50/50 dark:bg-green-900/10">
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 flex items-center gap-1.5">
                     <i data-lucide="user-plus" class="w-4 h-4 text-green-600 dark:text-green-400 shrink-0"></i>
-                    Artiest niet gevonden. Vul e-mail in om direct toe te voegen.
+                    Staat de artiest er niet bij? Vul e-mail in om direct toe te voegen.
                 </p>
                 <div class="flex gap-2">
                     <input type="email" id="new-artist-email" placeholder="E-mailadres (optioneel)..."
