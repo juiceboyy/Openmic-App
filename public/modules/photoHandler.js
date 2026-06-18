@@ -83,7 +83,16 @@ export function handlePhotoArtistSearch(index, query) {
         const artistName = (a.artistName || '').toLowerCase();
         const firstName = (a.firstName || '').toLowerCase();
         const lastName = (a.lastName || '').toLowerCase();
-        return artistName.includes(q) || firstName.includes(q) || lastName.includes(q);
+        const email = (a.email || '').toLowerCase();
+        const notes = (a.notes || '').toLowerCase();
+        const omschrijving = (a.omschrijving || '').toLowerCase();
+        
+        return artistName.includes(q) || 
+               firstName.includes(q) || 
+               lastName.includes(q) || 
+               email.includes(q) || 
+               notes.includes(q) || 
+               omschrijving.includes(q);
     });
     
     if (matches.length === 0) {
