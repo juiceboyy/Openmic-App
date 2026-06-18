@@ -20,13 +20,13 @@ export const photoModalTemplate = /*html*/`
             </div>
             <div id="photo-step-2" class="hidden">
                 <h3 class="text-sm font-semibold text-gray-800 dark:text-white mb-3">Gevonden Mappen & Matches</h3>
-                <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <div class="border border-gray-200 dark:border-gray-700 rounded-lg">
                     <table class="w-full text-left">
                         <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs uppercase">
                             <tr>
-                                <th class="px-4 py-2 font-semibold">Stuur?</th>
+                                <th class="px-4 py-2 font-semibold rounded-tl-lg">Stuur?</th>
                                 <th class="px-4 py-2 font-semibold">Mapnaam in Drive</th>
-                                <th class="px-4 py-2 font-semibold">Gevonden Artiest(en)</th>
+                                <th class="px-4 py-2 font-semibold rounded-tr-lg">Gevonden Artiest(en)</th>
                             </tr>
                         </thead>
                         <tbody id="photo-matches-body" class="text-sm divide-y divide-gray-100 dark:divide-gray-700"></tbody>
