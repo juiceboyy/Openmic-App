@@ -2,23 +2,33 @@ import { state } from './state.js';
 import { apiRequest } from './api.js';
 import { getEl } from './utils.js';
 import { showToast, showConfirm } from './notifications.js';
+import { getDisplayName } from './lineupHelpers.js';
+
+function escapeHtml(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
 
 export function getMatchStatusHTML(match, index) {
     let isValid = match.matchFound && !match.multipleMatches && match.email && match.email !== '-';
     let matchText = '';
     
     if (match.isCustom) {
-        matchText = `<span class="text-green-600 font-medium"><i data-lucide="check-circle-2" class="w-4 h-4 inline mr-1 -mt-0.5"></i> ${match.artistName} <span class="text-xs font-normal">(${match.email})</span> <span class="text-xs text-blue-500 font-normal ml-1">(Handmatig)</span></span>
+        matchText = `<span class="text-green-600 font-medium"><i data-lucide="check-circle-2" class="w-4 h-4 inline mr-1 -mt-0.5"></i> ${match.artistName} <span class="text-xs font-normal">(${match.email})</span> <span class="text-xs text-blue-500 font-normal ml-1">(Gekoppeld)</span></span>
         <br><button type="button" class="text-apple-blue hover:underline text-xs font-normal mt-1 block" onclick="window.enterCustomMatch(${index})">Wijzigen</button>`;
     } else if (match.multipleMatches) {
         let options = `<option value="">Kies de juiste artiest...</option>` + match.candidates.map((c, i) => `<option value="${i}">${c.artistName} (${c.email || 'Geen e-mail'})</option>`).join('');
-        matchText = `<div class="flex flex-col gap-1.5"><span class="text-orange-600 font-medium text-xs"><i data-lucide="help-circle" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i> Meerdere matches:</span><select data-index="${index}" class="match-resolver border border-orange-300 bg-orange-50 text-orange-800 rounded px-2 py-1 text-xs focus:outline-none w-full max-w-[280px]">${options}</select><button type="button" class="text-apple-blue hover:underline text-left text-xs font-normal" onclick="window.enterCustomMatch(${index})">Of handmatig invullen...</button></div>`;
+        matchText = `<div class="flex flex-col gap-1.5"><span class="text-orange-600 font-medium text-xs"><i data-lucide="help-circle" class="w-3.5 h-3.5 inline mr-1 -mt-0.5"></i> Meerdere matches:</span><select data-index="${index}" class="match-resolver border border-orange-300 bg-orange-50 text-orange-800 rounded px-2 py-1 text-xs focus:outline-none w-full max-w-[280px]">${options}</select><button type="button" class="text-apple-blue hover:underline text-left text-xs font-normal" onclick="window.enterCustomMatch(${index})">Of handmatig zoeken...</button></div>`;
     } else if(isValid) { 
         matchText = `<span class="text-green-600 font-medium"><i data-lucide="check-circle-2" class="w-4 h-4 inline mr-1 -mt-0.5"></i> ${match.artistName} <span class="text-xs font-normal">(${match.email})</span></span>`; 
     } else if (match.matchFound) { 
-        matchText = `<span class="text-orange-500 font-medium"><i data-lucide="alert-triangle" class="w-4 h-4 inline mr-1 -mt-0.5"></i> ${match.artistName} <span class="text-xs font-normal">(Geen E-mail)</span></span><br><button type="button" class="text-apple-blue hover:underline text-xs font-normal mt-1 block" onclick="window.enterCustomMatch(${index})">Handmatig invullen</button>`; 
+        matchText = `<span class="text-orange-500 font-medium"><i data-lucide="alert-triangle" class="w-4 h-4 inline mr-1 -mt-0.5"></i> ${match.artistName} <span class="text-xs font-normal">(Geen E-mail)</span></span><br><button type="button" class="text-apple-blue hover:underline text-xs font-normal mt-1 block" onclick="window.enterCustomMatch(${index})">Handmatig zoeken</button>`; 
     } else { 
-        matchText = `<span class="text-red-500"><i data-lucide="x-circle" class="w-4 h-4 inline mr-1 -mt-0.5"></i> Geen match</span><br><button type="button" class="text-apple-blue hover:underline text-xs font-normal mt-1 block" onclick="window.enterCustomMatch(${index})">Handmatig invullen</button>`; 
+        matchText = `<span class="text-red-500"><i data-lucide="x-circle" class="w-4 h-4 inline mr-1 -mt-0.5"></i> Geen match</span><br><button type="button" class="text-apple-blue hover:underline text-xs font-normal mt-1 block" onclick="window.enterCustomMatch(${index})">Handmatig zoeken</button>`; 
     }
     return matchText;
 }
@@ -42,52 +52,69 @@ export function enterCustomMatch(index) {
     const container = document.getElementById(`match-status-${index}`);
     if (!container) return;
     
-    const match = state.scannedMatches[index];
-    const defaultName = match.artistName || '';
-    const defaultEmail = match.email && match.email !== '-' ? match.email : '';
-    
     container.innerHTML = `
-        <div class="flex flex-col gap-1.5 mt-1 bg-blue-50/50 dark:bg-blue-950/20 p-2 rounded border border-blue-100 dark:border-blue-900/50 max-w-[280px]">
-            <span class="text-xs font-semibold text-apple-blue">Handmatige artiest</span>
-            <input type="text" id="custom-name-${index}" placeholder="Artiestennaam" value="${defaultName}" class="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs focus:outline-none w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-            <input type="email" id="custom-email-${index}" placeholder="E-mailadres" value="${defaultEmail}" class="border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-xs focus:outline-none w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200">
-            <div class="flex gap-2 justify-end mt-1">
+        <div class="relative flex flex-col gap-1.5 mt-1 max-w-[280px]">
+            <div class="flex gap-1 items-center">
+                <input type="text" id="photo-search-input-${index}" placeholder="Zoek artiest..." class="border border-gray-300 dark:border-gray-600 rounded px-2 py-1.5 text-xs focus:outline-none w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200" autocomplete="off" oninput="window.handlePhotoArtistSearch(${index}, this.value)">
                 <button type="button" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-xs px-2 py-1" onclick="window.cancelCustomMatch(${index})">Annuleren</button>
-                <button type="button" class="bg-apple-blue text-white rounded px-2 py-1 text-xs hover:bg-blue-600 transition-colors" onclick="window.saveCustomMatch(${index})">Opslaan</button>
+            </div>
+            <div id="photo-search-results-${index}" class="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded shadow-lg max-h-48 overflow-y-auto z-10 hidden">
             </div>
         </div>
     `;
+    setTimeout(() => {
+        const input = document.getElementById(`photo-search-input-${index}`);
+        if (input) input.focus();
+    }, 50);
 }
 
-export function saveCustomMatch(index) {
-    const nameInput = document.getElementById(`custom-name-${index}`);
-    const emailInput = document.getElementById(`custom-email-${index}`);
-    if (!nameInput || !emailInput) return;
+export function handlePhotoArtistSearch(index, query) {
+    const resultsContainer = document.getElementById(`photo-search-results-${index}`);
+    if (!resultsContainer) return;
     
-    const name = nameInput.value.trim();
-    const email = emailInput.value.trim();
+    const q = query.toLowerCase().trim();
+    if (!q) {
+        resultsContainer.innerHTML = '';
+        resultsContainer.classList.add('hidden');
+        return;
+    }
     
-    if (!name) {
-        showToast("Vul een artiestennaam in.", "error");
-        return;
+    const matches = state.allArtists.filter(a => {
+        const artistName = (a.artistName || '').toLowerCase();
+        const firstName = (a.firstName || '').toLowerCase();
+        const lastName = (a.lastName || '').toLowerCase();
+        return artistName.includes(q) || firstName.includes(q) || lastName.includes(q);
+    });
+    
+    if (matches.length === 0) {
+        resultsContainer.innerHTML = `<div class="px-2 py-1.5 text-xs text-gray-500 dark:text-gray-400">Geen artiesten gevonden...</div>`;
+    } else {
+        resultsContainer.innerHTML = matches.map(a => {
+            const displayName = getDisplayName(a);
+            const emailText = a.email && a.email !== '-' ? a.email : 'Geen e-mail';
+            return `<div onclick="window.selectSearchedArtist(${index}, ${a.rowIndex})" class="px-2 py-1.5 hover:bg-blue-50 dark:hover:bg-gray-700 cursor-pointer text-xs transition-colors border-b border-gray-100 dark:border-gray-700/50 last:border-b-0">
+                <div class="font-medium text-gray-900 dark:text-gray-100">${escapeHtml(displayName)}</div>
+                <div class="text-[10px] text-gray-500 dark:text-gray-400">${escapeHtml(emailText)}</div>
+            </div>`;
+        }).join('');
     }
-    if (!email) {
-        showToast("Vul een e-mailadres in.", "error");
-        return;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        showToast("Vul een geldig e-mailadres in.", "error");
-        return;
-    }
+    resultsContainer.classList.remove('hidden');
+}
+
+export function selectSearchedArtist(index, artistRowIndex) {
+    const artist = state.allArtists.find(a => a.rowIndex === artistRowIndex);
+    if (!artist) return;
+    
+    const displayName = getDisplayName(artist);
+    const email = artist.email && artist.email !== '-' ? artist.email : '';
     
     const match = state.scannedMatches[index];
-    match.artistName = name;
-    match.email = email;
+    match.artistName = displayName;
+    match.email = email || '-';
     match.matchFound = true;
     match.multipleMatches = false;
     match.isCustom = true;
-    match.selected = true;
+    match.selected = (email && email !== '-');
     
     const statusContainer = document.getElementById(`match-status-${index}`);
     if (statusContainer) {
@@ -96,8 +123,14 @@ export function saveCustomMatch(index) {
     
     const cb = document.getElementById(`match-cb-${index}`);
     if (cb) {
-        cb.disabled = false;
-        cb.checked = true;
+        if (email && email !== '-') {
+            cb.disabled = false;
+            cb.checked = true;
+        } else {
+            cb.disabled = true;
+            cb.checked = false;
+            showToast(`${displayName} heeft geen e-mailadres in de database.`, "warning");
+        }
     }
     
     const row = document.getElementById(`match-row-${index}`);
@@ -106,7 +139,7 @@ export function saveCustomMatch(index) {
     }
     
     lucide.createIcons();
-    showToast("Artiest handmatig gekoppeld.", "success");
+    showToast("Artiest gekoppeld.", "success");
 }
 
 export function cancelCustomMatch(index) {
@@ -120,7 +153,8 @@ export function cancelCustomMatch(index) {
 
 // Expose to window for inline HTML onclick handlers
 window.enterCustomMatch = enterCustomMatch;
-window.saveCustomMatch = saveCustomMatch;
+window.handlePhotoArtistSearch = handlePhotoArtistSearch;
+window.selectSearchedArtist = selectSearchedArtist;
 window.cancelCustomMatch = cancelCustomMatch;
 
 export function openPhotoModal() {
