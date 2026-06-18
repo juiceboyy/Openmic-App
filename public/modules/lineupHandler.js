@@ -420,6 +420,8 @@ export async function saveLineupToDatabase() {
                 'Soort contact': 'Artiest',
                 'Datum toegevoegd': today,
             });
+            // Markeer de artiest als niet meer nieuw na succesvol toevoegen
+            artist.isNew = false;
         }
         const res = await apiRequest({ _action: 'save_lineup', sheetName: activeSessionName, lineup: currentLineup, reserve: reserveLineup });
         if (res.status === "success") {
@@ -428,6 +430,12 @@ export async function saveLineupToDatabase() {
                 : "Lineup succesvol opgeslagen!";
             showToast(msg, "success");
             clearLocalStorage();
+            
+            // Ververs de lokale database in de frontend
+            if (newArtists.length > 0 && typeof window.loadArtists === 'function') {
+                await window.loadArtists();
+            }
+            renderLineupUI();
         } else showToast("Fout: " + res.message, "error");
     } catch (e) { showToast("Opslaan mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
