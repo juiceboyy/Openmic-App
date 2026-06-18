@@ -172,6 +172,13 @@ export function handleLineupSearch(event) {
     const q = event.target.value.toLowerCase().trim();
     const quickAdd = getEl('quick-add-new-artist');
     if (!q) { getEl('slot-search-results').innerHTML = ''; if (quickAdd) quickAdd.classList.add('hidden'); return; }
+    
+    // Toon altijd de "snel toevoegen" optie als de zoekopdracht niet leeg is
+    if (quickAdd) {
+        quickAdd.classList.remove('hidden');
+        lucide.createIcons();
+    }
+
     const matches = state.allArtists.filter(a =>
         !q ||
         checkSimilarity(q, a.artistName) ||
@@ -182,9 +189,7 @@ export function handleLineupSearch(event) {
     );
     if (matches.length === 0) {
         getEl('slot-search-results').innerHTML = '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">Geen artiesten gevonden...</div>';
-        if (quickAdd) { quickAdd.classList.remove('hidden'); lucide.createIcons(); }
     } else {
-        if (quickAdd) quickAdd.classList.add('hidden');
         getEl('slot-search-results').innerHTML = matches.map(a => {
             const dn = getDisplayName(a);
             return currentLineup.some(s => s?.rowIndex === a.rowIndex)
