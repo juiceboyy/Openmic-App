@@ -141,25 +141,66 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
 
     // Welkomstmail naar de aanmelder (Fire and forget)
     const welcomePayload = {
-      sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER },
-      to: [{ email: email, name: firstName || 'Muziekliefhebber' }],
-      subject: 'Welkom bij Haagse Open Mic Nieuws in Den Haag! 🎸✨',
-      htmlContent: `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px;">
-          <p>Hoi ${firstName || 'muziekliefhebber'},</p>
-          <p>Wat leuk dat je je hebt aangemeld! Voortaan ben jij als eerste op de hoogte van de nieuwste muziek in de stad.</p>
-          <p>Haagse Open Mic is een community voor en door makers, waar we een 'speelplaats' creëren voor nieuw, eigen werk. Als publiek ben jij onmisbaar in dit proces.</p>
-          <p>Noteer in je agenda:</p>
-          <ul>
-            <li><strong>Wanneer:</strong> Elke 2e dinsdag van de maand.</li>
-            <li><strong>Locatie:</strong> De intieme setting van Amare (Spuiplein 150).</li>
-            <li><strong>Wat:</strong> Een positief en warm bad vol nieuwe songs, variërend van intieme solo's tot beats en neo-klassiek.</li>
-          </ul>
-          <p>Naast onze avonden in Amare zijn we ook regelmatig te vinden op inspirerende plekken zoals Pianino.</p>
-          <p>Wil je meer weten over onze community of de volgende open mic? Check dan onze website: 👉 <a href="https://www.haagseopenmic.nl" style="color: #0071e3; text-decoration: none;">www.haagseopenmic.nl</a></p>
-          <p>Tot snel bij de volgende sessie!<br>
-          Met muzikale groet,<br>
-          <strong>Haagse Open Mic 🎙️📝</strong></p>
-        </div>`
+      sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER || 'nieuwsbrief@haagseopenmic.nl' },
+      to: [{ email: email, name: `${firstName || ''} ${lastName || ''}`.trim() || 'Muziekliefhebber' }],
+      subject: 'Welkom bij de Haagse Open Mic! 🎙️',
+      htmlContent: `<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welkom bij de Haagse Open Mic!</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f9fafb; color: #111827;">
+  <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); border: 1px solid #f3f4f6;">
+    <tr>
+      <td style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 40px 20px; text-align: center;">
+        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.025em;">Haagse Open Mic</h1>
+        <p style="color: #bfdbfe; margin: 5px 0 0 0; font-size: 16px;">Jouw podium voor Haags talent</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 40px 30px;">
+        <h2 style="margin-top: 0; color: #1e3a8a; font-size: 22px; font-weight: 600;">Hoi ${firstName || 'muziekliefhebber'},</h2>
+        <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+          Wat ontzettend leuk dat je je hebt aangemeld voor de nieuwsbrief van de <strong>Haagse Open Mic</strong>! Vanaf nu ben jij als eerste op de hoogte van onze nieuwe edities, het speelschema en al het talent dat op ons podium schittert.
+        </p>
+        <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+          Onze edities vinden regelmatig plaats in <strong>Amare</strong> (Den Haag). Het belooft telkens een fantastische avond te worden met diverse acts van muzikanten, dichters en andere podiumkunstenaars.
+        </p>
+        
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f3f4f6; border-radius: 12px; margin: 30px 0; padding: 20px;">
+          <tr>
+            <td>
+              <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #111827; font-weight: 600;">Wil je zelf optreden?</h3>
+              <p style="margin: 0 0 15px 0; font-size: 14px; line-height: 1.5; color: #4b5563;">
+                Ben je zelf artiest of wil je jouw talent delen met ons publiek? Meld je dan aan voor een van de komende edities!
+              </p>
+              <a href="https://haagseopenmic.nl/aanmelden" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 10px 20px; font-size: 14px; font-weight: 500; border-radius: 8px; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);">Meld je aan als Artiest</a>
+            </td>
+          </tr>
+        </table>
+
+        <p style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+          We hopen je snel te zien bij de volgende Haagse Open Mic!
+        </p>
+        <p style="font-size: 16px; line-height: 1.6; color: #4b5563; margin-bottom: 0;">
+          Met vriendelijke groet,<br>
+          <strong>Team Haagse Open Mic</strong>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td style="background-color: #f9fafb; padding: 20px 30px; text-align: center; border-top: 1px solid #f3f4f6;">
+        <p style="margin: 0; font-size: 12px; color: #9ca3af; line-height: 1.5;">
+          Dit is een automatische bevestiging van je aanmelding voor de nieuwsbrief van de Haagse Open Mic.<br>
+          © 2026 Haagse Open Mic
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`
     };
 
     fetch('https://api.brevo.com/v3/smtp/email', {
@@ -173,7 +214,7 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
     })
     .then(async (response) => {
       if (!response.ok) throw new Error(await response.text());
-      console.log(`Welkomstmail verstuurd naar: ${email}`);
+      console.log(`Welkomstmail succesvol verstuurd naar: ${email}`);
     })
     .catch(err => console.error('Fout bij sturen welkomstmail:', err));
   } catch (error) {
