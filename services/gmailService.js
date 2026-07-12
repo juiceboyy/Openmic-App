@@ -54,8 +54,35 @@ function getEmailBody(payload) {
 }
 
 /**
+ * Ensures that a Gmail label exists. Creates it if it doesn't.
+ * Returns the label ID.
+ */
+async function ensureLabelExists(gmail, labelName) {
+  try {
+    const res = await gmail.users.labels.list({ userId: 'me' });
+    const labels = res.data.labels || [];
+    const existing = labels.find(l => l.name.toLowerCase() === labelName.toLowerCase());
+    if (existing) return existing.id;
+
+    console.log(`🏷️ [Gmail Service] Label "${labelName}" not found. Creating it...`);
+    const createRes = await gmail.users.labels.create({
+      userId: 'me',
+      requestBody: {
+        name: labelName,
+        labelListVisibility: 'labelShow',
+        messageListVisibility: 'show'
+      }
+    });
+    return createRes.data.id;
+  } catch (err) {
+    console.error(`❌ [Gmail Service] Error ensuring label ${labelName} exists:`, err);
+    return null;
+  }
+}
+
+/**
  * Triggers the process of reading incoming unread emails,
- * responding to them via Gemini AI, and adding new contacts to the DB.
+ * checking relevance, responding via Gemini AI, and adding new contacts.
  */
 async function processIncomingEmails() {
   console.log('📬 [Gmail Service] Starting incoming email check...');
@@ -68,7 +95,7 @@ async function processIncomingEmails() {
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.warn('⚠️ [Gmail Service] GEMINI_API_KEY is not configured. Gemini-powered replies will not be available.');
+    console.warn('⚠️ [Gmail Service] GEMINI_API_KEY is not configured. Gemini features will not be available.');
   }
 
   try {
@@ -77,15 +104,20 @@ async function processIncomingEmails() {
 
     const gmail = google.gmail({ version: 'v1', auth: oauth2Client });
     
-    // Fetch unread messages in the INBOX
+    // Ensure the Checked-By-App label exists
+    const checkedLabelName = 'Checked-By-App';
+    const checkedLabelId = await ensureLabelExists(gmail, checkedLabelName);
+
+    // Fetch unread messages in the INBOX that have NOT been checked yet
+    const query = `is:unread label:INBOX -label:${checkedLabelName}`;
     const listRes = await gmail.users.messages.list({
       userId: 'me',
-      q: 'is:unread label:INBOX'
+      q: query
     });
 
     const messages = listRes.data.messages || [];
     if (messages.length === 0) {
-      console.log('📬 [Gmail Service] No unread emails found.');
+      console.log('📬 [Gmail Service] No new unread emails found.');
       return;
     }
 
@@ -144,7 +176,79 @@ async function processIncomingEmails() {
           continue;
         }
 
-        // 1. Check if contact is new and add to database
+        const emailBody = getEmailBody(msg.data.payload);
+
+        // 1. Classification Step via Gemini
+        let isPlayRequest = false;
+        if (apiKey) {
+          const classificationPrompt = `
+Je bent een administratieve hulp voor de Haagse Open Mic.
+Jouw taak is om te bepalen of een inkomende e-mail een verzoek, vraag of aanmelding is om te komen optreden (spelen) op de Haagse Open Mic.
+
+Hier is de e-mail van ${name || email}:
+Onderwerp: ${subjectHeader}
+Inhoud:
+${emailBody}
+
+Geef een JSON-antwoord terug met de volgende structuur:
+{
+  "isPlayRequest": true of false,
+  "explanation": "korte uitleg waarom dit wel of niet een verzoek is om te spelen"
+}
+Geef ALLEEN de JSON terug. Geen markdown code blocks.`;
+
+          try {
+            console.log(`🤖 [Gmail Service] Querying Gemini AI to classify email relevance...`);
+            const geminiRes = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ parts: [{ text: classificationPrompt }] }],
+                  generationConfig: { responseMimeType: "application/json" }
+                })
+              }
+            );
+
+            if (!geminiRes.ok) {
+              throw new Error(`Gemini API returned status ${geminiRes.status}`);
+            }
+
+            const geminiData = await geminiRes.json();
+            const aiText = geminiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+            const classification = JSON.parse(aiText.trim());
+            
+            isPlayRequest = !!classification.isPlayRequest;
+            console.log(`🤖 [Gmail Service] Classification result: isPlayRequest=${isPlayRequest} (${classification.explanation})`);
+          } catch (geminiErr) {
+            console.error('❌ [Gmail Service] Gemini classification failed. Defaulting to true to be safe:', geminiErr);
+            isPlayRequest = true; // Fallback to true in case of failure to prevent missing important emails
+          }
+        } else {
+          isPlayRequest = true; // Default to true if Gemini is not configured
+        }
+
+        // 2. Route based on relevance
+        if (!isPlayRequest) {
+          console.log(`📬 [Gmail Service] Email is NOT a play request. Skipping auto-reply and contact addition.`);
+          
+          // Mark as checked so we don't query it next time, but KEEP it UNREAD in Gmail
+          if (checkedLabelId) {
+            console.log(`🏷️ [Gmail Service] Adding "${checkedLabelName}" label to message ${msgObj.id}...`);
+            await gmail.users.messages.batchModify({
+              userId: 'me',
+              requestBody: {
+                ids: [msgObj.id],
+                addLabelIds: [checkedLabelId]
+              }
+            });
+          }
+          console.log(`✅ [Gmail Service] Message ${msgObj.id} skipped & marked as checked!`);
+          continue;
+        }
+
+        // 3. Add to Contacts Google Sheet (if play request and not yet existing)
         if (emailColIdx !== -1 && !existingEmails.has(email.toLowerCase().trim())) {
           console.log(`👤 [Gmail Service] New contact detected! Adding to sheet: ${email}`);
           
@@ -173,17 +277,14 @@ async function processIncomingEmails() {
           try {
             await addArtistData(newContact);
             console.log(`👤 [Gmail Service] Successfully added ${email} to Sheets.`);
-            // Add to existingEmails set so if they sent multiple emails in this batch, they aren't added again
             existingEmails.add(email.toLowerCase().trim());
           } catch (sheetErr) {
             console.error(`❌ [Gmail Service] Error adding contact ${email} to sheets:`, sheetErr);
           }
         }
 
-        // 2. Generate Gemini Response
+        // 4. Generate AI Auto-Reply
         let replyHtml = '';
-        const emailBody = getEmailBody(msg.data.payload);
-
         if (apiKey) {
           const prompt = `${systemInstructions}\n\nAfzender: ${name || email}\nE-mail onderwerp: ${subjectHeader}\nE-mail inhoud:\n${emailBody}`;
           
@@ -201,7 +302,7 @@ async function processIncomingEmails() {
             );
 
             if (!geminiRes.ok) {
-              throw new Error(`Gemini API returned status ${geminiRes.status}: ${await geminiRes.text()}`);
+              throw new Error(`Gemini API returned status ${geminiRes.status}`);
             }
 
             const geminiData = await geminiRes.json();
@@ -233,14 +334,11 @@ async function processIncomingEmails() {
           `;
         }
 
-        // 3. Send reply on thread
+        // 5. Send reply on thread
         console.log(`✉️ [Gmail Service] Sending thread reply to ${email}...`);
         const replySubject = subjectHeader.toLowerCase().startsWith('re:') ? subjectHeader : `Re: ${subjectHeader}`;
-        
-        // Encode subject with UTF-8 base64 encoding to prevent encoding issues
         const encodedSubject = `=?utf-8?B?${Buffer.from(replySubject).toString('base64')}?=`;
 
-        // Build RFC 2822 MIME message
         const mimeParts = [
           `To: ${email}`,
           `Subject: ${encodedSubject}`,
@@ -248,7 +346,6 @@ async function processIncomingEmails() {
           'Content-Type: text/html; charset=utf-8'
         ];
 
-        // Add headers for thread reply
         if (messageIdHeader) {
           mimeParts.push(`In-Reply-To: ${messageIdHeader}`);
           mimeParts.push(`References: ${messageIdHeader}`);
@@ -273,14 +370,20 @@ async function processIncomingEmails() {
         });
         console.log(`✉️ [Gmail Service] Reply sent successfully.`);
 
-        // 4. Remove UNREAD label from original message
-        console.log(`🏷️ [Gmail Service] Marking message ${msgObj.id} as read...`);
+        // 6. Remove UNREAD label and Add Checked-By-App label
+        console.log(`🏷️ [Gmail Service] Marking message ${msgObj.id} as read and checked...`);
+        
+        const modifyPayload = {
+          ids: [msgObj.id],
+          removeLabelIds: ['UNREAD']
+        };
+        if (checkedLabelId) {
+          modifyPayload.addLabelIds = [checkedLabelId];
+        }
+
         await gmail.users.messages.batchModify({
           userId: 'me',
-          requestBody: {
-            ids: [msgObj.id],
-            removeLabelIds: ['UNREAD']
-          }
+          requestBody: modifyPayload
         });
         console.log(`✅ [Gmail Service] Message ${msgObj.id} processed successfully!`);
 
