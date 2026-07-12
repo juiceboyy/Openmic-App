@@ -14,8 +14,11 @@ export const syncModalTemplate = /*html*/`
                 <i data-lucide="contact" class="w-12 h-12 text-gray-300 mx-auto mb-4"></i>
                 <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-2">Zoek naar nieuwe contacten</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">De app kijkt in jouw adresboek (Google Contacts) en vergelijkt dit met de huidige database. We laten je zien wie er nieuw is, en jij bepaalt wie er geïmporteerd wordt.</p>
-                <button id="btn-sync-start" class="bg-apple-blue hover:bg-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm inline-flex items-center">
+                <button id="btn-sync-start" class="bg-apple-blue hover:bg-blue-600 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm inline-flex items-center mr-2">
                     <i data-lucide="search" class="w-4 h-4 mr-2"></i> Adresboek Scannen
+                </button>
+                <button id="btn-sync-reauth" class="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 px-6 py-2.5 rounded-full text-sm font-medium transition-colors shadow-sm inline-flex items-center">
+                    <i data-lucide="link" class="w-4 h-4 mr-2"></i> Google Account Koppelen
                 </button>
             </div>
             <div id="sync-step-2" class="hidden">

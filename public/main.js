@@ -82,6 +82,7 @@ const App = {
 
         // Feature Specific Actions
         getEl('btn-sync-start').addEventListener('click', Sync.fetchGoogleContacts);
+        getEl('btn-sync-reauth').addEventListener('click', Sync.forceGoogleAuth);
         getEl('sync-select-all').addEventListener('change', (e) => Sync.toggleAllSyncCheckboxes(e.target));
         getEl('btn-import-contacts').addEventListener('click', Sync.importSelectedContacts);
         
