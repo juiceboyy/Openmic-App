@@ -22,7 +22,11 @@ router.get('/auth-url', (req, res) => {
   const oauth2Client = getOAuth2Client();
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
-    scope: ['https://www.googleapis.com/auth/contacts.readonly'],
+    scope: [
+      'https://www.googleapis.com/auth/contacts.readonly',
+      'https://www.googleapis.com/auth/gmail.modify',
+      'https://www.googleapis.com/auth/gmail.send'
+    ],
     prompt: 'consent',
     ...(process.env.GOOGLE_CONTACTS_ACCOUNT ? { login_hint: process.env.GOOGLE_CONTACTS_ACCOUNT } : {})
   });

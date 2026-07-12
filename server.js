@@ -8,6 +8,8 @@ const cors = require('cors'); // Zorgt dat je frontend met je backend mag praten
 const path = require('path');
 const { addArtistData, getSheetData, updateArtistData } = require('./googleSheets.js');
 const rateLimit = require('express-rate-limit');
+const cron = require('node-cron');
+const { processIncomingEmails } = require('./services/gmailService.js');
 
 // 2. De server (app) opstarten
 const app = express();
@@ -204,4 +206,22 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`🎤 Haagse Open Mic Backend is LIVE!`);
   console.log(`🌐 Server luistert op poort: ${PORT}`);
   console.log(`=========================================`);
+
+  // Start de Gmail Auto-Reply & Contact Import cronjob
+  const autoReplyEnabled = process.env.GMAIL_AUTO_REPLY_ENABLED === 'true' || process.env.GMAIL_AUTO_REPLY_ENABLED === undefined;
+  if (autoReplyEnabled) {
+    console.log('⏰ [Cron] Scheduling Gmail auto-reply and contact sync poll every 5 minutes.');
+    cron.schedule('*/5 * * * *', async () => {
+      try {
+        await processIncomingEmails();
+      } catch (err) {
+        console.error('❌ [Cron] Error running processIncomingEmails:', err);
+      }
+    });
+
+    // Run direct bij opstarten na 5 seconden om eventuele wachtende mails te verwerken
+    setTimeout(() => {
+      processIncomingEmails().catch(err => console.error('❌ [Startup] Initial processIncomingEmails failed:', err));
+    }, 5000);
+  }
 });
