@@ -19,11 +19,6 @@ const PORT = process.env.PORT || 3000; // Poort 3000 voor lokaal testen
 app.set('trust proxy', 1);
 
 // 3. Middleware instellen (De portiers van je server)
-app.use((req, res, next) => {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-  res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
-  next();
-});
 app.use(cors());
 app.use(express.json({ limit: '10mb' })); // Zorgt dat we inkomende JSON-data kunnen lezen (verhoogd naar 10mb)
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
