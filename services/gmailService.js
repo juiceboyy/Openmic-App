@@ -334,13 +334,24 @@ Geef ALLEEN de JSON terug. Geen markdown code blocks.`;
           `;
         }
 
-        // 5. Send reply on thread
-        console.log(`✉️ [Gmail Service] Sending thread reply to ${email}...`);
+        // 5. Send reply on thread (Redirected to halfhide@gmail.com in test phase)
+        const testRecipient = 'halfhide@gmail.com';
+        console.log(`✉️ [Gmail Service] [TEST MODE] Redirecting reply intended for ${email} to ${testRecipient}...`);
+        
         const replySubject = subjectHeader.toLowerCase().startsWith('re:') ? subjectHeader : `Re: ${subjectHeader}`;
         const encodedSubject = `=?utf-8?B?${Buffer.from(replySubject).toString('base64')}?=`;
 
+        // Prepend a nice test banner to the AI reply HTML
+        const testBanner = `
+          <div style="background-color: #ffe4e6; border: 1px solid #f43f5e; color: #9f1239; padding: 15px; border-radius: 8px; font-family: Arial, sans-serif; margin-bottom: 20px; font-size: 14px;">
+            <strong>🚨 TEST MODUS ACTIEF:</strong> Deze e-mail is automatisch gegenereerd door de Haagse Open Mic app en zou normaal gesproken verzonden worden naar: 
+            <strong>${name || 'Onbekend'}</strong> (&lt;${email}&gt;).
+          </div>
+        `;
+        const finalReplyHtml = testBanner + replyHtml;
+
         const mimeParts = [
-          `To: ${email}`,
+          `To: ${testRecipient}`,
           `Subject: ${encodedSubject}`,
           'MIME-Version: 1.0',
           'Content-Type: text/html; charset=utf-8'
@@ -352,7 +363,7 @@ Geef ALLEEN de JSON terug. Geen markdown code blocks.`;
         }
 
         mimeParts.push('');
-        mimeParts.push(replyHtml);
+        mimeParts.push(finalReplyHtml);
 
         const rawMime = mimeParts.join('\r\n');
         const encodedMime = Buffer.from(rawMime)
