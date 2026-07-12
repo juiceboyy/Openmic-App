@@ -139,3 +139,27 @@ export async function importSelectedContacts() {
         } else { showToast("Fout: " + result.message, "error"); }
     } catch (e) { showToast("Importeren mislukt.", "error"); } finally { toggleButtonLoading(btn, false, orig); }
 }
+
+export async function forceGoogleAuth() {
+    const btn = getEl('btn-sync-reauth');
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    toggleButtonLoading(btn, true);
+    try {
+        const authResult = await apiRequest({ _action: 'get_sync_auth_url' });
+        if (authResult.status !== 'success') {
+            showToast(authResult.message || 'Kon autorisatie-URL niet ophalen.', 'error'); return;
+        }
+        showToast('Geef toestemming in het popup-venster om door te gaan.', 'info');
+        const success = await openAuthPopup(authResult.url);
+        if (success) {
+            showToast('Google account succesvol gekoppeld! Check de logs voor het nieuwe token.', 'success');
+        } else {
+            showToast('Autorisatie geannuleerd.', 'error');
+        }
+    } catch (e) {
+        showToast('Koppelen mislukt.', 'error');
+    } finally {
+        toggleButtonLoading(btn, false, orig);
+    }
+}
