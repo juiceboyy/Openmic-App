@@ -108,6 +108,15 @@ export function processDropOnMain(targetIndex, currentLineup, reserveLineup, can
         candidatePool.splice(srcIndex, 1);
         if (mainItem) candidatePool.push(mainItem);
         return true;
+    } else if (srcList === 'main') {
+        if (srcIndex === targetIndex) return false;
+        // Only handle drop if the target slot is empty (null).
+        // If it is filled, we return false to let the default DOM-reordering shift behavior take place.
+        if (currentLineup[targetIndex] === null) {
+            currentLineup[targetIndex] = currentLineup[srcIndex];
+            currentLineup[srcIndex] = null;
+            return true;
+        }
     }
     return false;
 }

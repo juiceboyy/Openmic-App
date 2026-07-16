@@ -43,7 +43,7 @@ export const lineupModalTemplate = /*html*/`
                     </div>
 
                     <!-- Rechter kolom: Reserves & Aanmeldingen -->
-                    <div class="space-y-6">
+                    <div class="space-y-6 md:sticky md:top-4 md:max-h-[calc(85dvh-200px)] md:overflow-y-auto pr-1">
                         <!-- Reservelijst -->
                         <div id="reserve-list-container" class="p-4 border-2 border-dashed border-orange-200 bg-orange-50/30 rounded-xl dark:border-orange-900/50 dark:bg-orange-900/10 min-h-[100px] transition-colors">
                             <h3 class="font-bold text-orange-800 dark:text-orange-400 mb-3 flex items-center justify-between">
