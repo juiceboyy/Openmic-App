@@ -44,11 +44,42 @@ router.get('/callback', async (req, res) => {
     const oauth2Client = getOAuth2Client();
     const { tokens } = await oauth2Client.getToken(code);
     storedTokens = tokens;
-    console.log('✅ Google Contacts OAuth2 token ontvangen en opgeslagen.');
+    console.log('✅ Google OAuth2 token ontvangen en opgeslagen in geheugen.');
+
+    let refreshTokenSection = '';
     if (tokens.refresh_token) {
-      console.log(`ℹ️  Stel GOOGLE_OAUTH_REFRESH_TOKEN=${tokens.refresh_token} in als env var voor persistentie.`);
+      console.log('====================================================');
+      console.log('🔑 NIEUW GOOGLE_OAUTH_REFRESH_TOKEN VOOR RAILWAY:');
+      console.log(tokens.refresh_token);
+      console.log('====================================================');
+      
+      refreshTokenSection = `
+        <div style="margin-top: 15px; padding: 12px; background: #eef6ff; border: 1px solid #b6d4fe; border-radius: 8px;">
+          <p style="margin: 0 0 6px 0; font-weight: bold; color: #084298;">🔑 Nieuw Refresh Token voor Railway:</p>
+          <input type="text" readonly id="tokenInput" value="${tokens.refresh_token}" style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-family: monospace; font-size: 12px;" />
+          <button onclick="navigator.clipboard.writeText(document.getElementById('tokenInput').value); this.innerText='Gekopieerd!';" style="margin-top: 8px; padding: 6px 14px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Kopieer voor Railway</button>
+        </div>
+      `;
     }
-    res.send(`<!DOCTYPE html><html><body><script>window.opener && window.opener.postMessage('oauth-success', '*'); window.close();</script><p>Autorisatie gelukt! Je kunt dit venster sluiten.</p></body></html>`);
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head><title>Autorisatie geslaagd</title></head>
+      <body style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+        <h3 style="color: #198754; margin-top: 0;">✅ Autorisatie gelukt!</h3>
+        <p>De backend heeft nu toegang tot Google Contacten en Google Drive.</p>
+        ${refreshTokenSection}
+        <p style="margin-top: 20px; font-size: 13px; color: #6c757d;">Je kunt dit venster sluiten.</p>
+        <script>
+          window.opener && window.opener.postMessage('oauth-success', '*');
+          if (!${Boolean(tokens.refresh_token)}) {
+            setTimeout(() => window.close(), 2000);
+          }
+        </script>
+      </body>
+      </html>
+    `);
   } catch (err) {
     console.error('OAuth callback fout:', err);
     res.status(500).send('<h2>Autorisatie mislukt. Probeer opnieuw.</h2>');
