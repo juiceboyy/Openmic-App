@@ -137,15 +137,14 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
       '',                                                                // [20] Gender
       omschrijving,                                                      // [21] Omschrijving
       liveLink,                                                          // [22] Live Link
-      '',                                                                // [23] Bandfoto Link (niet meer in gebruik)
-      vrijwilliger === 'true' || vrijwilliger === true,                  // [24] Vrijwilliger
+      vrijwilliger === 'true' || vrijwilliger === true,                  // [23] Vrijwilliger
     ];
 
     // 6. Schrijf naar Google Sheets
     if (isNew) {
       await sheets.spreadsheets.values.append({
         spreadsheetId: SPREADSHEET_ID,
-        range: 'contacts!A:Y',
+        range: 'contacts!A:X',
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [rowData] },
       });
@@ -153,7 +152,7 @@ router.post('/', upload.single('bandfoto'), async (req, res) => {
     } else {
       await sheets.spreadsheets.values.update({
         spreadsheetId: SPREADSHEET_ID,
-        range: `contacts!A${existingRowNum}:Y${existingRowNum}`,
+        range: `contacts!A${existingRowNum}:X${existingRowNum}`,
         valueInputOption: 'USER_ENTERED',
         requestBody: { values: [rowData] },
       });
