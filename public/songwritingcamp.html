@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Songwriting Camp - Haagse Open Mic</title>
+
+    <!-- Tailwind & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=4">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        apple: {
+                            blue: '#0071e3',
+                            gray: '#f5f5f7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="antialiased min-h-screen font-sans bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 py-10 px-4 sm:px-6">
+
+    <main class="max-w-3xl mx-auto space-y-10">
+
+        <!-- Header met logo & titel -->
+        <header class="text-center space-y-4">
+            <img src="/logo.png" alt="Haagse Open Mic Logo" id="hom-header-logo">
+            <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">Songwriting Camp</h1>
+            <p class="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+                Schrijf, verbeter en neem op in één intensieve dag samen met 8 andere songwriters en 3 professionele coaches.
+            </p>
+        </header>
+
+        <!-- Kerninformatie grid -->
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label="Kerngegevens evenement">
+            <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400 mb-1">
+                    <i data-lucide="calendar" class="w-4 h-4"></i>
+                    <span class="text-xs uppercase tracking-wider font-semibold">Wanneer</span>
+                </div>
+                <p class="text-base font-semibold text-gray-900 dark:text-white">15 november 2026</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">10:00 - 18:00 uur</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400 mb-1">
+                    <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    <span class="text-xs uppercase tracking-wider font-semibold">Waar</span>
+                </div>
+                <p class="text-base font-semibold text-gray-900 dark:text-white">Pianino Theater</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Jupiterkade 2, Den Haag</p>
+            </div>
+
+            <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+                <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400 mb-1">
+                    <i data-lucide="euro" class="w-4 h-4"></i>
+                    <span class="text-xs uppercase tracking-wider font-semibold">Investering</span>
+                </div>
+                <p class="text-base font-semibold text-gray-900 dark:text-white">&euro; 100,- <span class="text-xs font-normal text-gray-500 dark:text-gray-400">excl. btw</span></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Inclusief lunch & eerste borrel</p>
+            </div>
+        </section>
+
+        <!-- Programma toelichting -->
+        <section class="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Wat gaan we doen?</h2>
+            <div class="space-y-3 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-gray-300">
+                <p>
+                    In de ochtend schrijf je in één uur een lied met twee van de andere 8 songwriters; de groepsindeling maken we op de dag zelf. Daarna heb je met je groepje en met je coach (er zijn 3 coaches) één uur om het lied te verbeteren en af te krijgen.
+                </p>
+                <p>
+                    Aansluitend is er een geheel verzorgde lunch met vers desembrood van Gijs en een vegan soep.
+                </p>
+                <p>
+                    In de middag doorlopen de drie groepen elk drie gerichte sessies van 1 uur:
+                </p>
+                <ul class="list-disc pl-5 space-y-1.5 text-sm sm:text-base text-gray-700 dark:text-gray-200">
+                    <li>Het liedje zo goed mogelijk vastleggen als audio demo in de studio.</li>
+                    <li>Het liedje visueel vormgeven en een videoclip demo maken.</li>
+                    <li>Het liedje live op het podium neerzetten met je coach.</li>
+                </ul>
+                <p>
+                    We sluiten de dag gezamenlijk af met een feedback kijk- en luisterpanel langs alle drie de liedjes, gevolgd door een ontspannen borrel.
+                </p>
+            </div>
+        </section>
+
+        <!-- Wat je krijgt -->
+        <section class="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Wat je krijgt</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div class="flex items-start space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-apple-blue shrink-0 mt-0.5"></i>
+                    <span>Een zelf geschreven lied met jouw trio</span>
+                </div>
+                <div class="flex items-start space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-apple-blue shrink-0 mt-0.5"></i>
+                    <span>Een uur coaching om het lied te perfectioneren</span>
+                </div>
+                <div class="flex items-start space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-apple-blue shrink-0 mt-0.5"></i>
+                    <span>Een uur studiotijd om je demo te tracken</span>
+                </div>
+                <div class="flex items-start space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-apple-blue shrink-0 mt-0.5"></i>
+                    <span>Een uur videotijd om een beeld-demo te tapen</span>
+                </div>
+                <div class="flex items-start space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-apple-blue shrink-0 mt-0.5"></i>
+                    <span>Een uur repetitie om je live-act neer te zetten</span>
+                </div>
+                <div class="flex items-start space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-apple-blue shrink-0 mt-0.5"></i>
+                    <span>Demopanel met feedback van coaches en peers</span>
+                </div>
+                <div class="flex items-start space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-apple-blue shrink-0 mt-0.5"></i>
+                    <span>Verzorgde lunch (desembrood en vegan soep)</span>
+                </div>
+                <div class="flex items-start space-x-3 text-sm text-gray-700 dark:text-gray-300">
+                    <i data-lucide="check" class="w-4 h-4 text-apple-blue shrink-0 mt-0.5"></i>
+                    <span>Eerste borrel na afloop van ons</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tijdschema -->
+        <section class="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Tijdschema</h2>
+            <div class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">10:00 - 11:00</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Songwriting met 3 groepjes van 3 personen</span>
+                </div>
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">11:05 - 12:05</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Coach erbij, lied fijnslijpen en afmaken</span>
+                </div>
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">12:05 - 12:45</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Gezamenlijke lunch</span>
+                </div>
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">12:45 - 13:00</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Adempauze</span>
+                </div>
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">13:00 - 14:00</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Ronde 1 (groep 1 Audio, groep 2 Video, groep 3 Live)</span>
+                </div>
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">14:05 - 15:05</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Ronde 2 (groep 2 Audio, groep 3 Video, groep 1 Live)</span>
+                </div>
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">15:10 - 16:10</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Ronde 3 (groep 3 Audio, groep 1 Video, groep 2 Live)</span>
+                </div>
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">16:10 - 16:30</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Adempauze</span>
+                </div>
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">16:30 - 17:00</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Kijk- en luisterpanel</span>
+                </div>
+                <div class="py-2.5 flex justify-between gap-4">
+                    <span class="font-mono text-gray-500 dark:text-gray-400 shrink-0">17:00 - 18:00</span>
+                    <span class="text-right text-gray-800 dark:text-gray-200">Afsluitende borrel</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Aanmeldformulier -->
+        <section id="aanmelden" class="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-6">
+            <div>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Inschrijven</h2>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Meld je aan via het formulier hieronder of reageer direct op de uitnodigingsmail. Na je aanmelding beoordelen we je gegevens en ontvang je persoonlijk bericht.
+                </p>
+            </div>
+
+            <div id="form-container">
+                <form id="camp-form" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Voornaam *</label>
+                            <input type="text" id="firstName" name="firstName" required
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+                                placeholder="Bijv. John">
+                        </div>
+
+                        <div>
+                            <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Achternaam *</label>
+                            <input type="text" id="lastName" name="lastName" required
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+                                placeholder="Bijv. Doe">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-mailadres *</label>
+                            <input type="email" id="email" name="email" required
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+                                placeholder="jouw@email.nl">
+                        </div>
+
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefoonnummer</label>
+                            <input type="tel" id="phone" name="phone"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+                                placeholder="06 12345678">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="artistName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Artiestennaam</label>
+                            <input type="text" id="artistName" name="artistName"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+                                placeholder="Als je die hebt">
+                        </div>
+
+                        <div>
+                            <label for="genre" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Muziekstijl / Genre</label>
+                            <input type="text" id="genre" name="genre"
+                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+                                placeholder="Bijv. Indie pop, folk, neo-soul">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="instruments" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Instrumenten / Rol</label>
+                        <input type="text" id="instruments" name="instruments"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+                            placeholder="Bijv. Zang, akoestische gitaar, beats/producer, piano">
+                    </div>
+
+                    <div>
+                        <label for="liveLink" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Live link / Demo (optioneel)</label>
+                        <input type="url" id="liveLink" name="liveLink"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+                            placeholder="https://spotify.com/... of https://youtube.com/...">
+                    </div>
+
+                    <div>
+                        <label for="dietary" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dieetwensen / Allergieën</label>
+                        <input type="text" id="dietary" name="dietary"
+                            class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
+                            placeholder="Geen, of bijv. glutenallergie, noten">
+                    </div>
+
+                    <!-- Foutmelding -->
+                    <div id="error-msg" class="hidden text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 p-3 rounded-xl"></div>
+
+                    <button type="submit" id="submit-btn"
+                        class="w-full bg-apple-blue hover:bg-blue-600 text-white font-medium py-3 px-5 rounded-xl transition-all shadow-sm active:scale-[0.99] flex justify-center items-center">
+                        Aanmelding versturen
+                    </button>
+                </form>
+            </div>
+
+            <!-- Succesmelding -->
+            <div id="success-msg" class="hidden text-center py-6 space-y-3">
+                <div class="bg-green-100 dark:bg-green-900/30 w-12 h-12 rounded-full flex items-center justify-center mx-auto text-green-600 dark:text-green-400">
+                    <i data-lucide="check" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Bedankt voor je aanmelding!</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
+                    We hebben je gegevens ontvangen. We bekijken je aanmelding zorgvuldig en nemen spoedig contact met je op per e-mail.
+                </p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-xs text-gray-400 dark:text-gray-600 pt-6 pb-12">
+            Haagse Open Mic &middot; Pianino Theater Den Haag
+        </footer>
+
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        document.getElementById('camp-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = document.getElementById('submit-btn');
+            const errorMsg = document.getElementById('error-msg');
+
+            const payload = {
+                firstName: document.getElementById('firstName').value.trim(),
+                lastName: document.getElementById('lastName').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                artistName: document.getElementById('artistName').value.trim(),
+                genre: document.getElementById('genre').value.trim(),
+                instruments: document.getElementById('instruments').value.trim(),
+                liveLink: document.getElementById('liveLink').value.trim(),
+                dietary: document.getElementById('dietary').value.trim()
+            };
+
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-2"></i> Bezig met versturen...';
+            lucide.createIcons();
+            errorMsg.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/songwriting-camp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    document.getElementById('form-container').classList.add('hidden');
+                    document.getElementById('success-msg').classList.remove('hidden');
+                    lucide.createIcons();
+                } else {
+                    throw new Error(result.message || 'Kon aanmelding niet versturen.');
+                }
+            } catch (err) {
+                console.error('Fout bij verzenden van formulier:', err);
+                errorMsg.textContent = err.message || 'Er ging iets mis. Probeer het later nog eens of reageer per mail.';
+                errorMsg.classList.remove('hidden');
+
+                btn.disabled = false;
+                btn.innerHTML = 'Aanmelding versturen';
+            }
+        });
+    </script>
+</body>
+
+</html>
