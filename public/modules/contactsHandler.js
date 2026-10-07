@@ -8,14 +8,16 @@ const FIELD_MAP = {
     'Voornaam': 'firstName', 'Achternaam': 'lastName', 'Artiestennaam': 'artistName',
     'E-mailadres': 'email', 'Telefoonnummer': 'phone', 'Instagram account': 'instagram',
     'Soort contact': 'type', 'Speelduur': 'setLength', 'Notities': 'notes', 'Profielfoto': 'profilePic',
-    'Gender': 'gender', 'Omschrijving': 'omschrijving', 'Live Link': 'liveLink'
+    'Gender': 'gender', 'Omschrijving': 'omschrijving', 'Live Link': 'liveLink',
+    'Voedselallergieën': 'foodAllergies'
 };
 
 const BOOL_MAP = {
     'Regio Den Haag': 'regionDH', 'Regio Rotterdam': 'regionRdam', 'Boekbaar (Ja/Nee)': 'bookable',
     'Favoriet Gijs (Ja/Nee)': 'favGijs', 'Favoriet Ro (Ja/Nee)': 'favRo', 'Interesse in workshops (Ja/Nee)': 'workshops',
     'Workshop 7 nov (Ja/Nee)': 'workshop7Nov', 'Unsubscribed (Ja/Nee)': 'unsubscribed', 'Blacklist (Ja/Nee)': 'blacklist',
-    'Mailing Selectie': 'mailingSelection', 'Vrijwilliger': 'vrijwilliger'
+    'Mailing Selectie': 'mailingSelection', 'Vrijwilliger': 'vrijwilliger',
+    'Writing Camp (Ja/Nee)': 'writingCamp'
 };
 
 export function openModal(rowIndex = null) {
@@ -86,7 +88,7 @@ export async function handleFieldBlur(event) {
     const el = event.target;
     const rowIndex = parseInt(el.getAttribute('data-row'));
     const field = el.getAttribute('data-field');
-    const newValue = field === 'Notities' ? el.innerText.trim() : el.innerText.replace(/\n/g, ' ').trim();
+    const newValue = (field === 'Notities' || field === 'Voedselallergieën') ? el.innerText.trim() : el.innerText.replace(/\n/g, ' ').trim();
     
     const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
     if (!artist) return;
@@ -100,7 +102,7 @@ export async function handleFieldBlur(event) {
     artist[prop] = newValue || '-';
     await saveArtistUpdate(rowIndex, artist, el);
     
-    if (field === 'Instagram account') {
+    if (field === 'Instagram account' || field === 'Voedselallergieën') {
         applyFilters();
     }
 }
@@ -122,7 +124,7 @@ export async function updateArtistField(event) {
     }
 
     await saveArtistUpdate(rowIndex, artist, el.closest('td') || el.closest('label'));
-    if (field === 'Gender') applyFilters();
+    if (field === 'Gender' || field === 'Writing Camp (Ja/Nee)') applyFilters();
 }
 window.updateArtistField = updateArtistField;
 

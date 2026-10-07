@@ -91,6 +91,9 @@ export const contactModalTemplate = /*html*/`
                         <label class="flex items-center space-x-2 text-sm cursor-pointer dark:text-gray-300">
                             <input type="checkbox" name="Vrijwilliger" class="rounded text-yellow-500 focus:ring-yellow-500"><span class="text-yellow-700 dark:text-yellow-400">Vrijwilliger</span>
                         </label>
+                        <label class="flex items-center space-x-2 text-sm cursor-pointer dark:text-gray-300">
+                            <input type="checkbox" name="Writing Camp (Ja/Nee)" class="rounded text-indigo-500 focus:ring-indigo-500"><span class="text-indigo-700 dark:text-indigo-400 font-medium">Writing Camp</span>
+                        </label>
                     </div>
                 </div>
                 <div>
@@ -105,6 +108,10 @@ export const contactModalTemplate = /*html*/`
                             <input type="text" name="Live Link" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white" placeholder="https://...">
                         </div>
                     </div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Voedselallergieën & Dieetwensen</h3>
+                    <input type="text" name="Voedselallergieën" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 placeholder-gray-400 bg-white dark:bg-gray-700 dark:text-white" placeholder="Bijv. Noten, lactose, gluten (leeg = geen allergie)">
                 </div>
                 <div>
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Notities</h3>

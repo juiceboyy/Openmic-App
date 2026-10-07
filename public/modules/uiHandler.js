@@ -111,9 +111,12 @@ export function renderTable(dataToRender, elements) {
         let detailsHTML = '';
         detailsHTML += `<div class="flex items-center mb-0.5 text-xs text-gray-600 dark:text-gray-400"><i data-lucide="clock" class="w-3 h-3 mr-1.5 text-gray-400"></i> Speelduur: <strong class="ml-1 text-gray-900 dark:text-gray-200">${editableSpan('Speelduur', artist.setLength, '...')}</strong></div>`;
         detailsHTML += `<label class="flex items-center mb-0.5 text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Interesse in workshops (Ja/Nee)" ${artist.workshops ? 'checked' : ''} onchange="window.updateArtistField(event)"> Interesse in workshops</label>`;
-        detailsHTML += `<label class="flex items-center text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-green-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-green-500" data-row="${artist.rowIndex}" data-field="Workshop 7 nov (Ja/Nee)" ${artist.workshop7Nov ? 'checked' : ''} onchange="window.updateArtistField(event)"> Workshop 7 nov</label>`;
+        detailsHTML += `<label class="flex items-center mb-0.5 text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-green-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-green-500" data-row="${artist.rowIndex}" data-field="Workshop 7 nov (Ja/Nee)" ${artist.workshop7Nov ? 'checked' : ''} onchange="window.updateArtistField(event)"> Workshop 7 nov</label>`;
+        detailsHTML += `<label class="flex items-center text-xs text-gray-600 dark:text-gray-400 cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-indigo-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-indigo-500" data-row="${artist.rowIndex}" data-field="Writing Camp (Ja/Nee)" ${artist.writingCamp ? 'checked' : ''} onchange="window.updateArtistField(event)"> Writing Camp</label>`;
 
-        let notesHTML = `<div class="text-xs text-gray-500 dark:text-gray-400 mb-1 leading-tight">${editableSpan('Omschrijving', artist.omschrijving !== '-' ? artist.omschrijving : '', 'Genre/Omschrijving...')}</div><div class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-tight px-1.5 py-0.5 editable-text outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-1 focus:ring-apple-blue rounded border border-transparent hover:border-gray-200 dark:hover:border-gray-600 cursor-text min-h-[30px] empty:before:content-['Notities...'] empty:before:text-gray-400 transition-colors" contenteditable="true" data-field="Notities" data-row="${artist.rowIndex}" onblur="window.handleFieldBlur(event)">${artist.notes !== '-' ? artist.notes : ''}</div>`;
+        const hasAllergies = artist.foodAllergies && artist.foodAllergies !== '-';
+        const allergiesHTML = `<div class="text-xs mb-1 leading-tight flex items-start gap-1"><span class="shrink-0 ${hasAllergies ? 'text-amber-700 dark:text-amber-400 font-medium' : 'text-gray-400 dark:text-gray-500'}">Allergie:</span> ${editableSpan('Voedselallergieën', hasAllergies ? artist.foodAllergies : '', 'Geen', 'text-xs ' + (hasAllergies ? 'text-amber-800 dark:text-amber-300 font-medium' : 'text-gray-400 dark:text-gray-500'))}</div>`;
+        let notesHTML = `${allergiesHTML}<div class="text-xs text-gray-500 dark:text-gray-400 mb-1 leading-tight">${editableSpan('Omschrijving', artist.omschrijving !== '-' ? artist.omschrijving : '', 'Genre/Omschrijving...')}</div><div class="text-xs text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-tight px-1.5 py-0.5 editable-text outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-1 focus:ring-apple-blue rounded border border-transparent hover:border-gray-200 dark:hover:border-gray-600 cursor-text min-h-[30px] empty:before:content-['Notities...'] empty:before:text-gray-400 transition-colors" contenteditable="true" data-field="Notities" data-row="${artist.rowIndex}" onblur="window.handleFieldBlur(event)">${artist.notes !== '-' ? artist.notes : ''}</div>`;
         
         let typeSelect = `<select data-field="Soort contact" data-row="${artist.rowIndex}" onchange="window.updateArtistField(event)" class="bg-transparent font-medium text-gray-900 dark:text-gray-100 text-xs outline-none cursor-pointer focus:ring-1 focus:ring-apple-blue rounded hover:bg-gray-100 dark:hover:bg-gray-700 py-0 m-0 px-1 -ml-1 h-auto leading-tight transition-colors">
             <option value="Artiest" ${artist.type === 'Artiest' ? 'selected' : ''} class="dark:bg-gray-800">Artiest</option>
@@ -161,7 +164,9 @@ export async function loadArtists() {
             blacklist: isTrue(row['Blacklist (Ja/Nee)']), notes: String(row['Notities'] || '-'), profilePic: String(row['Profielfoto'] || '-').trim(),
             mailingSelection: isTrue(row['Mailing Selectie']), gender: String(row['Gender'] || '').trim(),
             omschrijving: String(row['Omschrijving'] || '-'), liveLink: String(row['Live Link'] || '-'),
-            vrijwilliger: isTrue(row['Vrijwilliger'])
+            vrijwilliger: isTrue(row['Vrijwilliger']),
+            writingCamp: isTrue(row['Writing Camp (Ja/Nee)']),
+            foodAllergies: String(row['Voedselallergieën'] || '').trim()
         }));
         toggleGlobalLoading(loadingState, false);
         window.loadedArtists = state.allArtists;
@@ -184,6 +189,7 @@ export function applyFilters() {
     const bookableFilter = getEl('filter-bookable').value;
     const favFilter = getEl('filter-favs') ? getEl('filter-favs').value : 'all';
     const genderFilter = getEl('filter-gender') ? getEl('filter-gender').value : 'all';
+    const writingCampFilter = getEl('filter-writing-camp') ? getEl('filter-writing-camp').value : 'all';
 
     state.currentFilteredData = state.allArtists.filter(artist => {
         const matchesSearch = !searchTerm
@@ -193,7 +199,8 @@ export function applyFilters() {
             || checkSimilarity(searchTerm, artist.firstName + ' ' + artist.lastName)
             || (artist.email || '').toLowerCase().includes(searchTerm)
             || (artist.notes || '').toLowerCase().includes(searchTerm)
-            || (artist.omschrijving || '').toLowerCase().includes(searchTerm);
+            || (artist.omschrijving || '').toLowerCase().includes(searchTerm)
+            || (artist.foodAllergies || '').toLowerCase().includes(searchTerm);
         let matchesRegion = regionFilter === 'all' || (regionFilter === 'Den Haag' && artist.regionDH) || (regionFilter === 'Rotterdam' && artist.regionRdam);
         const matchesType = typeFilter === 'all' || artist.type === typeFilter;
         let matchesBookable = bookableFilter === 'all' || (bookableFilter === 'ja' && artist.bookable) || (bookableFilter === 'nee' && !artist.bookable);
@@ -206,8 +213,12 @@ export function applyFilters() {
         const matchesGender = genderFilter === 'all' ||
             (genderFilter === 'Onbekend' ? isUnknownGender(artist) : (artist.gender || '').toLowerCase() === genderFilter.toLowerCase());
 
+        let matchesWritingCamp = writingCampFilter === 'all'
+            || (writingCampFilter === 'ja' && artist.writingCamp)
+            || (writingCampFilter === 'nee' && !artist.writingCamp);
+
         const matchesImport = !state.importFilterActive || state.recentlyImportedEmails.has((artist.email || '').toLowerCase().trim());
-        return matchesSearch && matchesRegion && matchesType && matchesBookable && matchesFavs && matchesGender && matchesImport;
+        return matchesSearch && matchesRegion && matchesType && matchesBookable && matchesFavs && matchesGender && matchesWritingCamp && matchesImport;
     });
 
     const domElements = {
