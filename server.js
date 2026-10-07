@@ -228,7 +228,25 @@ app.use('/api/sync', require('./routes/sync'));
 app.use('/api/generate-mailing', require('./routes/generateMailing'));
 app.use('/api/songwriting-camp', require('./routes/songwritingCamp'));
 
-// 7. Statische bestanden Fallback (Voor Single Page Applications)
+// 7. Statische bestanden & Routing afhandeling
+// Voorkom dat /public/... per ongeluk de beheerapp toont; leid om naar het juiste pad zonder /public
+app.use((req, res, next) => {
+  if (req.path.startsWith('/public/')) {
+    const cleanPath = req.path.replace(/^\/public/, '');
+    return res.redirect(301, cleanPath || '/');
+  }
+  next();
+});
+
+// Bestaande HTML landingspagina's expliciet serveren
+app.get('/songwritingcamp', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'songwritingcamp.html'));
+});
+app.get('/aanmelden', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'aanmelden.html'));
+});
+
+// Interne Single Page Application fallback (alleen voor root of interne routes)
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
