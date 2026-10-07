@@ -58,6 +58,9 @@ export async function apiRequest(payload) {
         } else if (payload._action === 'import_contacts') {
             url = '/api/sync/import';
             options.headers = { 'Content-Type': 'application/json' };
+        } else if (payload._action === 'test_gmail') {
+            url = '/api/sync/test-gmail';
+            options.headers = { 'Content-Type': 'application/json' };
         }
 
         // Voeg de PIN altijd stateless toe aan de headers
