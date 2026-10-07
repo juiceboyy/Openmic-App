@@ -35,7 +35,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 5. Stateless API Authenticatie Middleware
 app.use('/api', (req, res, next) => {
-  if (req.path === '/verify-pin' || req.path === '/public-subscribe' || req.path === '/sync/callback') return next(); // De check zélf mag altijd door
+  if (req.path === '/verify-pin' || req.path === '/public-subscribe' || req.path === '/songwriting-camp' || req.path === '/sync/callback') return next(); // De check zélf mag altijd door
   
   const clientPin = req.headers['x-app-pin'];
   if (clientPin && clientPin === process.env.APP_PIN) return next();
@@ -226,8 +226,27 @@ app.use('/api/mailing', require('./routes/mailing'));
 app.use('/api/speelschema', require('./routes/speelschema'));
 app.use('/api/sync', require('./routes/sync'));
 app.use('/api/generate-mailing', require('./routes/generateMailing'));
+app.use('/api/songwriting-camp', require('./routes/songwritingCamp'));
 
-// 7. Statische bestanden Fallback (Voor Single Page Applications)
+// 7. Statische bestanden & Routing afhandeling
+// Voorkom dat /public/... per ongeluk de beheerapp toont; leid om naar het juiste pad zonder /public
+app.use((req, res, next) => {
+  if (req.path.startsWith('/public/')) {
+    const cleanPath = req.path.replace(/^\/public/, '');
+    return res.redirect(301, cleanPath || '/');
+  }
+  next();
+});
+
+// Bestaande HTML landingspagina's expliciet serveren
+app.get('/songwritingcamp', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'songwritingcamp.html'));
+});
+app.get('/aanmelden', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'aanmelden.html'));
+});
+
+// Interne Single Page Application fallback (alleen voor root of interne routes)
 app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
