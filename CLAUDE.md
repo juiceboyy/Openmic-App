@@ -29,9 +29,9 @@ No build step. The frontend is vanilla JS/HTML served directly from `public/`. N
 
 ### Key Architectural Patterns
 
-**Authentication:** PIN-based. Client stores PIN in localStorage; every API request sends it as `x-app-pin` header. Backend middleware validates it. Standalone public forms (`aanmelden.html`, `luisterlab.html`) bypass PIN checks.
+**Authentication:** PIN-based. Client stores PIN in localStorage; every API request sends it as `x-app-pin` header. Backend middleware validates it. Standalone public forms (`aanmelden.html`) bypass PIN checks.
 
-**Frontend state:** Simple JS object in `public/modules/state.js`. No reactivity — handlers mutate state and manually re-render DOM.
+**Frontend state:** Simple JS object in `public/modules/state.js`. No reactivity - handlers mutate state and manually re-render DOM.
 
 **Feature structure:** Each feature has a handler module (`contactsHandler.js`, `lineupHandler.js`, etc.) and a corresponding HTML template in `public/modules/templates/`. Templates are injected as modals at runtime.
 
@@ -41,8 +41,8 @@ No build step. The frontend is vanilla JS/HTML served directly from `public/`. N
 
 | Service | Used for |
 |---------|----------|
-| Google Sheets | Artist contacts, performance lineups, LuisterLab signups |
-| Google Drive | Scanning photo folders, uploading LuisterLab band/artist photos |
+| Google Sheets | Artist contacts, performance lineups |
+| Google Drive | Scanning photo folders |
 | Google People (Contacts) | Importing and syncing contacts from Google Contacts |
 
 Credentials: Google OAuth2 Refresh Token (standard for Drive and Contact Sync, fallback Service Account for Sheets).
@@ -101,7 +101,6 @@ POST /api/speelschema/sheets
 POST /api/speelschema/previous
 POST /api/speelschema/current
 POST /api/speelschema/save
-POST /api/luisterlab                # Public signup form for LuisterLab, processes photo + 25-col sheet mapping
 GET  /api/sync/auth-url             # Google Contacts OAuth2 initiation url
 GET  /api/sync/callback             # Google Contacts OAuth2 callback handler
 POST /api/sync/contacts             # Lists Google Contacts and compares with Sheet
@@ -111,7 +110,7 @@ POST /api/sync/import               # Appends selected contacts to Sheets
 ## Notes
 
 - Code and comments are mixed Dutch/English (Dutch for domain language: artiesten, speelschema, boekbaar, etc.)
-- The public signup pages are `public/aanmelden.html` and `public/luisterlab.html` — they are separate HTML files, not part of the PIN-protected SPA.
+- The public signup page is `public/aanmelden.html` - this is a separate HTML file, not part of the PIN-protected SPA.
 - Lineup feature uses HTML5 drag-and-drop with a mobile polyfill (`mobile-drag-drop`)
 - Brevo handles both newsletter campaigns and individual/transactional emails (including photo emails and notifications). Outbound Gmail SMTP is blocked on Railway, so the Brevo HTTP API is used exclusively.
 
