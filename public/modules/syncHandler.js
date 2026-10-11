@@ -163,3 +163,37 @@ export async function forceGoogleAuth() {
         toggleButtonLoading(btn, false, orig);
     }
 }
+
+export async function testGmailIntegration() {
+    const btn = getEl('btn-sync-test-gmail');
+    const feedbackEl = getEl('sync-test-feedback');
+    if (!btn) return;
+    const orig = btn.innerHTML;
+    toggleButtonLoading(btn, true);
+    if (feedbackEl) {
+        feedbackEl.classList.remove('hidden');
+        feedbackEl.textContent = 'Verbinding controleren en mailbox scannen...';
+    }
+
+    try {
+        const result = await apiRequest({ _action: 'test_gmail' });
+        if (result.success) {
+            showToast(`Gmail check voltooid: ${result.count || 0} bericht(en) verwerkt.`, 'success');
+            if (feedbackEl) {
+                feedbackEl.textContent = JSON.stringify(result, null, 2);
+            }
+        } else {
+            showToast('Gmail test mislukt: ' + (result.error || 'Onbekende fout'), 'error');
+            if (feedbackEl) {
+                feedbackEl.textContent = `Fout: ${result.error || 'Onbekende fout'}\nCode: ${result.code || '-'}`;
+            }
+        }
+    } catch (err) {
+        showToast('Fout bij uitvoeren van Gmail test.', 'error');
+        if (feedbackEl) {
+            feedbackEl.textContent = 'Fout bij aanroep: ' + (err.message || String(err));
+        }
+    } finally {
+        toggleButtonLoading(btn, false, orig);
+    }
+}

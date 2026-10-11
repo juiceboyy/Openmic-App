@@ -171,4 +171,18 @@ router.post('/import', async (req, res) => {
   }
 });
 
+// POST /api/sync/test-gmail - Direct testen van Gmail connectie en mailbox check
+router.post('/test-gmail', async (req, res) => {
+  try {
+    const { processIncomingEmails } = require('../services/gmailService');
+    const result = await processIncomingEmails({ isManualTrigger: true });
+    res.json(result);
+  } catch (err) {
+    console.error('Fout bij testen Gmail integratie:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+router.getStoredTokens = () => storedTokens;
+
 module.exports = router;
