@@ -97,15 +97,15 @@ export const contactModalTemplate = /*html*/`
                     </div>
                 </div>
                 <div>
-                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">LuisterLab</h3>
+                    <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Muzikaal Profiel & Demo</h3>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="col-span-2">
-                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Omschrijving / Genre</label>
-                            <textarea name="Omschrijving" rows="2" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 placeholder-gray-400 bg-white dark:bg-gray-700 dark:text-white" placeholder="Genre, stijl, korte omschrijving..."></textarea>
+                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Live link / Demo (URL)</label>
+                            <input type="text" name="Live Link" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white" placeholder="https://spotify.com/... of https://youtube.com/...">
                         </div>
-                        <div>
-                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Live Link</label>
-                            <input type="text" name="Live Link" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white" placeholder="https://...">
+                        <div class="col-span-2">
+                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Omschrijving / Genre / Instrumenten</label>
+                            <textarea name="Omschrijving" rows="2" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 placeholder-gray-400 bg-white dark:bg-gray-700 dark:text-white" placeholder="Genre, stijl, instrumenten, korte omschrijving..."></textarea>
                         </div>
                     </div>
                 </div>

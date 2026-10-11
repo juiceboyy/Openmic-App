@@ -102,7 +102,7 @@ export async function handleFieldBlur(event) {
     artist[prop] = newValue || '-';
     await saveArtistUpdate(rowIndex, artist, el);
     
-    if (field === 'Instagram account' || field === 'Voedselallergieën') {
+    if (field === 'Instagram account' || field === 'Voedselallergieën' || field === 'Live Link') {
         applyFilters();
     }
 }

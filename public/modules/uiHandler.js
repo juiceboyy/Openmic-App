@@ -99,13 +99,14 @@ export function renderTable(dataToRender, elements) {
             <div class="w-full overflow-hidden">${editableSpan('Instagram account', artist.instagram !== '-' ? artist.instagram : '', '@insta', 'block truncate w-full')}</div>
         </div>`;
 
-        const safeLink = artist.liveLink && artist.liveLink !== '-' && /^https?:\/\//.test(artist.liveLink);
-        const liveLinkIconHTML = safeLink
-            ? `<a href="${artist.liveLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-400 hover:text-apple-blue dark:hover:text-blue-400 transition-colors" title="Live Link openen"><i data-lucide="external-link" class="w-3 h-3"></i></a>`
-            : `<div class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-500/50"><i data-lucide="external-link" class="w-3 h-3"></i></div>`;
+        const rawLink = (artist.liveLink && artist.liveLink !== '-') ? artist.liveLink.trim() : '';
+        const normalizedLink = rawLink && !/^https?:\/\//i.test(rawLink) ? `https://${rawLink}` : rawLink;
+        const liveLinkIconHTML = normalizedLink
+            ? `<a href="${normalizedLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center shrink-0 mr-1.5 text-apple-blue hover:text-blue-600 dark:text-blue-400 transition-colors" title="Open Live link / Demo"><i data-lucide="external-link" class="w-3 h-3"></i></a>`
+            : `<div class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-400"><i data-lucide="link" class="w-3 h-3"></i></div>`;
         let liveLinkHTML = `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs mt-0.5 w-full overflow-hidden">
             ${liveLinkIconHTML}
-            <div class="w-full overflow-hidden">${editableSpan('Live Link', artist.liveLink !== '-' ? artist.liveLink : '', 'Live Link', 'block truncate w-full')}</div>
+            <div class="w-full overflow-hidden" title="${rawLink || 'Klik om een Live link / Demo URL te plakken'}">${editableSpan('Live Link', rawLink, 'Live link / Demo...', 'block truncate w-full')}</div>
         </div>`;
         
         let detailsHTML = '';
@@ -200,6 +201,7 @@ export function applyFilters() {
             || (artist.email || '').toLowerCase().includes(searchTerm)
             || (artist.notes || '').toLowerCase().includes(searchTerm)
             || (artist.omschrijving || '').toLowerCase().includes(searchTerm)
+            || (artist.liveLink || '').toLowerCase().includes(searchTerm)
             || (artist.foodAllergies || '').toLowerCase().includes(searchTerm);
         let matchesRegion = regionFilter === 'all' || (regionFilter === 'Den Haag' && artist.regionDH) || (regionFilter === 'Rotterdam' && artist.regionRdam);
         const matchesType = typeFilter === 'all' || artist.type === typeFilter;
