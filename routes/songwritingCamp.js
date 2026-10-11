@@ -135,6 +135,65 @@ router.post('/', writingCampLimiter, async (req, res) => {
     }
 
     console.log(`Songwriting Camp aanmelding verzonden voor ${fullName} (${email}) naar ${recipientEmail}`);
+
+    // Stuur automatische bevestigingsmail naar de artiest zelf
+    const confirmationHtml = `
+      <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #111827; max-width: 600px; line-height: 1.6;">
+        <h2 style="color: #111827; margin-bottom: 8px;">Hoi ${escapeHtml(firstName.trim())},</h2>
+        <p style="font-size: 15px; color: #374151;">
+          Bedankt voor je aanmelding voor het <strong>Songwriting Camp</strong> op <strong>zondag 15 november 2026</strong> in het Pianino Theater (Jupiterkade 2, Den Haag).
+        </p>
+        <p style="font-size: 15px; color: #374151;">
+          We hebben je gegevens goed ontvangen. Omdat we met een vaste groepsindeling van drie groepen van drie songwriters werken, bekijken we alle aanmeldingen zorgvuldig en nemen we binnenkort persoonlijk contact met je op om je deelname definitief te bevestigen.
+        </p>
+        <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; margin: 24px 0; font-size: 14px; color: #374151;">
+          <strong>Jouw ingevulde gegevens:</strong><br>
+          Naam: ${escapeHtml(fullName)}<br>
+          ${artistName ? `Artiestennaam: ${escapeHtml(artistName)}<br>` : ''}
+          ${genre ? `Muziekstijl / Genre: ${escapeHtml(genre)}<br>` : ''}
+          ${instruments ? `Instrumenten / Rol: ${escapeHtml(instruments)}<br>` : ''}
+          ${dietary ? `Dieetwensen / Allergieën: ${escapeHtml(dietary)}<br>` : ''}
+        </div>
+        <p style="font-size: 15px; color: #374151;">
+          Heb je tussentijds vragen? Je kunt altijd direct reageren op deze mail.
+        </p>
+        <p style="font-size: 15px; color: #374151; margin-top: 24px;">
+          Hartelijke groet,<br>
+          <strong>Gijs en Ro</strong><br>
+          Haagse Open Mic
+        </p>
+      </div>
+    `;
+
+    const confirmationPayload = {
+      sender: {
+        name: 'Haagse Open Mic',
+        email: process.env.EMAIL_USER || 'info@haagseopenmic.nl',
+      },
+      to: [{ email: email.trim(), name: fullName }],
+      replyTo: { email: recipientEmail, name: 'Haagse Open Mic' },
+      subject: 'Bevestiging van je aanmelding - Songwriting Camp (15 november)',
+      htmlContent: confirmationHtml,
+    };
+
+    fetch(BREVO_API_URL, {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify(confirmationPayload),
+    })
+      .then(async (confRes) => {
+        if (!confRes.ok) {
+          console.error('Fout bij verzenden bevestigingsmail naar artiest:', confRes.status, await confRes.text());
+        } else {
+          console.log(`Bevestigingsmail Songwriting Camp verstuurd naar artiest: ${email}`);
+        }
+      })
+      .catch((err) => console.error('Netwerkfout bij sturen bevestigingsmail:', err));
+
     return res.json({ success: true, message: 'Aanmelding succesvol verzonden.' });
   } catch (error) {
     console.error('Fout bij verwerken Songwriting Camp aanmelding:', error);
