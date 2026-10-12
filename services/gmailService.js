@@ -175,52 +175,44 @@ async function processIncomingEmails(options = {}) {
           replyHtml = getFallbackReplyHtml(name);
         }
 
-        // 4. Test-modus omleiding naar halfhide@gmail.com
-        const testRecipient = 'halfhide@gmail.com';
-        const testBanner = `
-          <div style="background-color: #ffe4e6; border: 1px solid #f43f5e; color: #9f1239; padding: 15px; border-radius: 8px; font-family: Arial, sans-serif; margin-bottom: 20px; font-size: 14px;">
-            <strong>TEST MODUS ACTIEF:</strong> Deze reactie is automatisch gegenereerd en zou normaal verzonden worden naar: 
-            <strong>${name || 'Onbekend'}</strong> (&lt;${email}&gt;).
-          </div>
-        `;
-        const finalReplyHtml = testBanner + replyHtml;
-
+        // 4. Concept (draft) klaarzetten in dezelfde e-mailthread
         const encodedMime = buildMimeMessage({
-          to: testRecipient,
+          to: email,
           subject: subjectHeader,
           inReplyTo: messageIdHeader,
           references: messageIdHeader,
-          htmlBody: finalReplyHtml
+          htmlBody: replyHtml
         });
 
-        await gmail.users.messages.send({
+        const draftRes = await gmail.users.drafts.create({
           userId: 'me',
           requestBody: {
-            raw: encodedMime,
-            threadId: msg.data.threadId
+            message: {
+              raw: encodedMime,
+              threadId: msg.data.threadId
+            }
           }
         });
 
-        // 5. Markeren als gelezen en checked
-        const modifyPayload = {
-          ids: [msgObj.id],
-          removeLabelIds: ['UNREAD']
-        };
-        if (checkedLabelId) {
-          modifyPayload.addLabelIds = [checkedLabelId];
-        }
+        console.log(`[Gmail Service] Concept klaargezet voor ${email} (Draft ID: ${draftRes.data.id}).`);
 
-        await gmail.users.messages.batchModify({
-          userId: 'me',
-          requestBody: modifyPayload
-        });
+        // 5. Markeren als checked (laat UNREAD staan zodat het concept opvalt in de inbox)
+        if (checkedLabelId) {
+          await gmail.users.messages.batchModify({
+            userId: 'me',
+            requestBody: {
+              ids: [msgObj.id],
+              addLabelIds: [checkedLabelId]
+            }
+          });
+        }
 
         results.push({
           id: msgObj.id,
           email,
-          status: 'replied_in_test_mode',
-          addedToSheet,
-          sentTo: testRecipient
+          status: 'draft_created',
+          draftId: draftRes.data.id,
+          addedToSheet
         });
       } catch (itemErr) {
         console.error(`[Gmail Service] Fout bij verwerken bericht ${msgObj.id}:`, itemErr);
