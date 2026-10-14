@@ -160,6 +160,7 @@ router.post('/import', async (req, res) => {
         "Voornaam": contact.firstName || '',
         "Achternaam": contact.lastName || '',
         "E-mailadres": contact.email || '',
+        "Regio Den Haag": true,
         "Datum toegevoegd": today
       });
     }

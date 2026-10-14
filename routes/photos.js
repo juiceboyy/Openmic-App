@@ -110,12 +110,14 @@ router.post('/scan', async (req, res) => {
         }
       }
 
+      const isTrue = (val) => String(val).toLowerCase() === 'ja' || val === true || val === 'TRUE';
       let formattedCandidates = candidates.map(c => {
         const artiestennaam = c['Artiestennaam'];
         const voornaam = c['Voornaam'];
         const achternaam = c['Achternaam'];
         const nameToUse = (artiestennaam && artiestennaam !== '-') ? artiestennaam : `${voornaam} ${achternaam}`.trim();
-        return { artistName: nameToUse, email: c['E-mailadres'] };
+        const isInternational = isTrue(c['Regio Internationaal']);
+        return { artistName: nameToUse, email: c['E-mailadres'], isInternational };
       });
 
       formattedCandidates = formattedCandidates.filter((v, i, a) => 
@@ -130,6 +132,7 @@ router.post('/scan', async (req, res) => {
         candidates: formattedCandidates,
         artistName: formattedCandidates.length === 1 ? formattedCandidates[0].artistName : null,
         email: formattedCandidates.length === 1 ? formattedCandidates[0].email : null,
+        isInternational: formattedCandidates.length === 1 ? !!formattedCandidates[0].isInternational : false,
         selected: false
       });
     });
@@ -145,6 +148,10 @@ function buildEmailBody(artistName, folderLink) {
   return `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">Hoi ${artistName},<br><br>Bedankt voor je optreden! We hebben de foto's binnengekregen van JCSFotografie.<br><br>Via de onderstaande link kun je jouw persoonlijke foto's bekijken en downloaden:<br><a href="${folderLink}" style="color: #0071e3;">${folderLink}</a><br><br>Deel je ze op Instagram? Vergeet dan niet de fotograaf (<b>@jcsfotografie_</b>) en ons (<b>@haagseopenmic</b>) te taggen!<br><br>Hartelijke groet,<br><br>Gijs en Ro<br><br><b>Haagse Open Mic</b><br>Elke 2e dinsdag van de maand<br>19u - 22u<br>IG: <a href="https://instagram.com/haagseopenmic" style="color: #0071e3; text-decoration: none;">@HaagseOpenMic</a></div>`;
 }
 
+function buildEnglishEmailBody(artistName, folderLink) {
+  return `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">Hi ${artistName},<br><br>Thank you so much for your performance! We just received the photos from JCSFotografie.<br><br>You can view and download your personal photos using the link below:<br><a href="${folderLink}" style="color: #0071e3;">${folderLink}</a><br><br>Sharing them on Instagram? Don't forget to tag the photographer (<b>@jcsfotografie_</b>) and us (<b>@haagseopenmic</b>)!<br><br>Warm regards,<br><br>Gijs and Ro<br><br><b>Haagse Open Mic</b><br>Every 2nd Tuesday of the month<br>7 PM - 10 PM<br>IG: <a href="https://instagram.com/haagseopenmic" style="color: #0071e3; text-decoration: none;">@HaagseOpenMic</a></div>`;
+}
+
 // Send-single route: Één email via Brevo API (HTTPS/443 — geen SMTP nodig)
 router.post('/send-single', async (req, res) => {
   if (!process.env.BREVO_API_KEY) {
@@ -158,12 +165,18 @@ router.post('/send-single', async (req, res) => {
       return res.json({ status: 'skipped' });
     }
 
+    const isInt = !!match.isInternational;
+    const subject = isInt ? "Your photos from the Haagse Open Mic!" : "Jouw foto's van de Haagse Open Mic!";
+    const htmlContent = isInt 
+      ? buildEnglishEmailBody(match.artistName, match.folderLink)
+      : buildEmailBody(match.artistName, match.folderLink);
+
     const payload = {
       sender: { name: 'Haagse Open Mic', email: process.env.EMAIL_USER || 'info@haagseopenmic.nl' },
       to: [{ email: match.email, name: match.artistName || match.email }],
       cc: [{ email: 'haagseopenmic@gmail.com' }],
-      subject: "Jouw foto's van de Haagse Open Mic!",
-      htmlContent: buildEmailBody(match.artistName, match.folderLink)
+      subject: subject,
+      htmlContent: htmlContent
     };
 
     const response = await fetch(BREVO_API_URL, {

@@ -97,6 +97,7 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
         "Achternaam": lastName || "",
         "E-mailadres": email || "",
         "Soort contact": "Publiek",
+        "Regio Den Haag": true,
         "Notities": "Nieuwsbrief",
         "Datum toegevoegd": new Date().toLocaleDateString('nl-NL')
       };
