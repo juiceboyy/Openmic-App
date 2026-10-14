@@ -115,6 +115,7 @@ export function selectSearchedArtist(index, artistRowIndex) {
     match.matchFound = true;
     match.multipleMatches = false;
     match.isCustom = true;
+    match.isInternational = !!artist.regionInt;
     match.selected = (email && email !== '-');
     
     const statusContainer = document.getElementById(`match-status-${index}`);
@@ -204,7 +205,10 @@ export function resolveMultipleMatch(index, selectElement) {
     let cb = getEl(`match-cb-${index}`); let row = getEl(`match-row-${index}`); let val = selectElement.value;
     state.scannedMatches[index].isCustom = false;
     if (val === "") { cb.checked = false; cb.disabled = true; row.classList.add('bg-orange-50/30'); state.scannedMatches[index].selected = false; } else {
-        let chosen = state.scannedMatches[index].candidates[val]; state.scannedMatches[index].artistName = chosen.artistName; state.scannedMatches[index].email = chosen.email;
+        let chosen = state.scannedMatches[index].candidates[val]; 
+        state.scannedMatches[index].artistName = chosen.artistName; 
+        state.scannedMatches[index].email = chosen.email;
+        state.scannedMatches[index].isInternational = !!chosen.isInternational;
         if (chosen.email && chosen.email !== '-') { cb.disabled = false; cb.checked = true; state.scannedMatches[index].selected = true; selectElement.classList.replace('border-orange-300', 'border-green-300'); selectElement.classList.replace('bg-orange-50', 'bg-green-50'); row.classList.remove('bg-orange-50/30'); } 
         else { cb.checked = false; cb.disabled = true; state.scannedMatches[index].selected = false; showToast("Geen geldig e-mailadres.", "error"); }
     }

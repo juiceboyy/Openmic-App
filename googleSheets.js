@@ -111,9 +111,18 @@ async function addArtistData(newArtistData) {
     });
     const headers = headersResponse.data.values[0];
 
-    // Standaard regio Den Haag instellen voor nieuwe artiesten indien niet expliciet opgegeven
-    if (newArtistData['Regio Den Haag'] === undefined || newArtistData['Regio Den Haag'] === null || newArtistData['Regio Den Haag'] === '') {
-      newArtistData['Regio Den Haag'] = true;
+    // Standaard regio instellen voor nieuwe artiesten
+    if (newArtistData['Regio Internationaal'] === true || String(newArtistData['Regio Internationaal']).toLowerCase() === 'true') {
+      newArtistData['Regio Den Haag'] = false;
+      newArtistData['Regio Rotterdam'] = false;
+      newArtistData['Regio Internationaal'] = true;
+    } else {
+      if (newArtistData['Regio Den Haag'] === undefined || newArtistData['Regio Den Haag'] === null || newArtistData['Regio Den Haag'] === '') {
+        newArtistData['Regio Den Haag'] = true;
+      }
+      if (newArtistData['Regio Internationaal'] === undefined || newArtistData['Regio Internationaal'] === null || newArtistData['Regio Internationaal'] === '') {
+        newArtistData['Regio Internationaal'] = false;
+      }
     }
 
     const newRow = headers.map(header => newArtistData[header] || "");

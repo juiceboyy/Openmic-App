@@ -68,6 +68,9 @@ export const contactModalTemplate = /*html*/`
                             <input type="checkbox" name="Regio Rotterdam" class="rounded text-apple-blue focus:ring-apple-blue"><span>Regio Rotterdam</span>
                         </label>
                         <label class="flex items-center space-x-2 text-sm cursor-pointer dark:text-gray-300">
+                            <input type="checkbox" name="Regio Internationaal" class="rounded text-apple-blue focus:ring-apple-blue"><span>Regio Internationaal</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-sm cursor-pointer dark:text-gray-300">
                             <input type="checkbox" name="Boekbaar (Ja/Nee)" class="rounded text-apple-blue focus:ring-apple-blue"><span>Boekbaar</span>
                         </label>
                         <label class="flex items-center space-x-2 text-sm cursor-pointer dark:text-gray-300">
