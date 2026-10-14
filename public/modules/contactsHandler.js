@@ -20,24 +20,8 @@ const BOOL_MAP = {
     'Writing Camp (Ja/Nee)': 'writingCamp'
 };
 
-function setupModalRegionExclusivity(form) {
-    if (!form || form._regionBound) return;
-    form._regionBound = true;
-    form.addEventListener('change', (e) => {
-        const target = e.target;
-        if (!target || target.type !== 'checkbox') return;
-        if (target.name === 'Regio Internationaal' && target.checked) {
-            if (form.elements['Regio Den Haag']) form.elements['Regio Den Haag'].checked = false;
-            if (form.elements['Regio Rotterdam']) form.elements['Regio Rotterdam'].checked = false;
-        } else if ((target.name === 'Regio Den Haag' || target.name === 'Regio Rotterdam') && target.checked) {
-            if (form.elements['Regio Internationaal']) form.elements['Regio Internationaal'].checked = false;
-        }
-    });
-}
-
 export function openModal(rowIndex = null) {
     const form = getEl('new-contact-form');
-    setupModalRegionExclusivity(form);
     getEl('modal-title').innerHTML = rowIndex !== null 
         ? `<i data-lucide="edit-2" class="w-5 h-5 text-apple-blue mr-2"></i> Contact Bewerken`
         : `<i data-lucide="user-plus" class="w-5 h-5 text-apple-blue mr-2"></i> Nieuw Contact Toevoegen`;
@@ -137,25 +121,6 @@ export async function updateArtistField(event) {
 
     if (el.type === 'checkbox' && BOOL_MAP[field]) {
         artist[BOOL_MAP[field]] = el.checked;
-
-        if (field === 'Regio Internationaal' && el.checked) {
-            artist.regionDH = false;
-            artist.regionRdam = false;
-            const td = el.closest('td');
-            if (td) {
-                const dh = td.querySelector('[data-field="Regio Den Haag"]');
-                const rdam = td.querySelector('[data-field="Regio Rotterdam"]');
-                if (dh) dh.checked = false;
-                if (rdam) rdam.checked = false;
-            }
-        } else if ((field === 'Regio Den Haag' || field === 'Regio Rotterdam') && el.checked) {
-            artist.regionInt = false;
-            const td = el.closest('td');
-            if (td) {
-                const intCb = td.querySelector('[data-field="Regio Internationaal"]');
-                if (intCb) intCb.checked = false;
-            }
-        }
     } else if (el.tagName === 'SELECT' && field === 'Soort contact') {
         artist.type = el.value;
     } else if (el.tagName === 'SELECT' && field === 'Gender') {
