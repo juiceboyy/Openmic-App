@@ -62,7 +62,7 @@ export const contactModalTemplate = /*html*/`
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Labels & Status</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
                         <label class="flex items-center space-x-2 text-sm cursor-pointer dark:text-gray-300">
-                            <input type="checkbox" name="Regio Den Haag" class="rounded text-apple-blue focus:ring-apple-blue"><span>Regio Den Haag</span>
+                            <input type="checkbox" name="Regio Den Haag" checked class="rounded text-apple-blue focus:ring-apple-blue"><span>Regio Den Haag</span>
                         </label>
                         <label class="flex items-center space-x-2 text-sm cursor-pointer dark:text-gray-300">
                             <input type="checkbox" name="Regio Rotterdam" class="rounded text-apple-blue focus:ring-apple-blue"><span>Regio Rotterdam</span>

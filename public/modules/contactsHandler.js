@@ -39,6 +39,9 @@ export function openModal(rowIndex = null) {
                 if (form.elements[key]) form.elements[key].checked = !!artist[prop];
             });
         }
+    } else {
+        if (form.elements['Regio Den Haag']) form.elements['Regio Den Haag'].checked = true;
+        if (form.elements['Regio Rotterdam']) form.elements['Regio Rotterdam'].checked = false;
     }
     
     getEl('contact-modal').classList.remove('hidden'); 

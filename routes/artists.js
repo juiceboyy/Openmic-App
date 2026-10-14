@@ -54,6 +54,9 @@ router.post('/add', async (req, res) => {
   try {
     const payload = req.body;
     console.log("Verzoek ontvangen om nieuwe artiest toe te voegen.");
+    if (payload['Regio Den Haag'] === undefined || payload['Regio Den Haag'] === null || payload['Regio Den Haag'] === '') {
+      payload['Regio Den Haag'] = true;
+    }
     const result = await addArtistData(payload);
     res.json(result);
   } catch (error) {

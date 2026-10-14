@@ -154,6 +154,7 @@ async function processIncomingEmails(options = {}) {
             "Achternaam": lastName,
             "E-mailadres": email,
             "Soort contact": "Artiest",
+            "Regio Den Haag": true,
             "Datum toegevoegd": new Date().toLocaleDateString('nl-NL')
           });
           existingEmails.add(email.toLowerCase().trim());

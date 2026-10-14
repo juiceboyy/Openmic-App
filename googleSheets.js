@@ -111,6 +111,11 @@ async function addArtistData(newArtistData) {
     });
     const headers = headersResponse.data.values[0];
 
+    // Standaard regio Den Haag instellen voor nieuwe artiesten indien niet expliciet opgegeven
+    if (newArtistData['Regio Den Haag'] === undefined || newArtistData['Regio Den Haag'] === null || newArtistData['Regio Den Haag'] === '') {
+      newArtistData['Regio Den Haag'] = true;
+    }
+
     const newRow = headers.map(header => newArtistData[header] || "");
 
     await sheets.spreadsheets.values.append({
