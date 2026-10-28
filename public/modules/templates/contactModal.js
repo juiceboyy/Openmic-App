@@ -40,8 +40,8 @@ export const contactModalTemplate = /*html*/`
                             <input type="text" name="Telefoonnummer" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white">
                         </div>
                         <div>
-                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Instagram (URL of @naam)</label>
-                            <input type="text" name="Instagram account" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white">
+                            <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Social Media (Instagram, TikTok, FB, etc.)</label>
+                            <input type="text" name="Social media" class="w-full border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-apple-blue/50 bg-white dark:bg-gray-700 dark:text-white" placeholder="https://... of @handle">
                         </div>
                         <div>
                             <label class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Soort Contact</label>

@@ -57,16 +57,41 @@ export function renderTable(dataToRender, elements) {
     sortedData.forEach(artist => {
         const editableSpan = (field, val, placeholder="...", extraClasses="") => `<span contenteditable="true" data-field="${field}" data-row="${artist.rowIndex}" class="editable-text outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-1 focus:ring-apple-blue rounded px-1 min-w-[20px] inline-block empty:before:content-['${placeholder}'] empty:before:text-gray-400 empty:before:pointer-events-none cursor-text transition-colors ${extraClasses}" onblur="window.handleFieldBlur(event)">${val !== '-' ? val : ''}</span>`;
 
-        // 1. Logica voor Profielfoto bepalen
+        // 1. Logica voor Profielfoto & Social Media bepalen
+        const rawSocial = (artist.instagram && artist.instagram !== '-') ? artist.instagram.trim() : '';
         let igHandle = '';
-        if (artist.instagram && artist.instagram !== '-') {
-            igHandle = artist.instagram
-                .replace(/(https?:\/\/)?(www\.)?instagram\.com\//i, '') // Verwijder domein
-                .replace(/\//g, '') // Verwijder trailing slashes
-                .replace('@', '') // Verwijder @ 
-                .split('?')[0] // Verwijder tracking parameters zoals ?igshid=...
-                .trim();
+        let socialUrl = '';
+        let socialType = 'generic'; // 'instagram', 'facebook', 'tiktok', 'youtube', 'x', 'generic'
+        
+        if (rawSocial) {
+            const lowerSocial = rawSocial.toLowerCase();
+            if (lowerSocial.includes('instagram.com') || lowerSocial.startsWith('@') || (!lowerSocial.includes('/') && !lowerSocial.includes('.'))) {
+                socialType = 'instagram';
+                igHandle = rawSocial
+                    .replace(/(https?:\/\/)?(www\.)?instagram\.com\//i, '')
+                    .replace(/\//g, '')
+                    .replace('@', '')
+                    .split('?')[0]
+                    .trim();
+                socialUrl = `https://instagram.com/${igHandle}`;
+            } else if (lowerSocial.includes('facebook.com') || lowerSocial.includes('fb.me') || lowerSocial.includes('fb.watch')) {
+                socialType = 'facebook';
+                socialUrl = /^https?:\/\//i.test(rawSocial) ? rawSocial : `https://${rawSocial}`;
+            } else if (lowerSocial.includes('tiktok.com')) {
+                socialType = 'tiktok';
+                socialUrl = /^https?:\/\//i.test(rawSocial) ? rawSocial : `https://${rawSocial}`;
+            } else if (lowerSocial.includes('youtube.com') || lowerSocial.includes('youtu.be')) {
+                socialType = 'youtube';
+                socialUrl = /^https?:\/\//i.test(rawSocial) ? rawSocial : `https://${rawSocial}`;
+            } else if (lowerSocial.includes('twitter.com') || lowerSocial.includes('x.com')) {
+                socialType = 'x';
+                socialUrl = /^https?:\/\//i.test(rawSocial) ? rawSocial : `https://${rawSocial}`;
+            } else {
+                socialType = 'generic';
+                socialUrl = /^https?:\/\//i.test(rawSocial) ? rawSocial : `https://${rawSocial}`;
+            }
         }
+        
         const fallbackUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(artist.firstName || '')}+${encodeURIComponent(artist.lastName || 'X')}&background=random`;
         const basePhotoUrl = igHandle ? `https://unavatar.io/instagram/${igHandle}` : fallbackUrl;
         const photoUrl = (artist.profilePic && artist.profilePic !== '-') ? artist.profilePic : basePhotoUrl;
@@ -86,17 +111,30 @@ export function renderTable(dataToRender, elements) {
 
         let artistNameHTML = `<div class="flex items-center gap-1.5 mt-0.5 flex-wrap">${artistNameBadge}${genderIconSelect}</div>`;
         
-        let instaIconHTML = '';
-        const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>`;
-
-        if (igHandle) {
-            instaIconHTML = `<a href="https://instagram.com/${igHandle}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-400 hover:text-apple-blue dark:hover:text-blue-400 transition-colors" title="Bekijk op Instagram">${svgIcon}</a>`;
+        let socialIconSvg = '';
+        if (socialType === 'facebook') {
+            socialIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>`;
+        } else if (socialType === 'tiktok') {
+            socialIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"></path></svg>`;
+        } else if (socialType === 'youtube') {
+            socialIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"></path><polygon points="10 15 15 12 10 9 10 15"></polygon></svg>`;
+        } else if (socialType === 'x') {
+            socialIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><path d="M4 4l11.733 16h4.267l-11.733 -16z"></path><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"></path></svg>`;
+        } else if (socialType === 'instagram') {
+            socialIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>`;
         } else {
-            instaIconHTML = `<div class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-500/50">${svgIcon}</div>`;
+            socialIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3"><circle cx="12" cy="12" r="4"></circle><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"></path></svg>`;
         }
-        let instaHTML = `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs mt-0.5 w-full overflow-hidden">
-            ${instaIconHTML}
-            <div class="w-full overflow-hidden">${editableSpan('Instagram account', artist.instagram !== '-' ? artist.instagram : '', '@insta', 'block truncate w-full')}</div>
+
+        let socialIconHTML = '';
+        if (socialUrl) {
+            socialIconHTML = `<a href="${socialUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-400 hover:text-apple-blue dark:hover:text-blue-400 transition-colors" title="Open ${rawSocial}">${socialIconSvg}</a>`;
+        } else {
+            socialIconHTML = `<div class="inline-flex items-center justify-center shrink-0 mr-1.5 text-gray-500/50" title="Social media">${socialIconSvg}</div>`;
+        }
+        let socialHTML = `<div class="flex items-center text-gray-600 dark:text-gray-400 text-xs mt-0.5 w-full overflow-hidden">
+            ${socialIconHTML}
+            <div class="w-full overflow-hidden" title="${rawSocial || 'Klik om social media toe te voegen'}">${editableSpan('Social media', rawSocial, 'Social media...', 'block truncate w-full')}</div>
         </div>`;
 
         const rawLink = (artist.liveLink && artist.liveLink !== '-') ? artist.liveLink.trim() : '';
@@ -138,7 +176,7 @@ export function renderTable(dataToRender, elements) {
         tr.innerHTML = `
             <td class="px-2 py-1.5 text-center w-8 align-middle"><div class="flex flex-col items-center gap-2"><input type="checkbox" class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer" ${artist.mailingSelection ? 'checked' : ''} onchange="window.toggleMailingSelection(${artist.rowIndex}, this.checked)"><button data-index="${artist.rowIndex}" class="btn-delete text-red-300 hover:text-red-600 p-1 rounded transition-colors focus:outline-none opacity-0 group-hover:opacity-100" title="Verwijder Artiest"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div></td>
             <td class="px-2 py-1.5 min-w-[140px]"><div class="flex items-center gap-2.5">${photoHTML}<div class="flex flex-col items-start"><div class="font-medium text-gray-900 dark:text-gray-100 text-sm flex flex-wrap gap-1 mb-0">${editableSpan('Voornaam', artist.firstName, 'Voor')} ${editableSpan('Achternaam', artist.lastName, 'Achter')}</div>${artistNameHTML}</div></div></td>
-            <td class="px-2 py-1.5 min-w-[200px] max-w-[250px]"><div class="flex flex-col gap-0.5 w-full overflow-hidden"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs w-full overflow-hidden">${artist.email && artist.email !== '-' ? `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${artist.email}" target="_blank" rel="noopener noreferrer" class="mr-1.5 text-gray-400 hover:text-apple-blue dark:hover:text-blue-400 transition-colors shrink-0" title="Stuur e-mail naar ${artist.email}"><i data-lucide="mail" class="w-3 h-3"></i></a>` : '<i data-lucide="mail" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i>'} <div class="w-full overflow-hidden" title="${artist.email}">${editableSpan('E-mailadres', artist.email, 'E-mail', 'block truncate w-full')}</div></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs w-full overflow-hidden"><i data-lucide="phone" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i> <div class="w-full overflow-hidden">${editableSpan('Telefoonnummer', artist.phone, 'Tel', 'block truncate w-full')}</div></div>${instaHTML}${liveLinkHTML}</div></td>
+            <td class="px-2 py-1.5 min-w-[200px] max-w-[250px]"><div class="flex flex-col gap-0.5 w-full overflow-hidden"><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs w-full overflow-hidden">${artist.email && artist.email !== '-' ? `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${artist.email}" target="_blank" rel="noopener noreferrer" class="mr-1.5 text-gray-400 hover:text-apple-blue dark:hover:text-blue-400 transition-colors shrink-0" title="Stuur e-mail naar ${artist.email}"><i data-lucide="mail" class="w-3 h-3"></i></a>` : '<i data-lucide="mail" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i>'} <div class="w-full overflow-hidden" title="${artist.email}">${editableSpan('E-mailadres', artist.email, 'E-mail', 'block truncate w-full')}</div></div><div class="flex items-center text-gray-600 dark:text-gray-400 text-xs w-full overflow-hidden"><i data-lucide="phone" class="w-3 h-3 mr-1.5 text-gray-400 shrink-0"></i> <div class="w-full overflow-hidden">${editableSpan('Telefoonnummer', artist.phone, 'Tel', 'block truncate w-full')}</div></div>${socialHTML}${liveLinkHTML}</div></td>
             <td class="px-2 py-1.5 w-[140px]"><div class="mb-0">${typeSelect}</div><div class="flex flex-col gap-0 text-xs text-gray-500 dark:text-gray-400"><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors leading-tight"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Den Haag" ${artist.regionDH ? 'checked' : ''} onchange="window.updateArtistField(event)"> Den Haag</label><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors leading-tight"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Rotterdam" ${artist.regionRdam ? 'checked' : ''} onchange="window.updateArtistField(event)"> Rotterdam</label><label class="flex items-center cursor-pointer hover:text-gray-900 dark:hover:text-gray-200 transition-colors leading-tight"><input type="checkbox" class="form-checkbox h-3 w-3 mr-1.5 rounded text-blue-500 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 focus:ring-blue-500" data-row="${artist.rowIndex}" data-field="Regio Internationaal" ${artist.regionInt ? 'checked' : ''} onchange="window.updateArtistField(event)"> Internationaal</label></div></td>
             <td class="px-2 py-1.5 w-[160px]"><div class="flex flex-col">${detailsHTML}</div></td>
             <td class="px-2 py-1.5 w-[180px]"><div class="flex flex-wrap items-center gap-1">${renderBadges(artist)} ${unsubHTML}</div></td>
@@ -157,7 +195,7 @@ export async function loadArtists() {
         const data = await fetchArtistsData();
         state.allArtists = data.map(row => ({
             rowIndex: row.rowIndex, firstName: String(row['Voornaam'] || '-'), lastName: String(row['Achternaam'] || '-'), artistName: String(row['Artiestennaam'] || '-'),
-            email: String(row['E-mailadres'] || '-'), phone: String(row['Telefoonnummer'] || '-'), instagram: String(row['Instagram account'] || '-'),
+            email: String(row['E-mailadres'] || '-'), phone: String(row['Telefoonnummer'] || '-'), instagram: String(row['Social media'] || row['Instagram account'] || '-'),
             bookable: isTrue(row['Boekbaar (Ja/Nee)']), favGijs: isTrue(row['Favoriet Gijs (Ja/Nee)']), favRo: isTrue(row['Favoriet Ro (Ja/Nee)']),
             setLength: String(row['Speelduur'] || '-'), regionDH: isTrue(row['Regio Den Haag']), regionRdam: isTrue(row['Regio Rotterdam']), regionInt: isTrue(row['Regio Internationaal']),
             workshops: isTrue(row['Interesse in workshops (Ja/Nee)']), workshop7Nov: isTrue(row['Workshop 7 nov (Ja/Nee)']),
