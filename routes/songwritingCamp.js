@@ -33,8 +33,9 @@ router.post('/', writingCampLimiter, async (req, res) => {
       phone,
       artistName,
       genre,
-      liveLink,
       instruments,
+      socialMedia,
+      liveLink,
       dietary,
     } = req.body || {};
 
@@ -85,6 +86,10 @@ router.post('/', writingCampLimiter, async (req, res) => {
           <tr style="border-bottom: 1px solid #e5e7eb;">
             <td style="padding: 10px 0; font-weight: 600; color: #374151;">Instrumenten / Rol</td>
             <td style="padding: 10px 0; color: #111827;">${escapeHtml(instruments)}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <td style="padding: 10px 0; font-weight: 600; color: #374151;">Social media</td>
+            <td style="padding: 10px 0; color: #111827;">${escapeHtml(socialMedia)}</td>
           </tr>
           <tr style="border-bottom: 1px solid #e5e7eb;">
             <td style="padding: 10px 0; font-weight: 600; color: #374151;">Live link / Demo</td>
@@ -152,6 +157,7 @@ router.post('/', writingCampLimiter, async (req, res) => {
           ${artistName ? `Artiestennaam: ${escapeHtml(artistName)}<br>` : ''}
           ${genre ? `Muziekstijl / Genre: ${escapeHtml(genre)}<br>` : ''}
           ${instruments ? `Instrumenten / Rol: ${escapeHtml(instruments)}<br>` : ''}
+          ${socialMedia ? `Social media: ${escapeHtml(socialMedia)}<br>` : ''}
           ${dietary ? `Dieetwensen / Allergieën: ${escapeHtml(dietary)}<br>` : ''}
         </div>
         <p style="font-size: 15px; color: #374151;">

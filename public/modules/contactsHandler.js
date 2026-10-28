@@ -6,7 +6,7 @@ import { showToast, showConfirm } from './notifications.js';
 
 const FIELD_MAP = {
     'Voornaam': 'firstName', 'Achternaam': 'lastName', 'Artiestennaam': 'artistName',
-    'E-mailadres': 'email', 'Telefoonnummer': 'phone', 'Instagram account': 'instagram',
+    'E-mailadres': 'email', 'Telefoonnummer': 'phone', 'Social media': 'instagram', 'Instagram account': 'instagram',
     'Soort contact': 'type', 'Speelduur': 'setLength', 'Notities': 'notes', 'Profielfoto': 'profilePic',
     'Gender': 'gender', 'Omschrijving': 'omschrijving', 'Live Link': 'liveLink',
     'Voedselallergieën': 'foodAllergies'
@@ -106,7 +106,7 @@ export async function handleFieldBlur(event) {
     artist[prop] = newValue || '-';
     await saveArtistUpdate(rowIndex, artist, el);
     
-    if (field === 'Instagram account' || field === 'Voedselallergieën' || field === 'Live Link') {
+    if (field === 'Social media' || field === 'Instagram account' || field === 'Voedselallergieën' || field === 'Live Link') {
         applyFilters();
     }
 }
