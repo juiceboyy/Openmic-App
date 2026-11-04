@@ -75,9 +75,14 @@
         </section>
 
         <!-- Deadline banner -->
-        <div class="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-amber-900 dark:text-amber-200 text-sm shadow-sm">
-            <i data-lucide="clock" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0"></i>
-            <p><span class="font-semibold">Let op:</span> Aanmelden kan uiterlijk t/m dinsdag 10 november.</p>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-amber-900 dark:text-amber-200 text-sm shadow-sm">
+            <div class="flex items-center gap-3">
+                <i data-lucide="clock" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0"></i>
+                <p><span class="font-semibold">Let op:</span> Aanmelden kan uiterlijk t/m dinsdag 10 november.</p>
+            </div>
+            <div class="flex items-center gap-1.5 pl-7 sm:pl-0 font-mono text-xs sm:text-sm font-semibold tabular-nums text-amber-800 dark:text-amber-300">
+                <span id="countdown-timer"></span>
+            </div>
         </div>
 
         <!-- Programma toelichting -->
@@ -266,6 +271,37 @@
 
     <script>
         lucide.createIcons();
+
+        // Countdown timer tot dinsdag 10 november 2026 om 23:59:59 (CET)
+        const deadline = new Date('2026-11-10T23:59:59+01:00').getTime();
+        const timerEl = document.getElementById('countdown-timer');
+
+        function updateCountdown() {
+            if (!timerEl) return;
+            const now = Date.now();
+            const diff = deadline - now;
+
+            if (diff <= 0) {
+                timerEl.textContent = 'Inschrijving gesloten';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            const pad = (n) => String(n).padStart(2, '0');
+
+            if (days > 0) {
+                timerEl.textContent = `Nog ${days}d ${pad(hours)}u ${pad(minutes)}m ${pad(seconds)}s`;
+            } else {
+                timerEl.textContent = `Nog ${pad(hours)}u ${pad(minutes)}m ${pad(seconds)}s`;
+            }
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
 
         document.getElementById('camp-form').addEventListener('submit', async (e) => {
             e.preventDefault();
