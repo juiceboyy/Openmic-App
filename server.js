@@ -170,9 +170,9 @@ app.post('/api/public-subscribe', subscribeLimiter, async (req, res) => {
             <td>
               <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #111827; font-weight: 600;">Wil je zelf optreden?</h3>
               <p style="margin: 0 0 15px 0; font-size: 14px; line-height: 1.5; color: #4b5563;">
-                Ben je zelf artiest of wil je jouw talent delen met ons publiek? Meld je dan aan voor een van de komende edities!
+                Ben je zelf artiest en wil je jouw eigen werk delen met ons publiek? Vooraf online aanmelden is niet mogelijk: de inschrijving om te spelen vindt op de avond zelf om <strong>18:30 uur ter plekke</strong> plaats.
               </p>
-              <a href="https://haagseopenmic.nl/aanmelden" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 10px 20px; font-size: 14px; font-weight: 500; border-radius: 8px; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);">Meld je aan als Artiest</a>
+              <a href="https://www.haagseopenmic.nl" style="display: inline-block; background-color: #3b82f6; color: #ffffff; text-decoration: none; padding: 10px 20px; font-size: 14px; font-weight: 500; border-radius: 8px; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);">Meer informatie op haagseopenmic.nl</a>
             </td>
           </tr>
         </table>
