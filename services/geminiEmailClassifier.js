@@ -61,7 +61,7 @@ Geef ALLEEN de JSON terug. Geen markdown code blocks.`;
 async function generateEmailReply({ apiKey, name, email, subject, body, systemInstructions }) {
   if (!apiKey) return '';
 
-  const prompt = `${systemInstructions}\n\nAfzender: ${name || email}\nE-mail onderwerp: ${subject}\nE-mail inhoud:\n${body}`;
+  const prompt = `${systemInstructions}\n\nAfzender: ${name || email}\nE-mail onderwerp: ${subject}\nE-mail inhoud:\n${body}\n\nBELANGRIJK: Detecteer de taal van de bovenstaande e-mail en schrijf je volledige antwoord (inclusief alle regels, aanhef en afsluiting) in exact dezelfde taal als het bericht van de afzender.`;
 
   try {
     const response = await fetch(
