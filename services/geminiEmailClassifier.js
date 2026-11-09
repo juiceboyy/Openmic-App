@@ -103,10 +103,13 @@ function getFallbackReplyHtml(name) {
       <p>Hoi ${firstName},</p>
       <p>Wat leuk dat je wilt komen optreden bij de Haagse Open Mic!</p>
       <p>Goed om te weten: je kunt je <strong>niet van tevoren online of per mail opgeven</strong>. We werken uitsluitend met <strong>inschrijving ter plekke op de avond zelf om 18:30 uur</strong>.</p>
-      <p>Voor de eerstvolgende edities en locaties kun je terecht op <a href="https://www.haagseopenmic.nl" style="color: #0071e3; text-decoration: none;">www.haagseopenmic.nl</a>.</p>
-      <p>Hopelijk tot snel!<br>
-      Met muzikale groet,<br>
-      <strong>Team Haagse Open Mic</strong></p>
+      <p>Voor meer informatie kun je terecht op <a href="https://www.haagseopenmic.nl" style="color: #0071e3; text-decoration: none;">www.haagseopenmic.nl</a>.</p>
+      <p>Hartelijke groet,<br>
+      Gijs en Ro</p>
+      <p>Haagse Open Mic<br>
+      Elke 2e dinsdag van de maand<br>
+      19u - 22u<br>
+      IG: @HaagseOpenMic</p>
     </div>
   `;
 }
