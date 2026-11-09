@@ -61,7 +61,7 @@ Geef ALLEEN de JSON terug. Geen markdown code blocks.`;
 async function generateEmailReply({ apiKey, name, email, subject, body, systemInstructions }) {
   if (!apiKey) return '';
 
-  const prompt = `${systemInstructions}\n\nAfzender: ${name || email}\nE-mail onderwerp: ${subject}\nE-mail inhoud:\n${body}\n\nBELANGRIJK: Detecteer de taal van de bovenstaande e-mail en schrijf je volledige antwoord (inclusief alle regels, aanhef en afsluiting) in exact dezelfde taal als het bericht van de afzender.`;
+  const prompt = `${systemInstructions}\n\nAfzender: ${name || email}\nE-mail onderwerp: ${subject}\nE-mail inhoud:\n${body}\n\nBELANGRIJK: Schrijf je antwoord in exact dezelfde taal als het bericht van de afzender. Som NIET alle 8 regels op, maar noem uitsluitend de regel(s) die direct relevant zijn voor deze specifieke e-mail.`;
 
   try {
     const response = await fetch(
@@ -102,18 +102,7 @@ function getFallbackReplyHtml(name) {
     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px;">
       <p>Hoi ${firstName},</p>
       <p>Wat leuk dat je wilt komen optreden bij de Haagse Open Mic!</p>
-      <p>Goed om te weten: je kunt je <strong>niet van tevoren online of per mail opgeven</strong>. We werken volledig met <strong>inschrijving ter plekke op de avond zelf om 18:30 uur</strong>.</p>
-      <p>Hier zijn onze vaste inschrijfregels op een rij:</p>
-      <ul>
-        <li>Je schrijft zelf je muziek/teksten en treedt daarmee op.</li>
-        <li>Ben je voor het eerst, dan heb je voorrang.</li>
-        <li>Je set is 10 minuten, of bij spoken word minimaal 5 minuten.</li>
-        <li>Heb je vorige maand gespeeld, dan speel je deze maand niet.</li>
-        <li>Je set is niet deelbaar met een andere artiest, tenzij je samen speelt.</li>
-        <li>Inschrijving is om 18:30 uur ter plekke. Wees op tijd, of zorg dat je wordt ingeschreven (niet door ons).</li>
-        <li>Ben je met meer dan 3 personen, overleg dan eerst even met ons.</li>
-        <li>We schrijven eerst iedereen in, en beslissen daarna wie er speelt en wie er op de reservelijst komt.</li>
-      </ul>
+      <p>Goed om te weten: je kunt je <strong>niet van tevoren online of per mail opgeven</strong>. We werken uitsluitend met <strong>inschrijving ter plekke op de avond zelf om 18:30 uur</strong>.</p>
       <p>Voor de eerstvolgende edities en locaties kun je terecht op <a href="https://www.haagseopenmic.nl" style="color: #0071e3; text-decoration: none;">www.haagseopenmic.nl</a>.</p>
       <p>Hopelijk tot snel!<br>
       Met muzikale groet,<br>
