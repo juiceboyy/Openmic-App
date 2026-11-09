@@ -265,13 +265,15 @@ app.listen(PORT, '0.0.0.0', () => {
   // Start de Gmail Auto-Reply & Contact Import cronjob
   const autoReplyEnabled = process.env.GMAIL_AUTO_REPLY_ENABLED === 'true' || process.env.GMAIL_AUTO_REPLY_ENABLED === undefined;
   if (autoReplyEnabled) {
-    console.log('⏰ [Cron] Scheduling Gmail auto-reply and contact sync poll every 5 minutes.');
-    cron.schedule('*/5 * * * *', async () => {
+    console.log('⏰ [Cron] Scheduling Gmail auto-reply and contact sync 3x per day (09:00, 14:00, 20:00).');
+    cron.schedule('0 9,14,20 * * *', async () => {
       try {
         await processIncomingEmails();
       } catch (err) {
         console.error('❌ [Cron] Error running processIncomingEmails:', err);
       }
+    }, {
+      timezone: 'Europe/Amsterdam'
     });
 
     // Run direct bij opstarten na 5 seconden om eventuele wachtende mails te verwerken
