@@ -24,13 +24,16 @@ Geef ALLEEN de JSON terug. Geen markdown code blocks.`;
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: classificationPrompt }] }],
-          generationConfig: { responseMimeType: 'application/json' }
+          generationConfig: {
+            responseMimeType: 'application/json',
+            temperature: 0.0
+          }
         })
       }
     );
@@ -62,7 +65,7 @@ async function generateEmailReply({ apiKey, name, email, subject, body, systemIn
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,9 +98,22 @@ function getFallbackReplyHtml(name) {
   return `
     <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px;">
       <p>Hoi ${firstName},</p>
-      <p>Bedankt voor je e-mail naar Haagse Open Mic. We hebben je bericht goed ontvangen.</p>
-      <p>We nemen zo snel mogelijk contact met je op. Als je je wilt aanmelden om op te treden, kan dit direct via de website: <a href="https://www.haagseopenmic.nl" style="color: #0071e3; text-decoration: none;">www.haagseopenmic.nl</a></p>
-      <p>Met muzikale groet,<br>
+      <p>Wat leuk dat je wilt komen optreden bij de Haagse Open Mic!</p>
+      <p>Goed om te weten: je kunt je <strong>niet van tevoren online of per mail opgeven</strong>. We werken volledig met <strong>inschrijving ter plekke op de avond zelf om 18:30 uur</strong>.</p>
+      <p>Hier zijn onze vaste inschrijfregels op een rij:</p>
+      <ul>
+        <li>Je schrijft zelf je muziek/teksten en treedt daarmee op.</li>
+        <li>Ben je voor het eerst, dan heb je voorrang.</li>
+        <li>Je set is 10 minuten, of bij spoken word minimaal 5 minuten.</li>
+        <li>Heb je vorige maand gespeeld, dan speel je deze maand niet.</li>
+        <li>Je set is niet deelbaar met een andere artiest, tenzij je samen speelt.</li>
+        <li>Inschrijving is om 18:30 uur ter plekke. Wees op tijd, of zorg dat je wordt ingeschreven (niet door ons).</li>
+        <li>Ben je met meer dan 3 personen, overleg dan eerst even met ons.</li>
+        <li>We schrijven eerst iedereen in, en beslissen daarna wie er speelt en wie er op de reservelijst komt.</li>
+      </ul>
+      <p>Voor de eerstvolgende edities en locaties kun je terecht op <a href="https://www.haagseopenmic.nl" style="color: #0071e3; text-decoration: none;">www.haagseopenmic.nl</a>.</p>
+      <p>Hopelijk tot snel!<br>
+      Met muzikale groet,<br>
       <strong>Team Haagse Open Mic</strong></p>
     </div>
   `;
