@@ -34,10 +34,13 @@ export const syncModalTemplate = /*html*/`
                 </h3>
                 <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
                     <table class="w-full text-left">
-                        <thead class="bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs uppercase border-b border-gray-200 dark:border-gray-700">
+                        <thead class="mobile-select-all-head bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs uppercase border-b border-gray-200 dark:border-gray-700">
                             <tr>
                                 <th class="px-4 py-2 font-semibold w-10 text-center">
-                                    <input type="checkbox" id="sync-select-all" checked class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer">
+                                    <label for="sync-select-all" class="inline-flex items-center justify-center gap-2 cursor-pointer">
+                                        <input type="checkbox" id="sync-select-all" checked class="rounded text-apple-blue focus:ring-apple-blue w-4 h-4 cursor-pointer">
+                                        <span class="select-all-label hidden text-sm font-medium normal-case tracking-normal text-gray-700 dark:text-gray-200">Selecteer alles</span>
+                                    </label>
                                 </th>
                                 <th class="px-4 py-2 font-semibold">Naam</th>
                                 <th class="px-4 py-2 font-semibold">Contactgegevens</th>

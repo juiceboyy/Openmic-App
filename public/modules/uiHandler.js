@@ -43,7 +43,9 @@ export function renderTable(dataToRender, elements) {
     contactCount.innerText = dataToRender.length;
     artistTableBody.innerHTML = '';
     const selectAllCb = document.getElementById('selectAllArtists');
-    if (selectAllCb) selectAllCb.checked = false;
+    if (selectAllCb) {
+        selectAllCb.checked = dataToRender.length > 0 && dataToRender.every(a => a.mailingSelection);
+    }
     
 
     if (dataToRender.length === 0) { 

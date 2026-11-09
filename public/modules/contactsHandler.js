@@ -82,6 +82,10 @@ export async function toggleMailingSelection(rowIndex, isChecked) {
     const artist = state.allArtists.find(a => a.rowIndex === rowIndex);
     if (artist) {
         artist.mailingSelection = isChecked;
+        const selectAllCb = document.getElementById('selectAllArtists');
+        if (selectAllCb && state.currentFilteredData) {
+            selectAllCb.checked = state.currentFilteredData.length > 0 && state.currentFilteredData.every(a => a.mailingSelection);
+        }
         try { await apiRequest({ _action: 'edit', _rowIndex: rowIndex, ...getArtistPayload(artist) }); } 
         catch (e) { showToast("Kon selectie niet opslaan.", "error"); }
     }
