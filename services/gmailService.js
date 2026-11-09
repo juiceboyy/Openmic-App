@@ -15,8 +15,31 @@ const {
   getFallbackReplyHtml
 } = require('./geminiEmailClassifier');
 
+let isProcessing = false;
+
+async function markThreadChecked(gmail, threadId, checkedLabelId) {
+  if (!checkedLabelId || !threadId) return;
+  try {
+    await gmail.users.threads.modify({
+      userId: 'me',
+      id: threadId,
+      requestBody: {
+        addLabelIds: [checkedLabelId]
+      }
+    });
+  } catch (err) {
+    console.warn(`[Gmail Service] Kon label niet op thread ${threadId} zetten:`, err.message);
+  }
+}
+
 async function processIncomingEmails(options = {}) {
-  const { isManualTrigger = false } = options;
+  if (isProcessing) {
+    console.log('[Gmail Service] Verwerking draait al, deze ronde wordt overgeslagen om dubbele drafts te voorkomen.');
+    return { success: true, count: 0, message: 'Verwerking is al bezig.' };
+  }
+
+  isProcessing = true;
+
   let syncRoute;
   try {
     syncRoute = require('../routes/sync');
@@ -27,6 +50,7 @@ async function processIncomingEmails(options = {}) {
   const apiKey = process.env.GEMINI_API_KEY;
 
   if (!refreshToken && !inMemoryTokens) {
+    isProcessing = false;
     const msg = 'GOOGLE_OAUTH_REFRESH_TOKEN is niet geconfigureerd en er is geen actief sessietoken.';
     console.warn(`[Gmail Service] ${msg}`);
     return { success: false, error: msg };
@@ -44,19 +68,51 @@ async function processIncomingEmails(options = {}) {
     const checkedLabelName = 'Checked-By-App';
     const checkedLabelId = await ensureLabelExists(gmail, checkedLabelName);
 
+    // 1. Controleer bestaande drafts en verwijder eventuele dubbele drafts binnen dezelfde conversatie
+    const existingDraftThreadIds = new Set();
+    let cleanedDuplicateDrafts = 0;
+    try {
+      const draftsRes = await gmail.users.drafts.list({ userId: 'me' });
+      const drafts = draftsRes.data.drafts || [];
+      for (const d of drafts) {
+        const tId = d.message?.threadId;
+        if (!tId) continue;
+        if (existingDraftThreadIds.has(tId)) {
+          try {
+            await gmail.users.drafts.delete({ userId: 'me', id: d.id });
+            cleanedDuplicateDrafts++;
+            console.log(`[Gmail Service] Dubbele draft ${d.id} in conversatie ${tId} opgeruimd.`);
+          } catch (delErr) {
+            console.warn(`[Gmail Service] Kon dubbele draft ${d.id} niet verwijderen:`, delErr.message);
+          }
+        } else {
+          existingDraftThreadIds.add(tId);
+        }
+      }
+    } catch (draftErr) {
+      console.warn('[Gmail Service] Kon bestaande drafts niet ophalen:', draftErr.message);
+    }
+
     const query = `is:unread label:INBOX -label:${checkedLabelName}`;
     const listRes = await gmail.users.messages.list({
       userId: 'me',
       q: query
     });
 
-    const messages = listRes.data.messages || [];
-    if (messages.length === 0) {
+    const rawMessages = listRes.data.messages || [];
+    if (rawMessages.length === 0) {
       console.log('[Gmail Service] Geen nieuwe ongelezen e-mails gevonden.');
-      return { success: true, count: 0, message: 'Geen nieuwe ongelezen e-mails gevonden.' };
+      return {
+        success: true,
+        count: 0,
+        cleanedDuplicateDrafts,
+        message: 'Geen nieuwe ongelezen e-mails gevonden.'
+      };
     }
 
-    console.log(`[Gmail Service] ${messages.length} ongelezen e-mail(s) gevonden voor verwerking.`);
+    // Groepeer op threadId zodat een conversatie met meerdere berichten maar 1 keer wordt verwerkt
+    const uniqueThreadIds = [...new Set(rawMessages.map(m => m.threadId).filter(Boolean))];
+    console.log(`[Gmail Service] ${uniqueThreadIds.length} unieke conversatie(s) gevonden voor verwerking.`);
 
     let systemInstructions = 'Je bent een behulpzame AI-assistent voor Haagse Open Mic. Schrijf een vriendelijke reactie op deze e-mail.';
     try {
@@ -86,27 +142,60 @@ async function processIncomingEmails(options = {}) {
     }
 
     const results = [];
+    const ownEmails = new Set([
+      'openmicamare@gmail.com',
+      'haagseopenmic@gmail.com',
+      'info@haagseopenmic.nl',
+      'nieuwsbrief@haagseopenmic.nl'
+    ]);
 
-    for (const msgObj of messages) {
+    for (const threadId of uniqueThreadIds) {
       try {
-        const msg = await gmail.users.messages.get({
+        // Als er al een draft in deze conversatie bestaat, maak nooit een tweede aan
+        if (existingDraftThreadIds.has(threadId)) {
+          console.log(`[Gmail Service] Conversatie ${threadId} heeft al een concept. Overgeslagen.`);
+          await markThreadChecked(gmail, threadId, checkedLabelId);
+          results.push({ threadId, status: 'skipped_existing_draft' });
+          continue;
+        }
+
+        const threadRes = await gmail.users.threads.get({
           userId: 'me',
-          id: msgObj.id,
+          id: threadId,
           format: 'full'
         });
 
-        const headers = msg.data.payload?.headers || [];
+        const threadMessages = threadRes.data.messages || [];
+
+        // Zoek het meest recente inkomende bericht (niet van onszelf en geen draft)
+        const incomingMessages = threadMessages.filter(m => {
+          const labels = m.labelIds || [];
+          if (labels.includes('DRAFT')) return false;
+          const headers = m.payload?.headers || [];
+          const fromHeader = headers.find(h => h.name.toLowerCase() === 'from')?.value || '';
+          const { email } = parseSender(fromHeader);
+          return email && !ownEmails.has(email.toLowerCase().trim());
+        });
+
+        const targetMsg = incomingMessages[incomingMessages.length - 1] || threadMessages[threadMessages.length - 1];
+        if (!targetMsg) {
+          await markThreadChecked(gmail, threadId, checkedLabelId);
+          continue;
+        }
+
+        const headers = targetMsg.payload?.headers || [];
         const fromHeader = headers.find(h => h.name.toLowerCase() === 'from')?.value || '';
         const subjectHeader = headers.find(h => h.name.toLowerCase() === 'subject')?.value || '(Geen onderwerp)';
         const messageIdHeader = headers.find(h => h.name.toLowerCase() === 'message-id')?.value || '';
 
         const { name, email } = parseSender(fromHeader);
-        if (!email) {
-          results.push({ id: msgObj.id, status: 'skipped', reason: 'Afzender e-mail kon niet worden uitgelezen' });
+        if (!email || ownEmails.has(email.toLowerCase().trim())) {
+          await markThreadChecked(gmail, threadId, checkedLabelId);
+          results.push({ threadId, status: 'skipped', reason: 'Geen externe afzender gevonden' });
           continue;
         }
 
-        const emailBody = getEmailBody(msg.data.payload);
+        const emailBody = getEmailBody(targetMsg.payload);
 
         // 1. Relevantie beoordelen via AI
         const relevance = await classifyEmailRelevance({
@@ -118,17 +207,9 @@ async function processIncomingEmails(options = {}) {
         });
 
         if (!relevance.isPlayRequest) {
-          console.log(`[Gmail Service] Bericht ${msgObj.id} is geen optreedverzoek. Overgeslagen (${relevance.explanation}).`);
-          if (checkedLabelId) {
-            await gmail.users.messages.batchModify({
-              userId: 'me',
-              requestBody: {
-                ids: [msgObj.id],
-                addLabelIds: [checkedLabelId]
-              }
-            });
-          }
-          results.push({ id: msgObj.id, email, status: 'ignored_not_play_request', explanation: relevance.explanation });
+          console.log(`[Gmail Service] Conversatie ${threadId} is geen optreedverzoek. Overgeslagen (${relevance.explanation}).`);
+          await markThreadChecked(gmail, threadId, checkedLabelId);
+          results.push({ threadId, email, status: 'ignored_not_play_request', explanation: relevance.explanation });
           continue;
         }
 
@@ -176,7 +257,7 @@ async function processIncomingEmails(options = {}) {
           replyHtml = getFallbackReplyHtml(name);
         }
 
-        // 4. Concept (draft) klaarzetten in dezelfde e-mailthread
+        // 4. Slechts 1 concept (draft) klaarzetten per conversatie
         const encodedMime = buildMimeMessage({
           to: email,
           subject: subjectHeader,
@@ -190,38 +271,36 @@ async function processIncomingEmails(options = {}) {
           requestBody: {
             message: {
               raw: encodedMime,
-              threadId: msg.data.threadId
+              threadId: threadId
             }
           }
         });
 
-        console.log(`[Gmail Service] Concept klaargezet voor ${email} (Draft ID: ${draftRes.data.id}).`);
+        existingDraftThreadIds.add(threadId);
+        console.log(`[Gmail Service] Concept klaargezet voor ${email} in conversatie ${threadId} (Draft ID: ${draftRes.data.id}).`);
 
-        // 5. Markeren als checked (laat UNREAD staan zodat het concept opvalt in de inbox)
-        if (checkedLabelId) {
-          await gmail.users.messages.batchModify({
-            userId: 'me',
-            requestBody: {
-              ids: [msgObj.id],
-              addLabelIds: [checkedLabelId]
-            }
-          });
-        }
+        // 5. Markeer de gehele conversatie als checked
+        await markThreadChecked(gmail, threadId, checkedLabelId);
 
         results.push({
-          id: msgObj.id,
+          threadId,
           email,
           status: 'draft_created',
           draftId: draftRes.data.id,
           addedToSheet
         });
       } catch (itemErr) {
-        console.error(`[Gmail Service] Fout bij verwerken bericht ${msgObj.id}:`, itemErr);
-        results.push({ id: msgObj.id, status: 'error', error: itemErr.message });
+        console.error(`[Gmail Service] Fout bij verwerken conversatie ${threadId}:`, itemErr);
+        results.push({ threadId, status: 'error', error: itemErr.message });
       }
     }
 
-    return { success: true, count: messages.length, results };
+    return {
+      success: true,
+      count: uniqueThreadIds.length,
+      cleanedDuplicateDrafts,
+      results
+    };
   } catch (err) {
     console.error('[Gmail Service] Fatale fout in email processor:', err);
     return {
@@ -229,6 +308,8 @@ async function processIncomingEmails(options = {}) {
       error: err.message,
       code: err.code || err.status
     };
+  } finally {
+    isProcessing = false;
   }
 }
 
