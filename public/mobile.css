@@ -75,9 +75,42 @@
         min-width: 0 !important;
     }
 
-    /* Verberg de originele tabel headers op mobiel */
+    /* Verberg de originele tabel headers op mobiel, behalve de 'Selecteer alles' balk */
     thead {
         display: none;
+    }
+
+    thead.mobile-select-all-head {
+        display: block !important;
+        position: static !important;
+        margin-bottom: 12px;
+    }
+
+    thead.mobile-select-all-head tr {
+        display: block !important;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+    }
+
+    html.dark thead.mobile-select-all-head tr {
+        border-color: #374151;
+    }
+
+    thead.mobile-select-all-head th:not(:first-child) {
+        display: none !important;
+    }
+
+    thead.mobile-select-all-head th:first-child {
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100% !important;
+        padding: 10px 16px !important;
+        text-align: left;
+    }
+
+    thead.mobile-select-all-head .select-all-label {
+        display: inline !important;
     }
 
     /* Maak van elke artiest-rij een afzonderlijke 'card' */
