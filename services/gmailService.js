@@ -93,10 +93,11 @@ async function processIncomingEmails(options = {}) {
       console.warn('[Gmail Service] Kon bestaande drafts niet ophalen:', draftErr.message);
     }
 
-    const query = `is:unread label:INBOX -label:${checkedLabelName}`;
+    const query = `is:unread label:INBOX -label:${checkedLabelName} newer_than:14d`;
     const listRes = await gmail.users.messages.list({
       userId: 'me',
-      q: query
+      q: query,
+      maxResults: 10
     });
 
     const rawMessages = listRes.data.messages || [];
@@ -110,8 +111,8 @@ async function processIncomingEmails(options = {}) {
       };
     }
 
-    // Groepeer op threadId zodat een conversatie met meerdere berichten maar 1 keer wordt verwerkt
-    const uniqueThreadIds = [...new Set(rawMessages.map(m => m.threadId).filter(Boolean))];
+    // Groepeer op threadId zodat een conversatie met meerdere berichten maar 1 keer wordt verwerkt (max 5 per run tegen timeouts)
+    const uniqueThreadIds = [...new Set(rawMessages.map(m => m.threadId).filter(Boolean))].slice(0, 5);
     console.log(`[Gmail Service] ${uniqueThreadIds.length} unieke conversatie(s) gevonden voor verwerking.`);
 
     let systemInstructions = 'Je bent een behulpzame AI-assistent voor Haagse Open Mic. Schrijf een vriendelijke reactie op deze e-mail.';

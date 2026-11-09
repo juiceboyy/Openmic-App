@@ -70,7 +70,10 @@ async function generateEmailReply({ apiKey, name, email, subject, body, systemIn
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.0
+          }
         })
       }
     );
