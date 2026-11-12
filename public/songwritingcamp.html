@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Songwriting Camp - Haagse Open Mic</title>
+    <title>Songwriting Camp - Interesse doorgeven - Haagse Open Mic</title>
 
     <!-- Tailwind & Icons -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,19 +40,28 @@
             <img src="/logo.png" alt="Haagse Open Mic Logo" id="hom-header-logo">
             <h1 class="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">Songwriting Camp</h1>
             <p class="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
-                Schrijf, verbeter en neem op in één intensieve dag samen met 8 andere songwriters en 3 professionele coaches.
+                Schrijf, verbeter en neem op in één intensieve dag samen met andere songwriters en professionele coaches.
             </p>
         </header>
 
+        <!-- Statusmelding gesloten editie -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/60 text-blue-950 dark:text-blue-200 text-sm shadow-sm">
+            <div class="flex items-start sm:items-center gap-3">
+                <i data-lucide="info" class="w-4 h-4 text-apple-blue dark:text-blue-400 shrink-0 mt-0.5 sm:mt-0"></i>
+                <p>De inschrijving voor de editie van 15 november is gesloten. Geef hieronder je interesse door om als eerste bericht te ontvangen bij een volgende editie.</p>
+            </div>
+            <a href="#aanmelden" class="text-xs sm:text-sm font-semibold text-apple-blue dark:text-blue-300 hover:underline shrink-0 pl-7 sm:pl-0">Naar het formulier</a>
+        </div>
+
         <!-- Kerninformatie grid -->
-        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label="Kerngegevens evenement">
+        <section class="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label="Algemene indruk evenement">
             <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
                 <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400 mb-1">
                     <i data-lucide="calendar" class="w-4 h-4"></i>
                     <span class="text-xs uppercase tracking-wider font-semibold">Wanneer</span>
                 </div>
-                <p class="text-base font-semibold text-gray-900 dark:text-white">15 november 2026</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">10:00 - 18:00 uur &middot; Aanmelden t/m 10 nov</p>
+                <p class="text-base font-semibold text-gray-900 dark:text-white">Volgende editie in planning</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">10:00 - 18:00 uur &middot; Datum volgt</p>
             </div>
 
             <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
@@ -60,37 +69,26 @@
                     <i data-lucide="map-pin" class="w-4 h-4"></i>
                     <span class="text-xs uppercase tracking-wider font-semibold">Waar</span>
                 </div>
-                <p class="text-base font-semibold text-gray-900 dark:text-white">Pianino Theater</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Jupiterkade 2, Den Haag</p>
+                <p class="text-base font-semibold text-gray-900 dark:text-white">Den Haag</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">O.a. Pianino Theater</p>
             </div>
 
             <div class="bg-white dark:bg-gray-900 p-5 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
                 <div class="flex items-center space-x-3 text-gray-500 dark:text-gray-400 mb-1">
                     <i data-lucide="euro" class="w-4 h-4"></i>
-                    <span class="text-xs uppercase tracking-wider font-semibold">Deelname</span>
+                    <span class="text-xs uppercase tracking-wider font-semibold">Indicatie deelname</span>
                 </div>
-                <p class="text-base font-semibold text-gray-900 dark:text-white">&euro; 100,- <span class="text-xs font-normal text-gray-500 dark:text-gray-400">excl. btw</span></p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Inclusief lunch & eerste borrel</p>
+                <p class="text-base font-semibold text-gray-900 dark:text-white">ca. &euro; 100,- <span class="text-xs font-normal text-gray-500 dark:text-gray-400">excl. btw</span></p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Inclusief lunch &amp; eerste borrel</p>
             </div>
         </section>
-
-        <!-- Deadline banner -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-amber-900 dark:text-amber-200 text-sm shadow-sm">
-            <div class="flex items-center gap-3">
-                <i data-lucide="clock" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0"></i>
-                <p><span class="font-semibold">Let op:</span> Aanmelden kan uiterlijk t/m dinsdag 10 november.</p>
-            </div>
-            <div class="flex items-center gap-1.5 pl-7 sm:pl-0 font-mono text-xs sm:text-sm font-semibold tabular-nums text-amber-800 dark:text-amber-300">
-                <span id="countdown-timer"></span>
-            </div>
-        </div>
 
         <!-- Programma toelichting -->
         <section class="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-4">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Wat gaan we doen?</h2>
             <div class="space-y-3 text-sm sm:text-base leading-relaxed text-gray-600 dark:text-gray-300">
                 <p>
-                    In de ochtend schrijf je in één uur een lied met twee van de andere 8 songwriters; de groepsindeling maken we op de dag zelf. Daarna heb je met je groepje en met je coach (er zijn 3 coaches) één uur om het lied te verbeteren en af te krijgen.
+                    In de ochtend schrijf je in één uur een lied met twee van de andere songwriters; de groepsindeling maken we op de dag zelf. Daarna heb je met je groepje en met je coach (er zijn 3 coaches) één uur om het lied te verbeteren en af te krijgen.
                 </p>
                 <p>
                     Aansluitend is er een geheel verzorgde lunch met vers desembrood van Gijs en een vegan soep.
@@ -148,21 +146,16 @@
             </div>
         </section>
 
-        <!-- Aanmeldformulier -->
+        <!-- Interesseformulier -->
         <section id="aanmelden" class="bg-white dark:bg-gray-900 p-6 sm:p-8 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm space-y-6">
             <div>
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Inschrijven</h2>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">Interesse doorgeven</h2>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Meld je aan via het formulier hieronder of reageer direct op de uitnodigingsmail. Na je aanmelding beoordelen we je gegevens en ontvang je persoonlijk bericht.
+                    Laat je gegevens achter voor de interesselijst. Zodra we een nieuwe datum plannen voor een volgend Songwriting Camp, hoor je als eerste van ons.
                 </p>
             </div>
 
             <div id="form-container" class="space-y-4">
-                <div class="flex items-center gap-3 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-amber-900 dark:text-amber-200 text-sm">
-                    <i data-lucide="clock" class="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0"></i>
-                    <p><span class="font-semibold">Let op:</span> Aanmelden kan uiterlijk t/m dinsdag 10 november.</p>
-                </div>
-
                 <form id="camp-form" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -234,10 +227,10 @@
                     </div>
 
                     <div>
-                        <label for="dietary" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dieetwensen / Allergieën</label>
-                        <input type="text" id="dietary" name="dietary"
+                        <label for="remarks" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Opmerkingen / Voorkeur (optioneel)</label>
+                        <textarea id="remarks" name="remarks" rows="3"
                             class="w-full px-4 py-2.5 rounded-xl border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-apple-blue/50 text-sm"
-                            placeholder="Geen, of bijv. glutenallergie, noten">
+                            placeholder="Bijv. voorkeur voor bepaalde dagen of periodes, of een korte motivatie"></textarea>
                     </div>
 
                     <!-- Foutmelding -->
@@ -245,7 +238,7 @@
 
                     <button type="submit" id="submit-btn"
                         class="w-full bg-apple-blue hover:bg-blue-600 text-white font-medium py-3 px-5 rounded-xl transition-all shadow-sm active:scale-[0.99] flex justify-center items-center">
-                        Aanmelding versturen
+                        Interesse versturen
                     </button>
                 </form>
             </div>
@@ -255,104 +248,21 @@
                 <div class="bg-green-100 dark:bg-green-900/30 w-12 h-12 rounded-full flex items-center justify-center mx-auto text-green-600 dark:text-green-400">
                     <i data-lucide="check" class="w-6 h-6"></i>
                 </div>
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Bedankt voor je aanmelding!</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Bedankt voor je interesse!</h3>
                 <p class="text-sm text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                    We hebben je gegevens ontvangen. We bekijken je aanmelding zorgvuldig en nemen spoedig contact met je op per e-mail.
+                    We hebben je gegevens ontvangen en op de interesselijst gezet. Zodra er een nieuwe editie gepland staat, hoor je als eerste van ons per e-mail.
                 </p>
             </div>
         </section>
 
         <!-- Footer -->
         <footer class="text-center text-xs text-gray-400 dark:text-gray-600 pt-6 pb-12">
-            Haagse Open Mic &middot; Pianino Theater Den Haag
+            Haagse Open Mic &middot; Den Haag
         </footer>
 
     </main>
 
-    <script>
-        lucide.createIcons();
-
-        // Countdown timer tot dinsdag 10 november 2026 om 23:59:59 (CET)
-        const deadline = new Date('2026-11-10T23:59:59+01:00').getTime();
-        const timerEl = document.getElementById('countdown-timer');
-
-        function updateCountdown() {
-            if (!timerEl) return;
-            const now = Date.now();
-            const diff = deadline - now;
-
-            if (diff <= 0) {
-                timerEl.textContent = 'Inschrijving gesloten';
-                return;
-            }
-
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            const pad = (n) => String(n).padStart(2, '0');
-
-            if (days > 0) {
-                timerEl.textContent = `Nog ${days}d ${pad(hours)}u ${pad(minutes)}m ${pad(seconds)}s`;
-            } else {
-                timerEl.textContent = `Nog ${pad(hours)}u ${pad(minutes)}m ${pad(seconds)}s`;
-            }
-        }
-
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-
-        document.getElementById('camp-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const btn = document.getElementById('submit-btn');
-            const errorMsg = document.getElementById('error-msg');
-
-            const payload = {
-                firstName: document.getElementById('firstName').value.trim(),
-                lastName: document.getElementById('lastName').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                phone: document.getElementById('phone').value.trim(),
-                artistName: document.getElementById('artistName').value.trim(),
-                genre: document.getElementById('genre').value.trim(),
-                instruments: document.getElementById('instruments').value.trim(),
-                socialMedia: document.getElementById('socialMedia').value.trim(),
-                liveLink: document.getElementById('liveLink').value.trim(),
-                dietary: document.getElementById('dietary').value.trim()
-            };
-
-            btn.disabled = true;
-            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin mr-2"></i> Bezig met versturen...';
-            lucide.createIcons();
-            errorMsg.classList.add('hidden');
-
-            try {
-                const response = await fetch('/api/songwriting-camp', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-
-                if (response.ok && result.success) {
-                    document.getElementById('form-container').classList.add('hidden');
-                    document.getElementById('success-msg').classList.remove('hidden');
-                    lucide.createIcons();
-                } else {
-                    throw new Error(result.message || 'Kon aanmelding niet versturen.');
-                }
-            } catch (err) {
-                console.error('Fout bij verzenden van formulier:', err);
-                errorMsg.textContent = err.message || 'Er ging iets mis. Probeer het later nog eens of reageer per mail.';
-                errorMsg.classList.remove('hidden');
-
-                btn.disabled = false;
-                btn.innerHTML = 'Aanmelding versturen';
-            }
-        });
-    </script>
+    <script src="/songwritingcamp.js?v=1"></script>
 </body>
 
 </html>
